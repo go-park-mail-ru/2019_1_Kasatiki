@@ -63,5 +63,6 @@ func main() {
 	reciever.HandleFunc("/createUser", createUser).Methods("POST")
 	reciever.HandleFunc("/users/{ID}", getUser).Methods("GET")
 	reciever.HandleFunc("/settings/{ID}", editUser).Methods("POST")
+	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 	log.Fatal(http.ListenAndServe(":8080", reciever))
 }
