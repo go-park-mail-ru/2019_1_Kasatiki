@@ -38,13 +38,13 @@ func (u *User) setUniqueId() {
 func createUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newUser User
-	error := map[string]string{
+	errorCreateUser := map[string]string{
 		"Error": "Nickname/mail already exists",
 	}
 	_ = json.NewDecoder(r.Body).Decode(&newUser) // ToDo: Log error
 	for _, existUser := range users {
 		if newUser.Nickname == existUser.Nickname || newUser.Email == existUser.Email {
-			json.NewEncoder(w).Encode(error)
+			json.NewEncoder(w).Encode(errorCreateUser)
 			return
 		}
 	}
@@ -57,7 +57,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var order Order
-	error := map[string]string{
+	errorOrder := map[string]string{
 		"Error": "Unknown order",
 	}
 
@@ -71,7 +71,7 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 			return users[i].Points > users[j].Points
 		})
 	} else {
-		json.NewEncoder(w).Encode(error)
+		json.NewEncoder(w).Encode(errorOrder)
 		return
 	}
 	json.NewEncoder(w).Encode(users)
