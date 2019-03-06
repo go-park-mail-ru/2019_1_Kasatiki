@@ -58,27 +58,16 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Use get with key order?
+// Use get with key order? (ASC/DESC )
 func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var order Order
-	errorOrder := map[string]string{
-		"Error": "Unknown order",
-	}
 
 	_ = json.NewDecoder(r.Body).Decode(&order)
-	if order.Sequence == "ASC" {
-		sort.Slice(users, func(i, j int) bool {
-			return users[i].Points < users[j].Points
-		})
-	} else if order.Sequence == "DESC" {
-		sort.Slice(users, func(i, j int) bool {
-			return users[i].Points > users[j].Points
-		})
-	} else {
-		json.NewEncoder(w).Encode(errorOrder)
-		return
-	}
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Points > users[j].Points
+	})
+
 	json.NewEncoder(w).Encode(users)
 }
 
@@ -134,7 +123,7 @@ func main() {
 	var mockedUser = User{"1", "Ag1", "123",
 		"123213", 100, 22, "test",
 		"Moscow", "salm"}
-	var mockedUser1 = User{"1", "Ag1", "123",
+	var mockedUser1 = User{"1", "", "123",
 		"123213", -100, 22, "test",
 		"Moscow", "salm"}
 	// Mocker part end
@@ -145,7 +134,7 @@ func main() {
 	reciever.HandleFunc("/users/{Nickname}", getUser).Methods("GET")
 	//reciever.HandleFunc("/settings/{ID}", editUser).Methods("POST")
 	reciever.HandleFunc("/upload", upload).Methods("POST")
-	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("POST")
+	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("GET")
 	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 	log.Fatal(http.ListenAndServe(":8080", reciever))
 }
