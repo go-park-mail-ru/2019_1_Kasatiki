@@ -58,7 +58,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Use get with key order? (ASC/DESC )
+//ToDo: Use get with key order? (ASC/DESC )
 func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var order Order
@@ -87,7 +87,7 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 //	}
 //}
 
-// Add case sensitive ( high/low )
+// ToDO: Add case sensitive ( high/low )
 func getUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
@@ -120,21 +120,23 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Mocked part for leaderboard
-	var mockedUser = User{"1", "Ag1", "123",
-		"123213", 100, 22, "test",
-		"Moscow", "salm"}
-	var mockedUser1 = User{"1", "", "123",
-		"123213", -100, 22, "test",
-		"Moscow", "salm"}
+	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
+		"nechitai", 100, 23, "test",
+		"Voronezh", "В левой руке салам"}
+	var mockedUser1 = User{"1", "tony", "trendpusher@hydra.com",
+		"qwerty", -100, 22, "test",
+		"Moscow", "В правой алейкум"}
 	// Mocker part end
 	users = append(users, mockedUser)
 	users = append(users, mockedUser1)
 	reciever := mux.NewRouter()
-	reciever.HandleFunc("/signup", createUser).Methods("POST")
+	// GET  ( get exists data )
 	reciever.HandleFunc("/users/{Nickname}", getUser).Methods("GET")
-	//reciever.HandleFunc("/settings/{ID}", editUser).Methods("POST")
-	reciever.HandleFunc("/upload", upload).Methods("POST")
 	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("GET")
+	// POST ( create new data )
+	reciever.HandleFunc("/signup", createUser).Methods("POST")
+	reciever.HandleFunc("/upload", upload).Methods("POST")
+	//reciever.HandleFunc("/settings/{ID}", editUser).Methods("POST")
 	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 	log.Fatal(http.ListenAndServe(":8080", reciever))
 }
