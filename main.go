@@ -20,6 +20,10 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Points   int
+	Age      int
+	ImgUrl   string
+	Region   string
+	About    string
 }
 
 type Order struct {
@@ -54,6 +58,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Use get with key order?
 func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var order Order
@@ -93,18 +98,19 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 //	}
 //}
 
-//func getUser(w http.ResponseWriter, r *http.Request) {
-//	w.Header().Set("Content-Type", "application/json")
-//	params := mux.Vars(r)
-//	for _, item := range users {
-//		id, _ := strconv.Atoi(params["ID"])
-//		if item.ID == id {
-//			json.NewEncoder(w).Encode(item)
-//			return
-//		}
-//	}
-//	json.NewEncoder(w).Encode(&User{})
-//}
+// Add case sensitive ( high/low )
+func getUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for _, item := range users {
+		//id, _ := strconv.Atoi(params["ID"])
+		if item.Nickname == params["Nickname"] {
+			json.NewEncoder(w).Encode(item)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(&User{})
+}
 
 func upload(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
@@ -124,13 +130,19 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var mockedUser = User{"1", "Ag1", "123", "123213", 100}
-	var mockedUser1 = User{"1", "Ag1", "123", "123213", -100}
+	// Mocked part for leaderboard
+	var mockedUser = User{"1", "Ag1", "123",
+		"123213", 100, 22, "test",
+		"Moscow", "salm"}
+	var mockedUser1 = User{"1", "Ag1", "123",
+		"123213", -100, 22, "test",
+		"Moscow", "salm"}
+	// Mocker part end
 	users = append(users, mockedUser)
 	users = append(users, mockedUser1)
 	reciever := mux.NewRouter()
 	reciever.HandleFunc("/signup", createUser).Methods("POST")
-	//reciever.HandleFunc("/users/{ID}", getUser).Methods("GET")
+	reciever.HandleFunc("/users/{Nickname}", getUser).Methods("GET")
 	//reciever.HandleFunc("/settings/{ID}", editUser).Methods("POST")
 	reciever.HandleFunc("/upload", upload).Methods("POST")
 	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("POST")
