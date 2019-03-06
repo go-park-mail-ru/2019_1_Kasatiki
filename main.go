@@ -121,10 +121,10 @@ func upload(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Mocked part for leaderboard
 	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
-		"nechitai", 100, 23, "test",
+		"nechitai", -100, 23, "test",
 		"Voronezh", "В левой руке салам"}
-	var mockedUser1 = User{"1", "tony", "trendpusher@hydra.com",
-		"qwerty", -100, 22, "test",
+	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
+		"qwerty", 100, 22, "test",
 		"Moscow", "В правой алейкум"}
 	// Mocker part end
 	users = append(users, mockedUser)
