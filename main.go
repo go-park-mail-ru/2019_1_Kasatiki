@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"sort"
 )
 
 // ToDo бахнуть обработку ошибок
@@ -21,11 +22,16 @@ type User struct {
 	Points   int
 }
 
+type Order struct {
+	Sequence string `json:"order"`
+}
+
 var users []User
 
 func (u *User) setUniqueId() {
 	// DB incremental or smth
 	out, _ := exec.Command("uuidgen").Output()
+	u.Points = 0
 	u.ID = string(out[:len(out)-1])
 }
 
@@ -33,7 +39,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var newUser User
 	error := map[string]string{
-		"Error": "Nickname already exists",
+		"Error": "Nickname/mail already exists",
 	}
 	_ = json.NewDecoder(r.Body).Decode(&newUser) // ToDo: Log error
 	for _, existUser := range users {
@@ -46,6 +52,29 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	users = append(users, newUser) // Check succesfull append? ( in db clearly )
 	json.NewEncoder(w).Encode(newUser)
 
+}
+
+func getLeaderboard(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var order Order
+	error := map[string]string{
+		"Error": "Unknown order",
+	}
+
+	_ = json.NewDecoder(r.Body).Decode(&order)
+	if order.Sequence == "ASC" {
+		sort.Slice(users, func(i, j int) bool {
+			return users[i].Points < users[j].Points
+		})
+	} else if order.Sequence == "DESC" {
+		sort.Slice(users, func(i, j int) bool {
+			return users[i].Points > users[j].Points
+		})
+	} else {
+		json.NewEncoder(w).Encode(error)
+		return
+	}
+	json.NewEncoder(w).Encode(users)
 }
 
 //func editUser(w http.ResponseWriter, r *http.Request) {
@@ -95,11 +124,16 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	var mockedUser = User{"1", "Ag1", "123", "123213", 100}
+	var mockedUser1 = User{"1", "Ag1", "123", "123213", -100}
+	users = append(users, mockedUser)
+	users = append(users, mockedUser1)
 	reciever := mux.NewRouter()
 	reciever.HandleFunc("/signup", createUser).Methods("POST")
 	//reciever.HandleFunc("/users/{ID}", getUser).Methods("GET")
 	//reciever.HandleFunc("/settings/{ID}", editUser).Methods("POST")
 	reciever.HandleFunc("/upload", upload).Methods("POST")
+	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("POST")
 	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 	log.Fatal(http.ListenAndServe(":8080", reciever))
 }
