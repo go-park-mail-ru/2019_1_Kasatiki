@@ -191,10 +191,12 @@ func main() {
 	reciever.HandleFunc("/users/{Nickname}", getUser).Methods("GET")
 	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("GET")
 	reciever.HandleFunc("/edit", editUser).Methods("GET")
+
 	// POST ( create new data )
 	reciever.HandleFunc("/signup", createUser).Methods("POST")
 	reciever.HandleFunc("/upload", upload).Methods("POST")
 	reciever.HandleFunc("/login", login).Methods("POST")
-	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+
+	//reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/"))) // Uncomment if want to run locally
 	log.Fatal(http.ListenAndServe(":8080", reciever))
 }
