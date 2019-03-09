@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"sort"
+	"strconv"
 )
 
 // ToDo бахнуть обработку ошибок
@@ -67,16 +68,46 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 }
 
 //ToDo: Use get with key order? (ASC/DESC )
+//ToDo: Check and simplify conditions !!!
 func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var order Order
+	var pageSize int
 
+	// Initilize pagesize
+	pageSize = 8
 	_ = json.NewDecoder(r.Body).Decode(&order)
 	sort.Slice(users, func(i, j int) bool {
 		return users[i].Points > users[j].Points
 	})
 
-	json.NewEncoder(w).Encode(users)
+	offset, getOffset := r.URL.Query()["offset"]
+	if getOffset {
+		offsetInt, _ := strconv.ParseInt(offset[0], 10, 32) // ToDo Handle error
+		if int(offsetInt) > len(users) {
+			json.NewEncoder(w).Encode(users)
+			return
+		} else if int(offsetInt) == len(users) {
+			json.NewEncoder(w).Encode(users)
+			return
+		}
+		if int(offsetInt)+pageSize < len(users) {
+			json.NewEncoder(w).Encode(users[offsetInt : int(offsetInt)+pageSize])
+			return
+		} else {
+			json.NewEncoder(w).Encode(users[offsetInt:len(users)])
+			return
+		}
+	} else {
+		if pageSize < len(users) {
+			json.NewEncoder(w).Encode(users[:pageSize])
+			return
+		} else {
+			json.NewEncoder(w).Encode(users)
+			return
+		}
+	}
+
 }
 
 func createSessionId(user User) string {
