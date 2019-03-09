@@ -75,7 +75,7 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	var pageSize int
 
 	// Initilize pagesize
-	pageSize = 8
+	pageSize = 1
 	_ = json.NewDecoder(r.Body).Decode(&order)
 	sort.Slice(users, func(i, j int) bool {
 		return users[i].Points > users[j].Points
