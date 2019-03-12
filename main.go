@@ -14,9 +14,7 @@ import (
 	"sort"
 	"strconv"
 )
-
-// ToDo бахнуть обработку ошибок
-
+// ToDo: set this in models.go
 type User struct {
 	ID       string
 	Nickname string `json:"nickname"`
@@ -29,11 +27,13 @@ type User struct {
 	About    string
 }
 
+
+// ToDo: delete this struct
 type Order struct {
 	Sequence string `json:"order"`
 }
 
-//ToDo: Move to another package
+//ToDo: set all errors in one map and set this map in AdvErrors.go
 var errorLogin = map[string]string{
 	"Error": "User dont exist",
 }
@@ -42,7 +42,9 @@ var errorCreateUser = map[string]string{
 	"Error": "Nickname/mail already exists",
 }
 
+
 var users []User
+
 
 func (u *User) setUniqueId() {
 	// DB incremental or smth
@@ -51,8 +53,8 @@ func (u *User) setUniqueId() {
 	u.ID = string(out[:len(out)-1])
 }
 
+// ToDo: set this func in Handlers.go or API.go or something else
 func createUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(users)
 	w.Header().Set("Content-Type", "application/json")
 	var newUser User
 	_ = json.NewDecoder(r.Body).Decode(&newUser) // ToDo: Log error
@@ -68,6 +70,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+
+// ToDo: set this func in Handlers.go or API.go or something else
 //ToDo: Use get with key order? (ASC/DESC )
 //ToDo: Check and simplify conditions !!!
 func getLeaderboard(w http.ResponseWriter, r *http.Request) {
@@ -109,6 +113,8 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 
 }
 
+
+// // ToDo: set this func in Cookie.go
 func createSessionId(user User) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": user.ID,
@@ -119,6 +125,7 @@ func createSessionId(user User) string {
 	return secretStr
 }
 
+// ToDo: set this func in Cookie.go
 func checkAuth(cookie *http.Cookie) jwt.MapClaims {
 	token, _ := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -134,6 +141,7 @@ func checkAuth(cookie *http.Cookie) jwt.MapClaims {
 	return claims
 }
 
+// ToDo: set this func in Handlers.go or API.go or something else
 func isAuth(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
@@ -151,8 +159,8 @@ func isAuth(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]bool{"is_auth": false})
 }
 
+// ToDo: set this func in Handlers.go or API.go or something else
 func editUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(users)
 	//Checking cookie
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
@@ -162,8 +170,6 @@ func editUser(w http.ResponseWriter, r *http.Request) {
 	// Taking JSON of modified user from edit form
 	var modUser User
 	_ = json.NewDecoder(r.Body).Decode(&modUser)
-	file, _, err := r.FormFile("avatar")
-	fmt.Println(file)
 	// Getting claims from current cookie
 	claims := checkAuth(cookie)
 
@@ -198,8 +204,8 @@ func editUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ToDo: set this func in Handlers.go or API.go or something else
 func login(w http.ResponseWriter, r *http.Request) {
-	var sessionId string
 	var userExistFlag bool
 	var existUser User
 	_ = json.NewDecoder(r.Body).Decode(&existUser)
@@ -213,7 +219,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorLogin)
 		return
 	}
-	sessionId = createSessionId(existUser)
+	sessionId := createSessionId(existUser)
+	// ToDo: set this move in another func
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionId,
@@ -223,7 +230,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(existUser)
 }
 
+// ToDo: set this func in Handlers.go or API.go or something else
 func getMe(w http.ResponseWriter, r *http.Request) {
+	// ToDo: set all process of getting cookies and claims in one func and return claims and error
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.Write([]byte("{}"))
@@ -238,6 +247,7 @@ func getMe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ToDo: set this func in Handlers.go or API.go or something else
 // ToDO: Add case sensitive ( high/low )
 func getUser(w http.ResponseWriter, r *http.Request) {
 
@@ -245,7 +255,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	for _, item := range users {
 		//id, _ := strconv.Atoi(params["ID"])
-		if item.ID == params["id"] {
+		if item.Nickname == params["Nickname"] {
 			json.NewEncoder(w).Encode(item)
 			return
 		}
@@ -253,19 +263,16 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&User{})
 }
 
+
+// ToDo: set this func in Handlers.go or API.go or something else
 func upload(w http.ResponseWriter, r *http.Request) {
 	// Tacking file from request
-	fmt.Println("UPLOAD")
 	r.ParseMultipartForm(32 << 20)
-	fmt.Println(r)
 	file, _, err := r.FormFile("uploadfile")
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer file.Close()
-	fmt.Println("FILE IS HERE")
-
 	// Tacking cookie of current user
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
@@ -274,10 +281,10 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 	claims := checkAuth(cookie)
 	// Path to users avatar
+	// ToDo: set process of saving pict in some func
 	picpath := "./static/img/" + claims["id"].(string) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 
@@ -293,6 +300,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// ToDo: Set this mocking in some func and file
 	// Mocked part for leaderboard
 	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
 		"evv", -100, 23, "test",
@@ -300,9 +308,14 @@ func main() {
 	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
 		"qwerty", 100, 22, "test",
 		"Moscow", "В правой алейкум"}
+
+
 	// Mocker part end
 	users = append(users, mockedUser)
 	users = append(users, mockedUser1)
+
+
+	// ToDo: set server in struct
 	reciever := mux.NewRouter()
 	// GET  ( get exists data )
 
@@ -317,6 +330,7 @@ func main() {
 	reciever.HandleFunc("/signup", createUser).Methods("POST")
 	reciever.HandleFunc("/upload", upload).Methods("POST")
 	reciever.HandleFunc("/login", login).Methods("POST")
+	// Todo: change method of request on PUT (CRUD)
 	reciever.HandleFunc("/users/{Nickname}", editUser).Methods("POST")
 
 	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/"))) // Uncomment if want to run locally
