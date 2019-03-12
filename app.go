@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -17,8 +16,7 @@ import (
 )
 
 type App struct {
-	Router *mux.Router
-	DB     *sql.DB // ToDo: __future__
+	Router *mux.Router // ToDo: __future__
 }
 
 func (instance *App) Initialize() {
@@ -40,10 +38,12 @@ func (instance *App) initializeRoutes() {
 	instance.Router.HandleFunc("/users/{Nickname}", instance.editUser).Methods("POST")
 
 	// PUT ( update data )
+
+	//Static
+	instance.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 }
 
 func (instance *App) Run(port string) {
-	instance.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 	log.Fatal(http.ListenAndServe(port, instance.Router))
 }
 
