@@ -20,9 +20,6 @@ type App struct {
 }
 
 func (instance *App) Initialize() {
-	instance.Router = mux.NewRouter()
-
-	// Mocked users
 	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
 		"evv", -100, 23, "test",
 		"Voronezh", "В левой руке салам"}
@@ -33,6 +30,7 @@ func (instance *App) Initialize() {
 
 	Users = append(Users, mockedUser)
 	Users = append(Users, mockedUser1)
+	instance.Router = mux.NewRouter()
 	instance.initializeRoutes()
 }
 
