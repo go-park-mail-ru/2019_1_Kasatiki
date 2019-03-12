@@ -8,6 +8,16 @@ import (
 	"net/http"
 )
 
+func GetClaims(r *http.Request) jwt.MapClaims {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		// ToDo: Error handle
+		return nil
+	}
+	claims := checkAuth(cookie)
+	return claims
+}
+
 func CreateSessionId(user Models.User) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": user.ID,
@@ -18,7 +28,7 @@ func CreateSessionId(user Models.User) string {
 	return secretStr
 }
 
-func CheckAuth(cookie *http.Cookie) jwt.MapClaims {
+func checkAuth(cookie *http.Cookie) jwt.MapClaims {
 	token, _ := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -28,7 +38,6 @@ func CheckAuth(cookie *http.Cookie) jwt.MapClaims {
 	})
 
 	claims, _ := token.Claims.(jwt.MapClaims)
-
 	// ToDo: Handle else case
 	return claims
 }

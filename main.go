@@ -90,13 +90,8 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 
 // ToDo: set this func in Handlers.go or API.go or something else
 func isAuth(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.Write([]byte("{}"))
-		return
-	}
-
-	claims := AdvCookie.CheckAuth(cookie)
+	// Getting claims from current cookie
+	claims := AdvCookie.GetClaims(r)
 	for _, user := range users {
 		if user.Nickname == claims["id"].(string) {
 			json.NewEncoder(w).Encode(map[string]bool{"is_auth": true})
@@ -108,17 +103,11 @@ func isAuth(w http.ResponseWriter, r *http.Request) {
 
 // ToDo: set this func in Handlers.go or API.go or something else
 func editUser(w http.ResponseWriter, r *http.Request) {
-	//Checking cookie
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.Write([]byte("{}"))
-		return
-	}
+	// Getting claims from current cookie
+	claims := AdvCookie.GetClaims(r)
 	// Taking JSON of modified user from edit form
 	var modUser Models.User
 	_ = json.NewDecoder(r.Body).Decode(&modUser)
-	// Getting claims from current cookie
-	claims := AdvCookie.CheckAuth(cookie)
 
 	// Finding user from claims in users and changing old data to modified data
 	for i, user := range users {
@@ -179,13 +168,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 // ToDo: set this func in Handlers.go or API.go or something else
 func getMe(w http.ResponseWriter, r *http.Request) {
-	// ToDo: set all process of getting cookies and claims in one func and return claims and error
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.Write([]byte("{}"))
-		return
-	}
-	claims := AdvCookie.CheckAuth(cookie)
+	// Getting claims from current cookie
+	claims := AdvCookie.GetClaims(r)
 	for _, user := range users {
 		if user.ID == claims["id"].(string) {
 			json.NewEncoder(w).Encode(user)
@@ -219,13 +203,8 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	// Tacking cookie of current user
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.Write([]byte("{}"))
-		return
-	}
-	claims := AdvCookie.CheckAuth(cookie)
+	// Getting claims from current cookie
+	claims := AdvCookie.GetClaims(r)
 	// Path to users avatar
 	// ToDo: set process of saving pict in some func
 	picpath := "./static/img/" + claims["id"].(string) + ".jpeg"
