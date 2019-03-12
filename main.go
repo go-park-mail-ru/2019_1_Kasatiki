@@ -1,32 +1,17 @@
 package main
 
 import (
+	"2019_1_Kasatiki/domestic/AdvCookie"
+	"2019_1_Kasatiki/domestic/Models"
 	"encoding/json"
-	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"sort"
 	"strconv"
 )
-// ToDo: set this in models.go
-type User struct {
-	ID       string
-	Nickname string `json:"nickname"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Points   int
-	Age      int
-	ImgUrl   string
-	Region   string
-	About    string
-}
-
 
 // ToDo: delete this struct
 type Order struct {
@@ -42,21 +27,12 @@ var errorCreateUser = map[string]string{
 	"Error": "Nickname/mail already exists",
 }
 
-
-var users []User
-
-
-func (u *User) setUniqueId() {
-	// DB incremental or smth
-	out, _ := exec.Command("uuidgen").Output()
-	u.Points = 0
-	u.ID = string(out[:len(out)-1])
-}
+var users []Models.User
 
 // ToDo: set this func in Handlers.go or API.go or something else
 func createUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var newUser User
+	var newUser Models.User
 	_ = json.NewDecoder(r.Body).Decode(&newUser) // ToDo: Log error
 	for _, existUser := range users {
 		if newUser.Nickname == existUser.Nickname || newUser.Email == existUser.Email {
@@ -64,12 +40,11 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	newUser.setUniqueId()
+	newUser.SetUniqueId()
 	users = append(users, newUser) // Check succesfull append? ( in db clearly )
 	//json.NewEncoder(w).Encode(newUser)
 
 }
-
 
 // ToDo: set this func in Handlers.go or API.go or something else
 //ToDo: Use get with key order? (ASC/DESC )
@@ -113,34 +88,6 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 
 }
 
-
-// // ToDo: set this func in Cookie.go
-func createSessionId(user User) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": user.ID,
-	})
-	// ToDo: Error handle
-	spiceSalt, _ := ioutil.ReadFile("secret.conf")
-	secretStr, _ := token.SignedString(spiceSalt)
-	return secretStr
-}
-
-// ToDo: set this func in Cookie.go
-func checkAuth(cookie *http.Cookie) jwt.MapClaims {
-	token, _ := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		spiceSalt, _ := ioutil.ReadFile("secret.conf")
-		return spiceSalt, nil
-	})
-
-	claims, _ := token.Claims.(jwt.MapClaims)
-
-	// ToDo: Handle else case
-	return claims
-}
-
 // ToDo: set this func in Handlers.go or API.go or something else
 func isAuth(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
@@ -149,7 +96,7 @@ func isAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims := checkAuth(cookie)
+	claims := AdvCookie.CheckAuth(cookie)
 	for _, user := range users {
 		if user.Nickname == claims["id"].(string) {
 			json.NewEncoder(w).Encode(map[string]bool{"is_auth": true})
@@ -168,10 +115,10 @@ func editUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Taking JSON of modified user from edit form
-	var modUser User
+	var modUser Models.User
 	_ = json.NewDecoder(r.Body).Decode(&modUser)
 	// Getting claims from current cookie
-	claims := checkAuth(cookie)
+	claims := AdvCookie.CheckAuth(cookie)
 
 	// Finding user from claims in users and changing old data to modified data
 	for i, user := range users {
@@ -207,7 +154,7 @@ func editUser(w http.ResponseWriter, r *http.Request) {
 // ToDo: set this func in Handlers.go or API.go or something else
 func login(w http.ResponseWriter, r *http.Request) {
 	var userExistFlag bool
-	var existUser User
+	var existUser Models.User
 	_ = json.NewDecoder(r.Body).Decode(&existUser)
 	for _, user := range users {
 		if user.Nickname == existUser.Nickname && user.Password == existUser.Password {
@@ -219,7 +166,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorLogin)
 		return
 	}
-	sessionId := createSessionId(existUser)
+	sessionId := AdvCookie.CreateSessionId(existUser)
 	// ToDo: set this move in another func
 	cookie := &http.Cookie{
 		Name:     "session_id",
@@ -238,7 +185,7 @@ func getMe(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("{}"))
 		return
 	}
-	claims := checkAuth(cookie)
+	claims := AdvCookie.CheckAuth(cookie)
 	for _, user := range users {
 		if user.ID == claims["id"].(string) {
 			json.NewEncoder(w).Encode(user)
@@ -260,9 +207,8 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	json.NewEncoder(w).Encode(&User{})
+	json.NewEncoder(w).Encode(&Models.User{})
 }
-
 
 // ToDo: set this func in Handlers.go or API.go or something else
 func upload(w http.ResponseWriter, r *http.Request) {
@@ -279,7 +225,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("{}"))
 		return
 	}
-	claims := checkAuth(cookie)
+	claims := AdvCookie.CheckAuth(cookie)
 	// Path to users avatar
 	// ToDo: set process of saving pict in some func
 	picpath := "./static/img/" + claims["id"].(string) + ".jpeg"
@@ -302,34 +248,31 @@ func upload(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// ToDo: Set this mocking in some func and file
 	// Mocked part for leaderboard
-	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
+	var mockedUser = Models.User{"1", "evv", "onetaker@gmail.com",
 		"evv", -100, 23, "test",
 		"Voronezh", "В левой руке салам"}
-	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
+	var mockedUser1 = Models.User{"2", "tony", "trendpusher@hydra.com",
 		"qwerty", 100, 22, "test",
 		"Moscow", "В правой алейкум"}
-
 
 	// Mocker part end
 	users = append(users, mockedUser)
 	users = append(users, mockedUser1)
 
-
 	// ToDo: set server in struct
 	reciever := mux.NewRouter()
+
 	// GET  ( get exists data )
-
 	reciever.HandleFunc("/users/{Nickname}", getUser).Methods("GET")
-
 	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("GET")
 	reciever.HandleFunc("/isauth", isAuth).Methods("GET")
 	reciever.HandleFunc("/me", getMe).Methods("Get")
-	//reciever.HandleFunc("/edit", editUser).Methods("GET")
 
 	// POST ( create new data )
 	reciever.HandleFunc("/signup", createUser).Methods("POST")
 	reciever.HandleFunc("/upload", upload).Methods("POST")
 	reciever.HandleFunc("/login", login).Methods("POST")
+
 	// Todo: change method of request on PUT (CRUD)
 	reciever.HandleFunc("/users/{Nickname}", editUser).Methods("POST")
 
