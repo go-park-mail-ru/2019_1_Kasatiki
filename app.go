@@ -21,12 +21,15 @@ type App struct {
 
 func (instance *App) Initialize() {
 	instance.Router = mux.NewRouter()
+
+	// Mocked users
 	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
 		"evv", -100, 23, "test",
 		"Voronezh", "В левой руке салам"}
 	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
 		"qwerty", 100, 22, "test",
 		"Moscow", "В правой алейкум"}
+	// Mocked users
 
 	Users = append(Users, mockedUser)
 	Users = append(Users, mockedUser1)
@@ -35,7 +38,6 @@ func (instance *App) Initialize() {
 
 func (instance *App) initializeRoutes() {
 	// GET ( get exist data )
-	instance.Router.HandleFunc("/users/{Nickname}", instance.getUser).Methods("GET")
 	instance.Router.HandleFunc("/leaderboard", instance.getLeaderboard).Methods("GET")
 	instance.Router.HandleFunc("/isauth", instance.isAuth).Methods("GET")
 	instance.Router.HandleFunc("/me", instance.getMe).Methods("GET")
@@ -44,9 +46,9 @@ func (instance *App) initializeRoutes() {
 	instance.Router.HandleFunc("/signup", instance.createUser).Methods("POST")
 	instance.Router.HandleFunc("/upload", instance.upload).Methods("POST")
 	instance.Router.HandleFunc("/login", instance.login).Methods("POST")
-	instance.Router.HandleFunc("/users/{Nickname}", instance.editUser).Methods("POST")
 
 	// PUT ( update data )
+	instance.Router.HandleFunc("/users/{Nickname}", instance.editUser).Methods("PUT")
 
 	//Static path
 	instance.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
@@ -182,7 +184,7 @@ func (instance *App) isAuth(w http.ResponseWriter, r *http.Request) {
 
 	claims := instance.checkAuth(cookie)
 	for _, user := range Users {
-		if user.Nickname == claims["id"].(string) {
+		if user.ID == claims["id"].(string) {
 			json.NewEncoder(w).Encode(map[string]bool{"is_auth": true})
 			return
 		}
@@ -324,26 +326,9 @@ func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 	for i, user := range Users {
 		if user.ID == claims["id"].(string) {
 			u := &Users[i]
-			u.ImgUrl = "http://advhater.ru/img/" + claims["id"].(string) + ".jpeg"
+			u.ImgUrl = "https://advhater.ru/img/" + claims["id"].(string) + ".jpeg"
 		}
 	}
 	defer f.Close()
 	io.Copy(f, file)
 }
-
-//func main() {
-//	// Mocked part for leaderboard
-//	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
-//		"evv", -100, 23, "test",
-//		"Voronezh", "В левой руке салам"}
-//	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
-//		"qwerty", 100, 22, "test",
-//		"Moscow", "В правой алейкум"}
-//	// Mocker part end
-//	Users = append(Users, mockedUser)
-//	Users = append(Users, mockedUser1)
-//	reciever := mux.NewRouter()
-//
-//	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/"))) // Uncomment if want to run locally
-//	log.Fatal(http.ListenAndServe(":8080", reciever))
-//}
