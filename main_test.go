@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -47,7 +48,24 @@ func TestLeaderboard(t *testing.T) {
 	if sortedUsers[0].Points < sortedUsers[1].Points {
 		t.Error("Expexted sortes list of users ( 2 users )")
 	}
-
 	checkResponseCode(t, http.StatusOK, response.Code)
 	main.Users = []main.User{}
+}
+
+func TestSignup(t *testing.T) {
+	reqGet, _ := http.NewRequest("GET", "/signup", nil)
+	reqPost, _ := http.NewRequest("POST", "/signup", strings.NewReader(`{"nickname":"tested","email":"tested@gmail.com","password":"qqq"}`))
+	responsePost := executeRequest(reqPost)
+	responseGet := executeRequest(reqGet)
+	checkResponseCode(t, http.StatusOK, responsePost.Code)
+	checkResponseCode(t, http.StatusNotFound, responseGet.Code)
+	usersCreated := false
+	for _, user := range main.Users {
+		if user.Nickname == "tested" && user.Email == "tested@gmail.com" {
+			usersCreated = true
+		}
+	}
+	if !usersCreated {
+		t.Error("New users not created")
+	}
 }
