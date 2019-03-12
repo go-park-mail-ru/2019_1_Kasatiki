@@ -21,6 +21,15 @@ type App struct {
 
 func (instance *App) Initialize() {
 	instance.Router = mux.NewRouter()
+	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
+		"evv", -100, 23, "test",
+		"Voronezh", "В левой руке салам"}
+	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
+		"qwerty", 100, 22, "test",
+		"Moscow", "В правой алейкум"}
+
+	Users = append(Users, mockedUser)
+	Users = append(Users, mockedUser1)
 	instance.initializeRoutes()
 }
 
@@ -39,7 +48,7 @@ func (instance *App) initializeRoutes() {
 
 	// PUT ( update data )
 
-	//Static
+	//Static path
 	instance.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 }
 
@@ -72,7 +81,7 @@ var errorCreateUser = map[string]string{
 	"Error": "Nickname/mail already exists",
 }
 
-var users []User
+var Users []User
 
 func (u *User) setUniqueId() {
 	// DB incremental or smth
@@ -82,18 +91,18 @@ func (u *User) setUniqueId() {
 }
 
 func (instance *App) createUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(users)
+	fmt.Println(Users)
 	w.Header().Set("Content-Type", "application/json")
 	var newUser User
 	_ = json.NewDecoder(r.Body).Decode(&newUser) // ToDo: Log error
-	for _, existUser := range users {
+	for _, existUser := range Users {
 		if newUser.Nickname == existUser.Nickname || newUser.Email == existUser.Email {
 			json.NewEncoder(w).Encode(errorCreateUser)
 			return
 		}
 	}
 	newUser.setUniqueId()
-	users = append(users, newUser) // Check succesfull append? ( in db clearly )
+	Users = append(Users, newUser) // Check succesfull append? ( in db clearly )
 	//json.NewEncoder(w).Encode(newUser)
 
 }
@@ -102,37 +111,37 @@ func (instance *App) createUser(w http.ResponseWriter, r *http.Request) {
 //ToDo: Check and simplify conditions !!!
 func (instance *App) getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var order Order
+	//var order Order
 	var pageSize int
 	// Initilize pagesize
 	pageSize = 1
-	_ = json.NewDecoder(r.Body).Decode(&order)
-	sort.Slice(users, func(i, j int) bool {
-		return users[i].Points > users[j].Points
+	//_ = json.NewDecoder(r.Body).Decode(&order)
+	sort.Slice(Users, func(i, j int) bool {
+		return Users[i].Points > Users[j].Points
 	})
 	offset, getOffset := r.URL.Query()["offset"]
 	if getOffset {
 		offsetInt, _ := strconv.ParseInt(offset[0], 10, 32) // ToDo Handle error
-		if int(offsetInt) > len(users) {
-			json.NewEncoder(w).Encode(users)
+		if int(offsetInt) > len(Users) {
+			json.NewEncoder(w).Encode(Users)
 			return
-		} else if int(offsetInt) == len(users) {
-			json.NewEncoder(w).Encode(users)
+		} else if int(offsetInt) == len(Users) {
+			json.NewEncoder(w).Encode(Users)
 			return
 		}
-		if int(offsetInt)+pageSize < len(users) {
-			json.NewEncoder(w).Encode(users[offsetInt : int(offsetInt)+pageSize])
+		if int(offsetInt)+pageSize < len(Users) {
+			json.NewEncoder(w).Encode(Users[offsetInt : int(offsetInt)+pageSize])
 			return
 		} else {
-			json.NewEncoder(w).Encode(users[offsetInt:len(users)])
+			json.NewEncoder(w).Encode(Users[offsetInt:len(Users)])
 			return
 		}
 	} else {
-		if pageSize < len(users) {
-			json.NewEncoder(w).Encode(users[:pageSize])
+		if pageSize < len(Users) {
+			json.NewEncoder(w).Encode(Users[:pageSize])
 			return
 		} else {
-			json.NewEncoder(w).Encode(users)
+			json.NewEncoder(w).Encode(Users)
 			return
 		}
 	}
@@ -172,7 +181,7 @@ func (instance *App) isAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claims := instance.checkAuth(cookie)
-	for _, user := range users {
+	for _, user := range Users {
 		if user.Nickname == claims["id"].(string) {
 			json.NewEncoder(w).Encode(map[string]bool{"is_auth": true})
 			return
@@ -182,7 +191,7 @@ func (instance *App) isAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (instance *App) editUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(users)
+	fmt.Println(Users)
 	//Checking cookie
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
@@ -197,10 +206,10 @@ func (instance *App) editUser(w http.ResponseWriter, r *http.Request) {
 	// Getting claims from current cookie
 	claims := instance.checkAuth(cookie)
 
-	// Finding user from claims in users and changing old data to modified data
-	for i, user := range users {
+	// Finding user from claims in Users and changing old data to modified data
+	for i, user := range Users {
 		if user.ID == claims["id"].(string) {
-			u := &users[i]
+			u := &Users[i]
 			if modUser.Nickname != "" {
 				u.Nickname = modUser.Nickname
 			}
@@ -233,7 +242,7 @@ func (instance *App) login(w http.ResponseWriter, r *http.Request) {
 	var userExistFlag bool
 	var existUser User
 	_ = json.NewDecoder(r.Body).Decode(&existUser)
-	for _, user := range users {
+	for _, user := range Users {
 		if user.Nickname == existUser.Nickname && user.Password == existUser.Password {
 			userExistFlag = true
 			existUser = user
@@ -260,7 +269,7 @@ func (instance *App) getMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	claims := instance.checkAuth(cookie)
-	for _, user := range users {
+	for _, user := range Users {
 		if user.ID == claims["id"].(string) {
 			json.NewEncoder(w).Encode(user)
 			return
@@ -273,7 +282,7 @@ func (instance *App) getUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	for _, item := range users {
+	for _, item := range Users {
 		//id, _ := strconv.Atoi(params["ID"])
 		if item.ID == params["id"] {
 			json.NewEncoder(w).Encode(item)
@@ -303,7 +312,7 @@ func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	claims := instance.checkAuth(cookie)
-	// Path to users avatar
+	// Path to Users avatar
 	picpath := "./static/img/" + claims["id"].(string) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -312,9 +321,9 @@ func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Changing ImgURL field in current user
-	for i, user := range users {
+	for i, user := range Users {
 		if user.ID == claims["id"].(string) {
-			u := &users[i]
+			u := &Users[i]
 			u.ImgUrl = "http://advhater.ru/img/" + claims["id"].(string) + ".jpeg"
 		}
 	}
@@ -331,8 +340,8 @@ func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 //		"qwerty", 100, 22, "test",
 //		"Moscow", "В правой алейкум"}
 //	// Mocker part end
-//	users = append(users, mockedUser)
-//	users = append(users, mockedUser1)
+//	Users = append(Users, mockedUser)
+//	Users = append(Users, mockedUser1)
 //	reciever := mux.NewRouter()
 //
 //	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/"))) // Uncomment if want to run locally
