@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -15,7 +16,35 @@ import (
 	"strconv"
 )
 
-// ToDo бахнуть обработку ошибок
+type App struct {
+	Router *mux.Router
+	DB     *sql.DB // ToDo: __future__
+}
+
+func (instance *App) Initialize(user, password, dbname string) {
+	instance.Router = mux.NewRouter()
+	instance.initializeRoutes()
+}
+
+func (instance *App) initializeRoutes() {
+	// GET ( get exist data )
+	instance.Router.HandleFunc("/users/{Nickname}", instance.getUser).Methods("GET")
+	instance.Router.HandleFunc("/leaderboard", instance.getLeaderboard).Methods("GET")
+	instance.Router.HandleFunc("/isauth", instance.isAuth).Methods("GET")
+	instance.Router.HandleFunc("/me", instance.getMe).Methods("GET")
+
+	// POST ( create new data )
+	instance.Router.HandleFunc("/signup", instance.createUser).Methods("POST")
+	instance.Router.HandleFunc("/upload", instance.upload).Methods("POST")
+	instance.Router.HandleFunc("/login", instance.login).Methods("POST")
+	instance.Router.HandleFunc("/users/{Nickname}", instance.editUser).Methods("POST")
+
+	// PUT ( update data )
+}
+
+func (instance *App) Run(addr string) {
+	log.Fatal(http.ListenAndServe(":8000", instance.Router))
+}
 
 type User struct {
 	ID       string
@@ -51,7 +80,7 @@ func (u *User) setUniqueId() {
 	u.ID = string(out[:len(out)-1])
 }
 
-func createUser(w http.ResponseWriter, r *http.Request) {
+func (instance *App) createUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(users)
 	w.Header().Set("Content-Type", "application/json")
 	var newUser User
@@ -70,7 +99,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 //ToDo: Use get with key order? (ASC/DESC )
 //ToDo: Check and simplify conditions !!!
-func getLeaderboard(w http.ResponseWriter, r *http.Request) {
+func (instance *App) getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var order Order
 	var pageSize int
@@ -109,7 +138,7 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func createSessionId(user User) string {
+func (instance *App) createSessionId(user User) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": user.ID,
 	})
@@ -119,7 +148,7 @@ func createSessionId(user User) string {
 	return secretStr
 }
 
-func checkAuth(cookie *http.Cookie) jwt.MapClaims {
+func (instance *App) checkAuth(cookie *http.Cookie) jwt.MapClaims {
 	token, _ := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -134,14 +163,14 @@ func checkAuth(cookie *http.Cookie) jwt.MapClaims {
 	return claims
 }
 
-func isAuth(w http.ResponseWriter, r *http.Request) {
+func (instance *App) isAuth(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.Write([]byte("{}"))
 		return
 	}
 
-	claims := checkAuth(cookie)
+	claims := instance.checkAuth(cookie)
 	for _, user := range users {
 		if user.Nickname == claims["id"].(string) {
 			json.NewEncoder(w).Encode(map[string]bool{"is_auth": true})
@@ -151,7 +180,7 @@ func isAuth(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]bool{"is_auth": false})
 }
 
-func editUser(w http.ResponseWriter, r *http.Request) {
+func (instance *App) editUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(users)
 	//Checking cookie
 	cookie, err := r.Cookie("session_id")
@@ -165,7 +194,7 @@ func editUser(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("avatar")
 	fmt.Println(file)
 	// Getting claims from current cookie
-	claims := checkAuth(cookie)
+	claims := instance.checkAuth(cookie)
 
 	// Finding user from claims in users and changing old data to modified data
 	for i, user := range users {
@@ -198,7 +227,7 @@ func editUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func login(w http.ResponseWriter, r *http.Request) {
+func (instance *App) login(w http.ResponseWriter, r *http.Request) {
 	var sessionId string
 	var userExistFlag bool
 	var existUser User
@@ -213,7 +242,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorLogin)
 		return
 	}
-	sessionId = createSessionId(existUser)
+	sessionId = instance.createSessionId(existUser)
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionId,
@@ -223,13 +252,13 @@ func login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(existUser)
 }
 
-func getMe(w http.ResponseWriter, r *http.Request) {
+func (instance *App) getMe(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.Write([]byte("{}"))
 		return
 	}
-	claims := checkAuth(cookie)
+	claims := instance.checkAuth(cookie)
 	for _, user := range users {
 		if user.ID == claims["id"].(string) {
 			json.NewEncoder(w).Encode(user)
@@ -239,7 +268,7 @@ func getMe(w http.ResponseWriter, r *http.Request) {
 }
 
 // ToDO: Add case sensitive ( high/low )
-func getUser(w http.ResponseWriter, r *http.Request) {
+func (instance *App) getUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
@@ -253,7 +282,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&User{})
 }
 
-func upload(w http.ResponseWriter, r *http.Request) {
+func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 	// Tacking file from request
 	fmt.Println("UPLOAD")
 	r.ParseMultipartForm(32 << 20)
@@ -272,7 +301,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("{}"))
 		return
 	}
-	claims := checkAuth(cookie)
+	claims := instance.checkAuth(cookie)
 	// Path to users avatar
 	picpath := "./static/img/" + claims["id"].(string) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
@@ -304,20 +333,6 @@ func main() {
 	users = append(users, mockedUser)
 	users = append(users, mockedUser1)
 	reciever := mux.NewRouter()
-	// GET  ( get exists data )
-
-	reciever.HandleFunc("/users/{Nickname}", getUser).Methods("GET")
-
-	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("GET")
-	reciever.HandleFunc("/isauth", isAuth).Methods("GET")
-	reciever.HandleFunc("/me", getMe).Methods("Get")
-	//reciever.HandleFunc("/edit", editUser).Methods("GET")
-
-	// POST ( create new data )
-	reciever.HandleFunc("/signup", createUser).Methods("POST")
-	reciever.HandleFunc("/upload", upload).Methods("POST")
-	reciever.HandleFunc("/login", login).Methods("POST")
-	reciever.HandleFunc("/users/{Nickname}", editUser).Methods("POST")
 
 	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/"))) // Uncomment if want to run locally
 	log.Fatal(http.ListenAndServe(":8080", reciever))
