@@ -1,5 +1,5 @@
 package main
-//123123
+
 import (
 	"database/sql"
 	"encoding/json"
@@ -21,7 +21,7 @@ type App struct {
 	DB     *sql.DB // ToDo: __future__
 }
 
-func (instance *App) Initialize(user, password, dbname string) {
+func (instance *App) Initialize() {
 	instance.Router = mux.NewRouter()
 	instance.initializeRoutes()
 }
@@ -42,8 +42,9 @@ func (instance *App) initializeRoutes() {
 	// PUT ( update data )
 }
 
-func (instance *App) Run(addr string) {
-	log.Fatal(http.ListenAndServe(":8000", instance.Router))
+func (instance *App) Run(port string) {
+	instance.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+	log.Fatal(http.ListenAndServe(port, instance.Router))
 }
 
 type User struct {
@@ -321,19 +322,19 @@ func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 	io.Copy(f, file)
 }
 
-func main() {
-	// Mocked part for leaderboard
-	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
-		"evv", -100, 23, "test",
-		"Voronezh", "В левой руке салам"}
-	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
-		"qwerty", 100, 22, "test",
-		"Moscow", "В правой алейкум"}
-	// Mocker part end
-	users = append(users, mockedUser)
-	users = append(users, mockedUser1)
-	reciever := mux.NewRouter()
-
-	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/"))) // Uncomment if want to run locally
-	log.Fatal(http.ListenAndServe(":8080", reciever))
+//func main() {
+//	// Mocked part for leaderboard
+//	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
+//		"evv", -100, 23, "test",
+//		"Voronezh", "В левой руке салам"}
+//	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
+//		"qwerty", 100, 22, "test",
+//		"Moscow", "В правой алейкум"}
+//	// Mocker part end
+//	users = append(users, mockedUser)
+//	users = append(users, mockedUser1)
+//	reciever := mux.NewRouter()
+//
+//	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/"))) // Uncomment if want to run locally
+//	log.Fatal(http.ListenAndServe(":8080", reciever))
 }
