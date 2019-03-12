@@ -1,24 +1,68 @@
 package main
 
 import (
-	"2019_1_Kasatiki/domestic/AdvCookie"
-	"2019_1_Kasatiki/domestic/Models"
+	"database/sql"
 	"encoding/json"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"sort"
 	"strconv"
 )
 
-// ToDo: delete this struct
+type App struct {
+	Router *mux.Router
+	DB     *sql.DB // ToDo: __future__
+}
+
+func (instance *App) Initialize(user, password, dbname string) {
+	instance.Router = mux.NewRouter()
+	instance.initializeRoutes()
+}
+
+func (instance *App) initializeRoutes() {
+	// GET ( get exist data )
+	instance.Router.HandleFunc("/users/{Nickname}", instance.getUser).Methods("GET")
+	instance.Router.HandleFunc("/leaderboard", instance.getLeaderboard).Methods("GET")
+	instance.Router.HandleFunc("/isauth", instance.isAuth).Methods("GET")
+	instance.Router.HandleFunc("/me", instance.getMe).Methods("GET")
+
+	// POST ( create new data )
+	instance.Router.HandleFunc("/signup", instance.createUser).Methods("POST")
+	instance.Router.HandleFunc("/upload", instance.upload).Methods("POST")
+	instance.Router.HandleFunc("/login", instance.login).Methods("POST")
+	instance.Router.HandleFunc("/users/{Nickname}", instance.editUser).Methods("POST")
+
+	// PUT ( update data )
+}
+
+func (instance *App) Run(addr string) {
+	log.Fatal(http.ListenAndServe(":8000", instance.Router))
+}
+
+type User struct {
+	ID       string
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Points   int
+	Age      int
+	ImgUrl   string
+	Region   string
+	About    string
+}
+
 type Order struct {
 	Sequence string `json:"order"`
 }
 
-//ToDo: set all errors in one map and set this map in AdvErrors.go
+//ToDo: Move to another package
 var errorLogin = map[string]string{
 	"Error": "User dont exist",
 }
@@ -27,12 +71,19 @@ var errorCreateUser = map[string]string{
 	"Error": "Nickname/mail already exists",
 }
 
-var users []Models.User
+var users []User
 
-// ToDo: set this func in Handlers.go or API.go or something else
-func createUser(w http.ResponseWriter, r *http.Request) {
+func (u *User) setUniqueId() {
+	// DB incremental or smth
+	out, _ := exec.Command("uuidgen").Output()
+	u.Points = 0
+	u.ID = string(out[:len(out)-1])
+}
+
+func (instance *App) createUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(users)
 	w.Header().Set("Content-Type", "application/json")
-	var newUser Models.User
+	var newUser User
 	_ = json.NewDecoder(r.Body).Decode(&newUser) // ToDo: Log error
 	for _, existUser := range users {
 		if newUser.Nickname == existUser.Nickname || newUser.Email == existUser.Email {
@@ -40,16 +91,15 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	newUser.SetUniqueId()
+	newUser.setUniqueId()
 	users = append(users, newUser) // Check succesfull append? ( in db clearly )
 	//json.NewEncoder(w).Encode(newUser)
 
 }
 
-// ToDo: set this func in Handlers.go or API.go or something else
 //ToDo: Use get with key order? (ASC/DESC )
 //ToDo: Check and simplify conditions !!!
-func getLeaderboard(w http.ResponseWriter, r *http.Request) {
+func (instance *App) getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var order Order
 	var pageSize int
@@ -88,10 +138,39 @@ func getLeaderboard(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// ToDo: set this func in Handlers.go or API.go or something else
-func isAuth(w http.ResponseWriter, r *http.Request) {
-	// Getting claims from current cookie
-	claims := AdvCookie.GetClaims(r)
+func (instance *App) createSessionId(user User) string {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id": user.ID,
+	})
+	// ToDo: Error handle
+	spiceSalt, _ := ioutil.ReadFile("secret.conf")
+	secretStr, _ := token.SignedString(spiceSalt)
+	return secretStr
+}
+
+func (instance *App) checkAuth(cookie *http.Cookie) jwt.MapClaims {
+	token, _ := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		spiceSalt, _ := ioutil.ReadFile("secret.conf")
+		return spiceSalt, nil
+	})
+
+	claims, _ := token.Claims.(jwt.MapClaims)
+
+	// ToDo: Handle else case
+	return claims
+}
+
+func (instance *App) isAuth(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		w.Write([]byte("{}"))
+		return
+	}
+
+	claims := instance.checkAuth(cookie)
 	for _, user := range users {
 		if user.Nickname == claims["id"].(string) {
 			json.NewEncoder(w).Encode(map[string]bool{"is_auth": true})
@@ -101,13 +180,21 @@ func isAuth(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]bool{"is_auth": false})
 }
 
-// ToDo: set this func in Handlers.go or API.go or something else
-func editUser(w http.ResponseWriter, r *http.Request) {
-	// Getting claims from current cookie
-	claims := AdvCookie.GetClaims(r)
+func (instance *App) editUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(users)
+	//Checking cookie
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		w.Write([]byte("{}"))
+		return
+	}
 	// Taking JSON of modified user from edit form
-	var modUser Models.User
+	var modUser User
 	_ = json.NewDecoder(r.Body).Decode(&modUser)
+	file, _, err := r.FormFile("avatar")
+	fmt.Println(file)
+	// Getting claims from current cookie
+	claims := instance.checkAuth(cookie)
 
 	// Finding user from claims in users and changing old data to modified data
 	for i, user := range users {
@@ -140,10 +227,10 @@ func editUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ToDo: set this func in Handlers.go or API.go or something else
-func login(w http.ResponseWriter, r *http.Request) {
+func (instance *App) login(w http.ResponseWriter, r *http.Request) {
+	var sessionId string
 	var userExistFlag bool
-	var existUser Models.User
+	var existUser User
 	_ = json.NewDecoder(r.Body).Decode(&existUser)
 	for _, user := range users {
 		if user.Nickname == existUser.Nickname && user.Password == existUser.Password {
@@ -155,8 +242,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(errorLogin)
 		return
 	}
-	sessionId := AdvCookie.CreateSessionId(existUser)
-	// ToDo: set this move in another func
+	sessionId = instance.createSessionId(existUser)
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionId,
@@ -166,10 +252,13 @@ func login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(existUser)
 }
 
-// ToDo: set this func in Handlers.go or API.go or something else
-func getMe(w http.ResponseWriter, r *http.Request) {
-	// Getting claims from current cookie
-	claims := AdvCookie.GetClaims(r)
+func (instance *App) getMe(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		w.Write([]byte("{}"))
+		return
+	}
+	claims := instance.checkAuth(cookie)
 	for _, user := range users {
 		if user.ID == claims["id"].(string) {
 			json.NewEncoder(w).Encode(user)
@@ -178,38 +267,46 @@ func getMe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ToDo: set this func in Handlers.go or API.go or something else
 // ToDO: Add case sensitive ( high/low )
-func getUser(w http.ResponseWriter, r *http.Request) {
+func (instance *App) getUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	for _, item := range users {
 		//id, _ := strconv.Atoi(params["ID"])
-		if item.Nickname == params["Nickname"] {
+		if item.ID == params["id"] {
 			json.NewEncoder(w).Encode(item)
 			return
 		}
 	}
-	json.NewEncoder(w).Encode(&Models.User{})
+	json.NewEncoder(w).Encode(&User{})
 }
 
-// ToDo: set this func in Handlers.go or API.go or something else
-func upload(w http.ResponseWriter, r *http.Request) {
+func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 	// Tacking file from request
+	fmt.Println("UPLOAD")
 	r.ParseMultipartForm(32 << 20)
+	fmt.Println(r)
 	file, _, err := r.FormFile("uploadfile")
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	defer file.Close()
-	// Getting claims from current cookie
-	claims := AdvCookie.GetClaims(r)
+	fmt.Println("FILE IS HERE")
+
+	// Tacking cookie of current user
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		w.Write([]byte("{}"))
+		return
+	}
+	claims := instance.checkAuth(cookie)
 	// Path to users avatar
-	// ToDo: set process of saving pict in some func
 	picpath := "./static/img/" + claims["id"].(string) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -225,35 +322,17 @@ func upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// ToDo: Set this mocking in some func and file
 	// Mocked part for leaderboard
-	var mockedUser = Models.User{"1", "evv", "onetaker@gmail.com",
+	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
 		"evv", -100, 23, "test",
 		"Voronezh", "В левой руке салам"}
-	var mockedUser1 = Models.User{"2", "tony", "trendpusher@hydra.com",
+	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
 		"qwerty", 100, 22, "test",
 		"Moscow", "В правой алейкум"}
-
 	// Mocker part end
 	users = append(users, mockedUser)
 	users = append(users, mockedUser1)
-
-	// ToDo: set server in struct
 	reciever := mux.NewRouter()
-
-	// GET  ( get exists data )
-	reciever.HandleFunc("/users/{Nickname}", getUser).Methods("GET")
-	reciever.HandleFunc("/leaderboard", getLeaderboard).Methods("GET")
-	reciever.HandleFunc("/isauth", isAuth).Methods("GET")
-	reciever.HandleFunc("/me", getMe).Methods("Get")
-
-	// POST ( create new data )
-	reciever.HandleFunc("/signup", createUser).Methods("POST")
-	reciever.HandleFunc("/upload", upload).Methods("POST")
-	reciever.HandleFunc("/login", login).Methods("POST")
-
-	// Todo: change method of request on PUT (CRUD)
-	reciever.HandleFunc("/users/{Nickname}", editUser).Methods("POST")
 
 	reciever.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/"))) // Uncomment if want to run locally
 	log.Fatal(http.ListenAndServe(":8080", reciever))
