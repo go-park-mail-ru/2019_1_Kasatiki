@@ -1,0 +1,16 @@
+.paginatorBox {
+    align-content: center;
+    display: flex;
+}
+
+.paginatorBox a {
+    font-size: 20px;
+}
+
+.next {
+    background-color: aqua;
+}
+
+.prev {
+    background-color: aqua;
+}

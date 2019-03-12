@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+.profile {
+    position: relative;
+
+    margin: 15vh auto;
+    padding: 15px;
+
+    max-width: 900px;
+    min-width: 300px;
+
+    background-color: rgb(214, 210, 210);
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 900;
+}
+.userSection {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.userCart, .fullInfo {
+    display: flex;
+    flex-wrap: wrap;
+    margin: auto;
+    
+}
+.userCart {
+    flex-direction: column;
+    max-width: 270px;
+
+    background-color: bisque
+}
+
+.userCart div {
+    position: relative;
+    margin: auto;
+    min-width: 270px;
+    text-align: center;    
+}
+
+.nickname {
+
+    background-color: rgb(255, 236, 213);
+}
+
+.about {
+    background-color: rgb(255, 211, 157);
+}
+
+.mainInfo {
+    background-color: rgb(255, 200, 132);
+}
+
+.buttonSection {
+    background-color: rgb(255, 189, 109);
+
+    display: flex;
+    flex-direction: column;
+}
+
+.buttonSection button {
+    width: 250px;
+    height: 35px;
+    margin: 2px auto;
+
+    border: 0px;
+    background-color:aquamarine;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+    transition: 0.2s linear;
+
+}
+
+.buttonSection button:hover {
+    transition: 0.2s linear;
+    background-color: rgb(48, 219, 162);
+} 
+
+.social {
+    background-color: rgb(252, 174, 80);
+}
+
+.fullInfo {
+    /* flex: 2; */
+    max-width: 600px;
+    background-color: rgb(181, 255, 255);
+}
+
+.fullInfo div {
+    border: 2px solid;
+    background-color: rgb(188, 152, 221);
+    margin: 1px auto;
+    width: 290px;
+    height: 200px;
+}
+    </style>
+
+    <div class="profile">
+        <div class="userSection">
+            <div class="userCart">
+                <div class="nickname">
+                    <input type="text" name="nickname" value="{{nickname}}">
+                </div>
+                <div class="avatar">
+                    <img src="https://cdn.iconscout.com/icon/free/png-256/avatar-372-456324.png" alt="avatar">
+                </div>
+                <div class="about">
+                    {{About}}
+                </div>
+                <div class="mainInfo">
+                    points: {{Points}} region: {{Region}}
+                </div>
+                <div class="buttonSection">
+                    <button>Изменить</button>
+                    <button data-section="menu" class="btn">Назад</button>
+                </div>
+                <div class="social">
+                    <a href="">vk</a>
+                    <a href="">fb</a>
+                    <a href="">inst</a>
+                    <a href="">tw</a>
+                    <a href="">pr</a>
+                </div>
+            </div>
+            <div class="fullInfo">
+                <div class="id">{{ID}}</div>
+                <div class="region">{{Region}}</div>
+                <div class="emailDiv">{{email}}</div>
+                <div class="age">{{Age}}</div>
+            </div>
+            <p type="submit" class="submit_btn">post</p>
+        </div>
+    </div>
+</body>
+</html>

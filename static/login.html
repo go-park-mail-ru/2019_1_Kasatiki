@@ -1,0 +1,176 @@
+		<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<title>login</title>
+
+			<style>
+			.main {
+				width: 422px;
+				height: 500px;
+
+				margin: 110px auto 0 auto;
+
+				/*border: solid;*/
+				background-color: #fff;
+				border-radius: 7px;
+				box-shadow: 0px 15px 48px rgba(0,0,0,0.5);
+				font-family: Helvetica;
+				font-weight: bold;
+			}
+
+			body { 
+				background-color: #858585;
+			}
+
+			.title {
+				padding: 18px 0px 5px 0px;
+		        font-size: 24px;
+			}
+
+			.social-bar {
+				margin: 18px 0px 36px 0px;
+
+				text-align: center;
+				border-radius: 10px;
+			}
+
+			.login-form {
+				margin: 24px 0px 0px 0px;
+				align-content: center;
+			}
+
+			.hr-or {
+				margin: 0px 20px 0px 20px;
+			    background-color: #fff;
+			    z-index: 2;
+			    size: 1px;
+			}
+
+			.or {
+				position: relative;
+				top: -10px;
+				background-color: #fff;
+				color: #E0E0E0;
+				padding: 0px 5px 0px 5px;
+				z-index: 0;
+			}
+
+
+			.form {
+				width: 368px;
+				height: 47px;
+
+				margin: 19px 0px 0px 0px;
+				padding: 0px 0px 0px 10px;
+
+				border-radius: 8px;
+
+				font-size: 14px;
+				font-family: Helvetica;
+				font-weight: bold;
+				border: 1px solid;
+			}
+
+			.pass {
+				background-image: url("https://svgshare.com/i/BHR.svg");
+				background-repeat: no-repeat;
+				background-position: 95.7% 50%;
+			}
+
+			.pass:valid {
+				border-color: #E0E0E0;
+			}
+
+			.pass:invalid {
+				border-color: #FF1100;
+				content: asdfsdaf;
+			}
+
+			.email {
+				border-color: #E0E0E0;
+			}
+
+			.mail-login {
+				background-color: #005FF9;
+				/*border-color: #0053DB;*/
+			}
+
+			.vk-login {
+				background-color: #4A76A8;
+				/*border-color: #416894;*/
+			}
+
+			.fb-login {
+				background-color: #3B5998;
+				/*border-color: #344E86;*/
+			}
+
+			.btn {
+				width: 380px;
+				height: 48px;
+
+				margin: 0px 0px 10px 0px;
+				border-radius: 7px;
+				font-size: 14px;
+				color: #fff;
+				border: 0;
+				font-weight: 1000;
+
+				box-shadow: 0px 0px 1px rgba(0,0,0,1);
+			}
+
+			.vk-icon {
+				position: relative;
+				top: 1px;
+				right: -5px;
+			}
+
+			.fb-icon {
+				position: relative;
+				top: 1px;
+				right: -2px;
+			}
+
+			.mail-icon {
+				position: relative;
+				top: 2px;
+				right: 8px;
+			}
+			
+			.icon {
+				filter: invert(1);
+			}			
+
+			.pass-req {
+				font-size: 12px;
+				position: solid;
+				align-content: left;
+				color: red;
+				margin: 7px 286px 15px 0px;
+			}
+				
+			</style>
+				
+				<!-- <link rel="stylesheet" type="text/css" href="css/login.css"> -->
+			</head>
+			<body>
+
+				<div class="main" align="center">
+					<div class="title">Логин</div>
+					<div class="social-bar">
+						<button class="vk-login btn"><img src='https://svgshare.com/i/BGv.svg' class="icon vk-icon" alt="vk-icon" /> Войти через Вконтакте</button>
+						<button class="fb-login btn"><img src='https://svgshare.com/i/BHS.svg' class="icon fb-icon" alt="fb-icon" /> Войти через Facebook</button>
+					</div>
+					<hr class="hr-or" color=#E0E0E0> 
+		<!-- 			<div class="or">или</div> -->
+					<div class="login-form">
+						<input class="email form" type="email" placeholder="Email">
+						<input class="pass form" type="password" required placeholder="Пароль">
+						<div class="pass-req">Введите пароль</div>
+						<button class="mail-login btn"><img src='https://svgshare.com/i/BHG.svg' class="icon mail-icon" alt="mail-icon" /> Войти через почту</button>
+					</div>
+				</div>
+
+			</body>
+			</html>

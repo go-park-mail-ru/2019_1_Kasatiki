@@ -1,0 +1,36 @@
+.signup_input {
+    width: 350px;
+    height: 50px;
+    margin: 10px 25px 10px 25px;
+    border: 0;
+
+    border-radius: 10px;
+}
+
+.signup_bad_input {
+    border: solid 2px #ff0000;
+}
+
+.signup_good_input {
+    border: solid 2px #808080;
+}
+
+.signup_btn {
+    width: 350px;
+    height: 50px;
+    margin: 10px 25px 10px 25px;
+    border: 0;
+    background-color: rgb(0, 255, 255);
+    font-size: 20px;
+    font-weight: 1000;
+    color: rgb(160, 119, 235);
+    padding: 0 0 0 0;
+    transform: scale(1);
+    transition: 0.2s linear;
+}
+
+.signup_btn:hover {
+    transform: scale(1.1);
+    transition: 0.2s linear;
+    background-color: rgb(2, 224, 224);
+}

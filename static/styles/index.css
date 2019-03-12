@@ -1,0 +1,25 @@
+.title {	
+	align-content: center;
+	margin: 150px;
+}
+
+.myHeared {
+	align-content: center;
+	
+}
+
+.blueSqr {
+	background-color: blue;
+}
+
+body {
+	position: relative;
+    background-image: url('http://genchi.info/images/4k-minimalist-wallpaper-3.jpg');
+    background-position: center;
+	background-repeat: no-repeat;
+}
+
+html {
+	height: 100%;
+	overflow: hidden;
+}

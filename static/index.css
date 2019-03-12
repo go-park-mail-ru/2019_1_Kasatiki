@@ -1,0 +1,44 @@
+@import url('components/board/board.css');
+@import url('components/pagination/pagination.css');
+@import url('components/helper/helper.css');
+@import url('components/login/login.css');
+@import url('components/signup/signup.css');
+@import url('components/profile/profile.css');
+
+.myHeared {
+	align-content: center;
+	
+}
+
+body {
+	position: relative;
+    background-image: url(/img/bg.jpg);
+    background-position: center;
+	background-repeat: no-repeat;
+}
+
+html {
+	height: 100%;
+	overflow: hidden;
+}
+
+.menu {
+    align-content: center;
+    width: 400px;
+    height: 500px;
+    margin:  100px auto auto auto;
+}
+
+.gameBlock {
+    margin: 100px auto auto auto;
+
+    width: 700px;
+    height: 700px;  
+    border: solid;
+}
+
+#gameCanvas {
+    /* width: 700px;
+    height: 700px;   */
+    border: solid;
+}
