@@ -1,36 +1,28 @@
 package main
 
 import (
+	"./domestic/AdvCookie"
+	"./domestic/Models"
+	"2019_1_Kasatiki/domestic/Errors"
+	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"sort"
 	"strconv"
 	"time"
 )
 
 type App struct {
-	Router *mux.Router // ToDo: __future__
+	Router *mux.Router
+	DB     *sql.DB // ToDo: __future__
 }
 
 func (instance *App) Initialize() {
-	var mockedUser = User{"1", "evv", "onetaker@gmail.com",
-		"evv", -100, 23, "test",
-		"Voronezh", "В левой руке салам"}
-	var mockedUser1 = User{"2", "tony", "trendpusher@hydra.com",
-		"qwerty", 100, 22, "test",
-		"Moscow", "В правой алейкум"}
-	// Mocked users
-
-	Users = append(Users, mockedUser)
-	Users = append(Users, mockedUser1)
 	instance.Router = mux.NewRouter()
 	instance.initializeRoutes()
 }
@@ -55,163 +47,195 @@ func (instance *App) initializeRoutes() {
 }
 
 func (instance *App) Run(port string) {
-	log.Fatal(http.ListenAndServe(port, instance.Router))
-}
-
-type User struct {
-	ID       string
-	Nickname string `json:"nickname"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Points   int
-	Age      int
-	ImgUrl   string
-	Region   string
-	About    string
+	instance.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+	log.Fatalln(http.ListenAndServe(port, instance.Router))
 }
 
 type Order struct {
 	Sequence string `json:"order"`
 }
 
-//ToDo: Move to another package
-var errorLogin = map[string]string{
-	"Error": "User dont exist",
-}
+var users []Models.User
 
-var errorCreateUser = map[string]string{
-	"Error": "Nickname/mail already exists",
-}
+func (instance *App) logout(w http.ResponseWriter, r *http.Request) {
+	_, err := r.Cookie("session_id")
 
-var Users []User
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
-func (u *User) setUniqueId() {
-	// DB incremental or smth
-	out, _ := exec.Command("uuidgen").Output()
-	u.Points = 0
-	u.ID = string(out[:len(out)-1])
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Expires:  time.Now().AddDate(0, 0, -1),
+		Path:     "/",
+		HttpOnly: true,
+	})
+	w.WriteHeader(http.StatusOK)
 }
 
 func (instance *App) createUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(Users)
 	w.Header().Set("Content-Type", "application/json")
-	var newUser User
-	_ = json.NewDecoder(r.Body).Decode(&newUser) // ToDo: Log error
-	for _, existUser := range Users {
-		if newUser.Nickname == existUser.Nickname || newUser.Email == existUser.Email {
-			json.NewEncoder(w).Encode(errorCreateUser)
+	var newUser Models.User
+	// Taking JSON with new user's data
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+	if err != nil {
+		// Sending error response
+		err := json.NewEncoder(w).Encode(Errors.Error["Invalid JSON"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
+		return
+	}
+	// Checking new user's data on existing
+	for _, existUser := range users {
+		// If nickname exist
+		if newUser.Nickname == existUser.Nickname {
+			err := json.NewEncoder(w).Encode(Errors.Error["Nickname already exist"])
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
+			return
+			// If email exist
+		} else if newUser.Email == existUser.Email {
+			err := json.NewEncoder(w).Encode(Errors.Error["Email already exist"])
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		}
 	}
-	newUser.setUniqueId()
-	Users = append(Users, newUser) // Check succesfull append? ( in db clearly )
-	//json.NewEncoder(w).Encode(newUser)
-
+	newUser.SetUniqueId()
+	users = append(users, newUser)
 }
 
-//ToDo: Use get with key order? (ASC/DESC )
-//ToDo: Check and simplify conditions !!!
 func (instance *App) getLeaderboard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	//var order Order
+	var order Order
 	var pageSize int
 	// Initilize pagesize
 	pageSize = 1
-	//_ = json.NewDecoder(r.Body).Decode(&order)
-	sort.Slice(Users, func(i, j int) bool {
-		return Users[i].Points > Users[j].Points
+	_ = json.NewDecoder(r.Body).Decode(&order)
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Points > users[j].Points
 	})
 	offset, getOffset := r.URL.Query()["offset"]
 	if getOffset {
-		offsetInt, _ := strconv.ParseInt(offset[0], 10, 32) // ToDo Handle error
-		if int(offsetInt) > len(Users) {
-			json.NewEncoder(w).Encode(Users)
+		offsetInt, err := strconv.ParseInt(offset[0], 10, 32) // ToDo Handle error
+		if err != nil {
+			fmt.Println("Parsing ofset error")
+			fmt.Println(err)
+		}
+		if int(offsetInt) > len(users) {
+			err := json.NewEncoder(w).Encode(users)
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
-		} else if int(offsetInt) == len(Users) {
-			json.NewEncoder(w).Encode(Users)
+		} else if int(offsetInt) == len(users) {
+			err := json.NewEncoder(w).Encode(users)
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		}
-		if int(offsetInt)+pageSize < len(Users) {
-			json.NewEncoder(w).Encode(Users[offsetInt : int(offsetInt)+pageSize])
+		if int(offsetInt)+pageSize < len(users) {
+			err := json.NewEncoder(w).Encode(users[offsetInt : int(offsetInt)+pageSize])
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		} else {
-			json.NewEncoder(w).Encode(Users[offsetInt:len(Users)])
+			err := json.NewEncoder(w).Encode(users[offsetInt:len(users)])
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		}
 	} else {
-		if pageSize < len(Users) {
-			json.NewEncoder(w).Encode(Users[:pageSize])
+		if pageSize < len(users) {
+			err := json.NewEncoder(w).Encode(users[:pageSize])
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		} else {
-			json.NewEncoder(w).Encode(Users)
+			err := json.NewEncoder(w).Encode(users)
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		}
 	}
 
-}
-
-func (instance *App) createSessionId(user User) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": user.ID,
-	})
-	// ToDo: Error handle
-	spiceSalt, _ := ioutil.ReadFile("secret.conf")
-	secretStr, _ := token.SignedString(spiceSalt)
-	return secretStr
-}
-
-func (instance *App) checkAuth(cookie *http.Cookie) jwt.MapClaims {
-	token, _ := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		spiceSalt, _ := ioutil.ReadFile("secret.conf")
-		return spiceSalt, nil
-	})
-
-	claims, _ := token.Claims.(jwt.MapClaims)
-
-	// ToDo: Handle else case
-	return claims
 }
 
 func (instance *App) isAuth(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_id")
+	claims, err := AdvCookie.GetClaims(r)
 	if err != nil {
-		w.Write([]byte("{}"))
+		err := json.NewEncoder(w).Encode(Errors.Error["Bad cookies"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
 		return
 	}
-
-	claims := instance.checkAuth(cookie)
-	for _, user := range Users {
-		if user.ID == claims["id"].(string) {
-			json.NewEncoder(w).Encode(map[string]bool{"is_auth": true})
+	for _, user := range users {
+		if user.Nickname == claims["id"].(string) {
+			err := json.NewEncoder(w).Encode(map[string]bool{"is_auth": true})
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		}
 	}
-	json.NewEncoder(w).Encode(map[string]bool{"is_auth": false})
+	err = json.NewEncoder(w).Encode(map[string]bool{"is_auth": false})
+	if err != nil {
+		fmt.Println("Can't sand response")
+		fmt.Println(err)
+		return
+	}
 }
 
 func (instance *App) editUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(Users)
 	//Checking cookie
-	cookie, err := r.Cookie("session_id")
+	claims, err := AdvCookie.GetClaims(r)
 	if err != nil {
-		w.Write([]byte("{}"))
+		err := json.NewEncoder(w).Encode(Errors.Error["Bad cookies"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
 		return
 	}
 	// Taking JSON of modified user from edit form
-	var modUser User
-	_ = json.NewDecoder(r.Body).Decode(&modUser)
-	file, _, err := r.FormFile("avatar")
-	fmt.Println(file)
-	// Getting claims from current cookie
-	claims := instance.checkAuth(cookie)
+	var modUser Models.User
+	err = json.NewDecoder(r.Body).Decode(&modUser)
+	if err != nil {
+		fmt.Println("Bad JSON")
+		fmt.Println(err)
+		err = json.NewEncoder(w).Encode(Errors.Error["Invalid JSON"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
+	}
 
-	// Finding user from claims in Users and changing old data to modified data
-	for i, user := range Users {
+	// Finding user from claims in users and changing old data to modified data
+	for i, user := range users {
 		if user.ID == claims["id"].(string) {
-			u := &Users[i]
+			u := &users[i]
 			if modUser.Nickname != "" {
 				u.Nickname = modUser.Nickname
 			}
@@ -233,47 +257,79 @@ func (instance *App) editUser(w http.ResponseWriter, r *http.Request) {
 			if modUser.ImgUrl != "" {
 				u.ImgUrl = modUser.ImgUrl
 			}
-			json.NewEncoder(w).Encode(*u)
+			err := json.NewEncoder(w).Encode(*u)
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+				return
+			}
 			break
 		}
 	}
 }
 
 func (instance *App) login(w http.ResponseWriter, r *http.Request) {
-	var sessionId string
 	var userExistFlag bool
-	var existUser User
-	_ = json.NewDecoder(r.Body).Decode(&existUser)
-	for _, user := range Users {
+	var existUser Models.User
+	err := json.NewDecoder(r.Body).Decode(&existUser)
+	if err != nil {
+		fmt.Println("Bad JSON")
+		fmt.Println(err)
+		err := json.NewEncoder(w).Encode(Errors.Error["Invalid JSON"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
+	}
+	for _, user := range users {
 		if user.Nickname == existUser.Nickname && user.Password == existUser.Password {
 			userExistFlag = true
 			existUser = user
 		}
 	}
 	if !userExistFlag {
-		json.NewEncoder(w).Encode(errorLogin)
+		err := json.NewEncoder(w).Encode(Errors.Error["User does not exist"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
 		return
 	}
-	sessionId = instance.createSessionId(existUser)
+	sessionId, err := AdvCookie.CreateSessionId(existUser)
+	if err != nil {
+
+	}
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionId,
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
-	json.NewEncoder(w).Encode(existUser)
+	err = json.NewEncoder(w).Encode(existUser)
+	if err != nil {
+		fmt.Println("Can't sand response")
+		fmt.Println(err)
+		return
+	}
 }
 
 func (instance *App) getMe(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_id")
+	claims, err := AdvCookie.GetClaims(r)
 	if err != nil {
-		w.Write([]byte("{}"))
+		err := json.NewEncoder(w).Encode(Errors.Error["Bad cookies"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
 		return
 	}
-	claims := instance.checkAuth(cookie)
-	for _, user := range Users {
+	for _, user := range users {
 		if user.ID == claims["id"].(string) {
-			json.NewEncoder(w).Encode(user)
+			err = json.NewEncoder(w).Encode(user)
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		}
 	}
@@ -281,73 +337,73 @@ func (instance *App) getMe(w http.ResponseWriter, r *http.Request) {
 
 // ToDO: Add case sensitive ( high/low )
 func (instance *App) getUser(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	for _, item := range Users {
-		//id, _ := strconv.Atoi(params["ID"])
+	for _, item := range users {
 		if item.ID == params["id"] {
-			json.NewEncoder(w).Encode(item)
+			err := json.NewEncoder(w).Encode(item)
+			if err != nil {
+				fmt.Println("Can't sand response")
+				fmt.Println(err)
+			}
 			return
 		}
 	}
-	json.NewEncoder(w).Encode(&User{})
+	err := json.NewEncoder(w).Encode(&Models.User{})
+	if err != nil {
+		fmt.Println("Can't sand response")
+		fmt.Println(err)
+	}
 }
 
 func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 	// Tacking file from request
-	fmt.Println("UPLOAD")
-	r.ParseMultipartForm(32 << 20)
-	fmt.Println(r)
+	err := r.ParseMultipartForm(32 << 20)
+	if err != nil {
+		fmt.Println("Memory error")
+		fmt.Println(err)
+		err := json.NewEncoder(w).Encode(Errors.Error["Bad File"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
+		return
+	}
 	file, _, err := r.FormFile("uploadfile")
 	if err != nil {
+		fmt.Println("Bad file read")
 		fmt.Println(err)
+		err := json.NewEncoder(w).Encode(Errors.Error["Bad File"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
 		return
 	}
 	defer file.Close()
-	fmt.Println("FILE IS HERE")
-
 	// Tacking cookie of current user
-	cookie, err := r.Cookie("session_id")
+	claims, err := AdvCookie.GetClaims(r)
 	if err != nil {
-		w.Write([]byte("{}"))
+		err := json.NewEncoder(w).Encode(Errors.Error["Bad cookies"])
+		if err != nil {
+			fmt.Println("Can't sand response")
+			fmt.Println(err)
+		}
 		return
 	}
-	claims := instance.checkAuth(cookie)
-	// Path to Users avatar
+	// Path to users avatar
 	picpath := "./static/img/" + claims["id"].(string) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
-
 	// Changing ImgURL field in current user
-	for i, user := range Users {
+	for i, user := range users {
 		if user.ID == claims["id"].(string) {
-			u := &Users[i]
-			u.ImgUrl = "https://advhater.ru/img/" + claims["id"].(string) + ".jpeg"
+			u := &users[i]
+			u.ImgUrl = "http://advhater.ru/img/" + claims["id"].(string) + ".jpeg"
 		}
 	}
 	defer f.Close()
 	io.Copy(f, file)
-}
-
-// ToDo: Add cookie handle
-func (instance *App) logout(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("session_id")
-
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    "",
-		Expires:  time.Now().AddDate(0, 0, -1),
-		Path:     "/",
-		HttpOnly: true,
-	})
-	w.WriteHeader(http.StatusOK)
 }
