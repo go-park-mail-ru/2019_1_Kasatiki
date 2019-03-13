@@ -69,3 +69,93 @@ func TestSignup(t *testing.T) {
 		t.Error("New users not created")
 	}
 }
+
+// ToDo: Set cookie before put request
+func TestEditUser(t *testing.T) {
+	reqGet, _ := http.NewRequest("GET", "/nickname/evv", nil)
+	reqPost, _ := http.NewRequest("put", "/nickname/tested", strings.NewReader(`{"Age": 25}`))
+
+	//existUser, _:= http.NewRequest("POST", "/login", strings.NewReader(`{"nickname":"tested","password":"qqq"}`))
+	//responseExist := executeRequest(existUser)
+	//authGet.Header.Set("Cookie", responseExist.Header()["Set-Cookie"][0])
+	//authResp := executeRequest(authGet)
+
+	//reqPut, _ := http.NewRequest("PUT", "/nickname/tested" , strings.NewReader(`{"Age": 25}`))
+	responsePost := executeRequest(reqPost)
+	responseGet := executeRequest(reqGet)
+	//responsePut := executeRequest(reqPut)
+	checkResponseCode(t, http.StatusNotFound, responsePost.Code)
+	checkResponseCode(t, http.StatusNotFound, responseGet.Code)
+	//fmt.Println(main.Users)
+
+}
+
+func TestLogin(t *testing.T) {
+	existUser, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"nickname":"tested","password":"qqq"}`))
+	notExistUser, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"nickname":"NOTEXIST","password":"NOTEXIST"}`))
+	responseNotExist := executeRequest(notExistUser)
+	responseExist := executeRequest(existUser)
+
+	compare := strings.Compare(strings.TrimRight(responseNotExist.Body.String(), "\n"), `{"Error":"User dont exist"}`)
+	if compare != 0 {
+		t.Errorf(`Expected answer: {"Error":"User dont exist"}, got %s`, responseNotExist.Body.String())
+	}
+
+	decoder := json.NewDecoder(responseExist.Body)
+	var userInfo main.User
+	_ = decoder.Decode(&userInfo)
+	if userInfo.Nickname != "tested" {
+		t.Errorf("Expected nickname for tested user, got %s", responseExist.Body.String())
+	}
+
+}
+
+//ToDo: Remove cookie from test )
+func TestIsAuth(t *testing.T) {
+	nonAuthGet, _ := http.NewRequest("GET", "/isauth", nil)
+	responseExist := executeRequest(nonAuthGet)
+	//fmt.Println(responseExist.Body)
+	if strings.Compare(strings.TrimRight(responseExist.Body.String(), "\n"), `{}`) != 0 {
+		t.Errorf("Expected {}, got %s", responseExist.Body.String())
+	}
+
+	authGet, _ := http.NewRequest("GET", "/isauth", nil)
+	// Login
+	existUser, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"nickname":"tested","password":"qqq"}`))
+	responseExist = executeRequest(existUser)
+	authGet.Header.Set("Cookie", responseExist.Header()["Set-Cookie"][0])
+	authResp := executeRequest(authGet)
+	if strings.Compare(strings.TrimRight(authResp.Body.String(), "\n\t"), `{"is_auth":true}`) != 0 {
+		t.Errorf(`Expected auth is {"is_auth":true}, got !%s!`, `{"is_auth":true}`)
+	}
+
+	//nonAuthGet, _ := http.NewRequest("GET", "/isauth", nil)
+	//authGet, _ := http.NewRequest("GET", "/isauth", nil)
+	//existUser, _:= http.NewRequest("POST", "/login", strings.NewReader(`{"nickname":"tested","password":"qqq"}`))
+	//responseExist := executeRequest(existUser)
+	//authGet.Header.Set("Cookie", responseExist.Header()["Set-Cookie"][0])
+	//nonAuthResp := executeRequest(nonAuthGet)
+	//authResp := executeRequest(authGet)
+	//fmt.Println(nonAuthResp.Body)
+	//fmt.Println(authResp.Body)
+
+}
+
+func TestLogout(t *testing.T) {
+	authGet, _ := http.NewRequest("GET", "/isauth", nil)
+	// Login
+	existUser, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"nickname":"tested","password":"qqq"}`))
+	responseExist := executeRequest(existUser)
+	authGet.Header.Set("Cookie", responseExist.Header()["Set-Cookie"][0])
+	authResp := executeRequest(authGet)
+	if strings.Compare(strings.TrimRight(authResp.Body.String(), "\n\t"), `{"is_auth":true}`) != 0 {
+		t.Errorf(`Expected auth is {"is_auth":true}, got !%s!`, authResp.Body.String())
+	}
+
+	logout, _ := http.NewRequest("GET", "/logout", nil)
+	logout.Header.Set("Cookie", responseExist.Header()["Set-Cookie"][0])
+	afLogResp := executeRequest(logout)
+	if !strings.Contains(afLogResp.Header()["Set-Cookie"][0], "session_id=;") {
+		t.Errorf("Session id not deleted %s", afLogResp.Header())
+	}
+}
