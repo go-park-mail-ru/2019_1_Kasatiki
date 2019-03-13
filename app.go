@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"sort"
 	"strconv"
+	"time"
 )
 
 type App struct {
@@ -39,6 +40,7 @@ func (instance *App) initializeRoutes() {
 	instance.Router.HandleFunc("/leaderboard", instance.getLeaderboard).Methods("GET")
 	instance.Router.HandleFunc("/isauth", instance.isAuth).Methods("GET")
 	instance.Router.HandleFunc("/me", instance.getMe).Methods("GET")
+	instance.Router.HandleFunc("/logout", instance.logout).Methods("GET") // ToDO: Cors added ( maybe post?)
 
 	// POST ( create new data )
 	instance.Router.HandleFunc("/signup", instance.createUser).Methods("POST")
@@ -329,4 +331,23 @@ func (instance *App) upload(w http.ResponseWriter, r *http.Request) {
 	}
 	defer f.Close()
 	io.Copy(f, file)
+}
+
+// ToDo: Add cookie handle
+func (instance *App) logout(w http.ResponseWriter, r *http.Request) {
+	_, err := r.Cookie("session_id")
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Expires:  time.Now().AddDate(0, 0, -1),
+		Path:     "/",
+		HttpOnly: true,
+	})
+	w.WriteHeader(http.StatusOK)
 }
