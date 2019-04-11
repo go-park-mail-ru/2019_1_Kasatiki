@@ -37,21 +37,21 @@ func (instance *App) Initialize() {
 
 func (instance *App) initializeRoutes() {
 	// GET ( get exist data )
-	instance.Router.HandleFunc("/leaderboard", instance.getLeaderboard).Methods("GET")
-	instance.Router.HandleFunc("/isauth", instance.isAuth).Methods("GET")
-	instance.Router.HandleFunc("/me", instance.getMe).Methods("GET")
-	instance.Router.HandleFunc("/logout", instance.logout).Methods("GET") // ToDO: Cors added ( maybe post?)
+	instance.Router.HandleFunc("/api/leaderboard", instance.getLeaderboard).Methods("GET")
+	instance.Router.HandleFunc("/api/isauth", instance.isAuth).Methods("GET")
+	instance.Router.HandleFunc("/api/me", instance.getMe).Methods("GET")
+	instance.Router.HandleFunc("/api/logout", instance.logout).Methods("GET") // ToDO: Cors added ( maybe post?)
 
 	// POST ( create new data )
-	instance.Router.HandleFunc("/signup", instance.createUser).Methods("POST")
-	instance.Router.HandleFunc("/upload", instance.upload).Methods("POST")
-	instance.Router.HandleFunc("/login", instance.login).Methods("POST")
+	instance.Router.HandleFunc("/api/signup", instance.createUser).Methods("POST")
+	instance.Router.HandleFunc("/api/upload", instance.upload).Methods("POST")
+	instance.Router.HandleFunc("/api/login", instance.login).Methods("POST")
 
 	// PUT ( update data )
-	instance.Router.HandleFunc("/users/{Nickname}", instance.editUser).Methods("PUT")
+	instance.Router.HandleFunc("/api/users/{Nickname}", instance.editUser).Methods("PUT")
 
 	//Static path
-	instance.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+	//instance.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 }
 
 func (instance *App) Run(port string) {
