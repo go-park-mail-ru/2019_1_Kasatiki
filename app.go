@@ -4,13 +4,12 @@ import (
 	"github.com/jackc/pgx"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"gopkg.in/olahol/melody.v1"
 )
 import (
-	"models"
-
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"log"
+	"models"
 )
 
 var Users []models.User
@@ -33,13 +32,22 @@ func AuthMiddleware(c *gin.Context) {
 
 }
 
+func CORSMiddleware(c *gin.Context) {
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "www.advhater.ru")
+	c.Header("Access-Control-Allow-Credentials", "true")
+	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT")
+	c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Next()
+}
+
 func (instance *App) initializeRoutes() {
 
+	m := melody.New()
 	instance.Router.Use(gin.Logger())
 	instance.Router.Use(gin.Recovery())
 	instance.Router.Use(CORSMiddleware)
-
-	// GET ( get exist data )
+  
 	api := instance.Router.Group("/api")
 	{
 		api.GET("/leaderboard", instance.getLeaderboard)
@@ -55,10 +63,19 @@ func (instance *App) initializeRoutes() {
 		// PUT ( update data )
 		api.PUT("/users/{Nickname}", instance.editUser)
 		api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+    api.GET("/api/ws", func(c *gin.Context) {
+		    m.HandleRequest(c.Writer, c.Request)
+	  })
+	  m.HandleMessage(func(s *melody.Session, msg []byte) {
+		  m.Broadcast(msg)
+	  })
 	}
 
 	//Static path
 	instance.Router.Use(static.Serve("/", static.LocalFile("./static", true)))
+
+	// Echo websocket for test
+
 }
 
 func (instance *App) Run(port string) {
