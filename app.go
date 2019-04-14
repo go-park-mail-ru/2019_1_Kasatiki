@@ -18,22 +18,43 @@ type App struct {
 	Router *gin.Engine
 }
 
+func CORSMiddleware(c *gin.Context) {
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "www.advhater.ru")
+	c.Header("Access-Control-Allow-Credentials", "true")
+	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT")
+	c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Next()
+}
+
+func AuthMiddleware(c *gin.Context) {
+
+}
+
 func (instance *App) initializeRoutes() {
 
+	instance.Router.Use(gin.Logger())
+	instance.Router.Use(gin.Recovery())
+	instance.Router.Use(CORSMiddleware)
+
 	// GET ( get exist data )
-	instance.Router.GET("/leaderboard", instance.getLeaderboard)
-	instance.Router.GET("/isauth", instance.isAuth)
-	instance.Router.GET("/me", instance.getMe)
-	instance.Router.GET("/logout", instance.logout)
+	api := instance.Router.Group("/api")
+	{
+		api.GET("/leaderboard", instance.getLeaderboard)
+		api.GET("/isauth", instance.isAuth)
+		api.GET("/me", instance.getMe)
+		api.GET("/logout", instance.logout)
 
-	// POST ( create new data )
-	instance.Router.POST("/signup", instance.createUser)
-	instance.Router.POST("/upload", instance.upload)
-	instance.Router.POST("/login", instance.login)
+		// POST ( create new data )
+		api.POST("/signup", instance.createUser)
+		api.POST("/upload", instance.upload)
+		api.POST("/login", instance.login)
 
-	// PUT ( update data )
-	instance.Router.PUT("/users/{Nickname}", instance.editUser)
-	instance.Router.GET("/swagger", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		// PUT ( update data )
+		api.PUT("/users/{Nickname}", instance.editUser)
+		api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
+
 	//Static path
 	instance.Router.Use(static.Serve("/", static.LocalFile("./static", true)))
 }
