@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/swaggo/gin-swagger"
+	"github.com/gin-contrib/static"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"gopkg.in/olahol/melody.v1"
 )
 import (
-	"models"
-
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"log"
+	"models"
 )
 
 var Users []models.User
@@ -20,6 +20,7 @@ type App struct {
 
 func (instance *App) initializeRoutes() {
 
+	m := melody.New()
 	// GET ( get exist data )
 	instance.Router.GET("/api/leaderboard", instance.getLeaderboard)
 	instance.Router.GET("/api/isauth", instance.isAuth)
@@ -34,8 +35,17 @@ func (instance *App) initializeRoutes() {
 	// PUT ( update data )
 	instance.Router.PUT("/api/users/{Nickname}", instance.editUser)
 	instance.Router.GET("/api/swagger", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	instance.Router.GET("/api/ws", func(c *gin.Context) {
+		m.HandleRequest(c.Writer, c.Request)
+	})
+	m.HandleMessage(func(s *melody.Session, msg []byte) {
+		m.Broadcast(msg)
+	})
 	//Static path
 	instance.Router.Use(static.Serve("/", static.LocalFile("./static", true)))
+
+	// Echo websocket for test
+
 }
 
 func (instance *App) Run(port string) {
