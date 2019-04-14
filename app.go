@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/jackc/pgx"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -38,13 +39,13 @@ func (instance *App) initializeRoutes() {
 	m := melody.New()
 	instance.Router.Use(gin.Logger())
 	instance.Router.Use(gin.Recovery())
-	instance.Router.Use(CORSMiddleware)
+	//instance.Router.Use(CORSMiddleware)
 
 	api := instance.Router.Group("/api")
 	{
 		api.GET("/leaderboard", instance.getLeaderboard)
 		api.GET("/isauth", instance.isAuth)
-		api.GET("/me", instance.getMe)
+		//api.GET("/me", instance.getMe)
 		api.GET("/logout", instance.logout)
 
 		// POST ( create new data )
@@ -53,7 +54,7 @@ func (instance *App) initializeRoutes() {
 		api.POST("/login", instance.login)
 
 		// PUT ( update data )
-		api.PUT("/users/{Nickname}", instance.editUser)
+		api.PUT("/edit", instance.editUser)
 		api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		api.GET("/ws", func(c *gin.Context) {
 			m.HandleRequest(c.Writer, c.Request)
@@ -80,7 +81,7 @@ func (instance *App) GetDBConnection() error {
 		Password:  "boy",
 		Host:      "localhost",
 		Port:      5432,
-		Database:  "Kasatiki",
+		Database:  "kasatiki",
 		TLSConfig: nil,
 	}
 	conn, err := pgx.Connect(conf)
@@ -92,17 +93,10 @@ func (instance *App) GetDBConnection() error {
 }
 
 func (instance *App) Initialize() {
-	_ = instance.GetDBConnection()
-	var mockedUser = models.User{"1", "evv", "onetaker@gmail.com",
-		"evv", -100, 23, "test",
-		"Voronezh", "В левой руке салам"}
-	var mockedUser1 = models.User{"2", "tony", "trendpusher@hydra.com",
-		"qwerty", 100, 22, "test",
-		"Moscow", "В правой алейкум"}
-	// Mocked users
-
-	Users = append(Users, mockedUser)
-	Users = append(Users, mockedUser1)
+	err := instance.GetDBConnection()
+	//fmt.Println(err)
+	err = instance.CreateTables()
+	fmt.Println(err)
 	instance.Router = gin.New()
 	instance.initializeRoutes()
 }

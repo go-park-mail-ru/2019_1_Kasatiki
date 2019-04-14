@@ -1,22 +1,60 @@
 package models
 
-import "os/exec"
+import (
+	"errors"
+)
 
 type User struct {
-	ID       string
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Points   int
-	Age      int
-	ImgUrl   string
-	Region   string
-	About    string
+	Age      int    `json:"age"`
+	ImgUrl   string `json:"imgurl"`
+	Region   string `json:"region"`
+	About    string `json:"about"`
+	Points   int    `json"points"`
 }
 
-func (u *User) SetUniqueId() {
-	// DB incremental or smth
-	out, _ := exec.Command("uuidgen").Output()
-	u.Points = 0
-	u.ID = string(out[:len(out)-1])
+type EditUser struct {
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Age      int    `json:"age"`
+	ImgUrl   string `json:"imgurl"`
+	Region   string `json:"region"`
+	About    string `json:"about"`
+}
+
+type SignupUser struct {
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type PublicUser struct {
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Points   int    `json:"points"`
+	Age      int    `json:"age"`
+	ImgUrl   string `json:"imgurl"`
+	Region   string `json:"region"`
+	About    string `json:"about"`
+}
+
+type LoginInfo struct {
+	Nickname string `json:"nickname"`
+	Password string `json:"password"`
+}
+
+type LeaderboardUsers struct {
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Points   int    `json:"points"`
+}
+
+func (u *User) Validation() error {
+	if u.Nickname == "" || u.Email == "" || u.Password == "" {
+		return errors.New("Bad request")
+	}
+	return nil
 }
