@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/gin-contrib/static"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/jackc/pgx"
+	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gopkg.in/olahol/melody.v1"
 )
@@ -18,23 +18,40 @@ type App struct {
 	Router *gin.Engine
 }
 
+func CORSMiddleware(c *gin.Context) {
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "www.advhater.ru")
+	c.Header("Access-Control-Allow-Credentials", "true")
+	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT")
+	c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Next()
+}
+
 func (instance *App) initializeRoutes() {
 
 	m := melody.New()
 	// GET ( get exist data )
-	instance.Router.GET("/api/leaderboard", instance.getLeaderboard)
-	instance.Router.GET("/api/isauth", instance.isAuth)
-	instance.Router.GET("/api/me", instance.getMe)
-	instance.Router.GET("/api/logout", instance.logout)
+	instance.Router.Use(gin.Logger())
+	instance.Router.Use(gin.Recovery())
+	instance.Router.Use(CORSMiddleware)
 
-	// POST ( create new data )
-	instance.Router.POST("/api/signup", instance.createUser)
-	instance.Router.POST("/api/upload", instance.upload)
-	instance.Router.POST("/api/login", instance.login)
+	// GET ( get exist data )
+	api := instance.Router.Group("/api")
+	{
+		api.GET("/leaderboard", instance.getLeaderboard)
+		api.GET("/isauth", instance.isAuth)
+		api.GET("/me", instance.getMe)
+		api.GET("/logout", instance.logout)
 
-	// PUT ( update data )
-	instance.Router.PUT("/api/users/{Nickname}", instance.editUser)
-	instance.Router.GET("/api/swagger", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		// POST ( create new data )
+		api.POST("/signup", instance.createUser)
+		api.POST("/upload", instance.upload)
+		api.POST("/login", instance.login)
+
+		// PUT ( update data )
+		api.PUT("/users/{Nickname}", instance.editUser)
+		api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 	instance.Router.GET("/api/ws", func(c *gin.Context) {
 		m.HandleRequest(c.Writer, c.Request)
 	})
