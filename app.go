@@ -21,19 +21,19 @@ type App struct {
 func (instance *App) initializeRoutes() {
 
 	// GET ( get exist data )
-	instance.Router.GET("/leaderboard", instance.getLeaderboard)
-	instance.Router.GET("/isauth", instance.isAuth)
-	instance.Router.GET("/me", instance.getMe)
-	instance.Router.GET("/logout", instance.logout)
+	instance.Router.GET("/api/leaderboard", instance.getLeaderboard)
+	instance.Router.GET("/api/isauth", instance.isAuth)
+	instance.Router.GET("/api/me", instance.getMe)
+	instance.Router.GET("/api/logout", instance.logout)
 
 	// POST ( create new data )
-	instance.Router.POST("/signup", instance.createUser)
-	instance.Router.POST("/upload", instance.upload)
-	instance.Router.POST("/login", instance.login)
+	instance.Router.POST("/api/signup", instance.createUser)
+	instance.Router.POST("/api/upload", instance.upload)
+	instance.Router.POST("/api/login", instance.login)
 
 	// PUT ( update data )
-	instance.Router.PUT("/users/{Nickname}", instance.editUser)
-	instance.Router.GET("/swagger", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	instance.Router.PUT("/api/users/{Nickname}", instance.editUser)
+	instance.Router.GET("/api/swagger", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	//Static path
 	instance.Router.Use(static.Serve("/", static.LocalFile("./static", true)))
 }
