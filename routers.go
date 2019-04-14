@@ -26,7 +26,9 @@ func (instance *App) createUser(c *gin.Context) {
 		}
 	}
 	newUser.SetUniqueId()
-	Users = append(Users, newUser) // Check succesfull append? ( in db clearly )
+	err := instance.InsertUser(newUser)
+	fmt.Println(err)
+	//Users = append(Users, newUser) // Check succesfull append? ( in db clearly )
 }
 
 //ToDo: Use get with key order? (ASC/DESC )

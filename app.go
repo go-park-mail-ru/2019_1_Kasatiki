@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/jackc/pgx"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
@@ -15,7 +16,8 @@ import (
 var Users []models.User
 
 type App struct {
-	Router *gin.Engine
+	Router     *gin.Engine
+	Connection *pgx.Conn
 }
 
 func CORSMiddleware(c *gin.Context) {
@@ -63,7 +65,25 @@ func (instance *App) Run(port string) {
 	log.Fatal(instance.Router.Run()) // ToDO change logFatal?
 }
 
+func (instance *App) GetDBConnection() error {
+	conf := pgx.ConnConfig{
+		User:      "sayonara",
+		Password:  "boy",
+		Host:      "localhost",
+		Port:      5432,
+		Database:  "Kasatiki",
+		TLSConfig: nil,
+	}
+	conn, err := pgx.Connect(conf)
+	if err != nil {
+		return err
+	}
+	instance.Connection = conn
+	return err
+}
+
 func (instance *App) Initialize() {
+	_ = instance.GetDBConnection()
 	var mockedUser = models.User{"1", "evv", "onetaker@gmail.com",
 		"evv", -100, 23, "test",
 		"Voronezh", "В левой руке салам"}
