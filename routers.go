@@ -202,6 +202,6 @@ func (instance *App) logout(c *gin.Context) {
 		c.Status(404)
 		return
 	}
-	c.SetCookie("sesion_id", "", -1, "/", "", true, true)
+	c.SetCookie("session_id", "", -1, "/", "", true, true)
 	c.Status(200)
 }

@@ -25,7 +25,7 @@ func CORSMiddleware(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 	c.Header("Access-Control-Allow-Origin", "www.advhater.ru")
 	c.Header("Access-Control-Allow-Credentials", "true")
-	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT")
+	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 	c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	c.Next()
 }
@@ -39,14 +39,14 @@ func (instance *App) initializeRoutes() {
 	m := melody.New()
 	instance.Router.Use(gin.Logger())
 	instance.Router.Use(gin.Recovery())
-	//instance.Router.Use(CORSMiddleware)
+	instance.Router.Use(CORSMiddleware)
 
 	api := instance.Router.Group("/api")
 	{
 		api.GET("/leaderboard", instance.getLeaderboard)
 		api.GET("/isauth", instance.isAuth)
 		//api.GET("/me", instance.getMe)
-		api.GET("/logout", instance.logout)
+		api.DELETE("/logout", instance.logout)
 
 		// POST ( create new data )
 		api.POST("/signup", instance.createUser)
