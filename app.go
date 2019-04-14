@@ -15,7 +15,21 @@ import (
 var Users []models.User
 
 type App struct {
-	Router *gin.Engine
+	Router     *gin.Engine
+	Connection *pgx.Conn
+}
+
+func CORSMiddleware(c *gin.Context) {
+	c.Header("Content-Type", "application/json")
+	c.Header("Access-Control-Allow-Origin", "www.advhater.ru")
+	c.Header("Access-Control-Allow-Credentials", "true")
+	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT")
+	c.Header("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	c.Next()
+}
+
+func AuthMiddleware(c *gin.Context) {
+
 }
 
 func CORSMiddleware(c *gin.Context) {
@@ -30,12 +44,10 @@ func CORSMiddleware(c *gin.Context) {
 func (instance *App) initializeRoutes() {
 
 	m := melody.New()
-	// GET ( get exist data )
 	instance.Router.Use(gin.Logger())
 	instance.Router.Use(gin.Recovery())
 	instance.Router.Use(CORSMiddleware)
-
-	// GET ( get exist data )
+  
 	api := instance.Router.Group("/api")
 	{
 		api.GET("/leaderboard", instance.getLeaderboard)
@@ -51,13 +63,14 @@ func (instance *App) initializeRoutes() {
 		// PUT ( update data )
 		api.PUT("/users/{Nickname}", instance.editUser)
 		api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+    api.GET("/api/ws", func(c *gin.Context) {
+		    m.HandleRequest(c.Writer, c.Request)
+	  })
+	  m.HandleMessage(func(s *melody.Session, msg []byte) {
+		  m.Broadcast(msg)
+	  })
 	}
-	instance.Router.GET("/api/ws", func(c *gin.Context) {
-		m.HandleRequest(c.Writer, c.Request)
-	})
-	m.HandleMessage(func(s *melody.Session, msg []byte) {
-		m.Broadcast(msg)
-	})
+
 	//Static path
 	instance.Router.Use(static.Serve("/", static.LocalFile("./static", true)))
 
@@ -69,7 +82,25 @@ func (instance *App) Run(port string) {
 	log.Fatal(instance.Router.Run()) // ToDO change logFatal?
 }
 
+func (instance *App) GetDBConnection() error {
+	conf := pgx.ConnConfig{
+		User:      "sayonara",
+		Password:  "boy",
+		Host:      "localhost",
+		Port:      5432,
+		Database:  "Kasatiki",
+		TLSConfig: nil,
+	}
+	conn, err := pgx.Connect(conf)
+	if err != nil {
+		return err
+	}
+	instance.Connection = conn
+	return err
+}
+
 func (instance *App) Initialize() {
+	_ = instance.GetDBConnection()
 	var mockedUser = models.User{"1", "evv", "onetaker@gmail.com",
 		"evv", -100, 23, "test",
 		"Voronezh", "В левой руке салам"}
