@@ -30,6 +30,20 @@ func (instance *App) createUser(c *gin.Context) {
 			return
 		}
 	}
+	nickname := newUser.Nickname
+	password := newUser.Password
+
+	// Login after signup tmp
+	var data models.LoginInfo
+	data.Nickname = nickname
+	data.Password = password
+	_, id, err := instance.LoginCheck(data)
+	if err != nil {
+		c.Status(404)
+		return
+	}
+	sessionId := instance.createSessionId(id)
+	c.SetCookie("session_id", sessionId, 3600, "/", "", true, true)
 	c.Status(201)
 }
 
@@ -154,7 +168,7 @@ func (instance *App) login(c *gin.Context) {
 	}
 	sessionId := instance.createSessionId(id)
 	c.SetCookie("session_id", sessionId, 3600, "/", "", true, true)
-	c.Status(200)
+	c.Status(201)
 }
 
 func (instance *App) upload(c *gin.Context) {
