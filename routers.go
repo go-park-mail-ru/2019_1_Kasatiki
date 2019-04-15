@@ -43,7 +43,7 @@ func (instance *App) createUser(c *gin.Context) {
 		return
 	}
 	sessionId := instance.createSessionId(id)
-	c.SetCookie("session_id", sessionId, 3600, "/", "", true, true)
+	c.SetCookie("session_id", sessionId, 3600, "/", "", false, true)
 	c.Status(201)
 }
 
@@ -167,7 +167,7 @@ func (instance *App) login(c *gin.Context) {
 		return
 	}
 	sessionId := instance.createSessionId(id)
-	c.SetCookie("session_id", sessionId, 3600, "/", "", true, true)
+	c.SetCookie("session_id", sessionId, 3600, "/", "", false, true)
 	c.Status(201)
 }
 
@@ -216,6 +216,6 @@ func (instance *App) logout(c *gin.Context) {
 		c.Status(404)
 		return
 	}
-	c.SetCookie("session_id", "", -1, "/", "", true, true)
+	c.SetCookie("session_id", "", -1, "/", "", false, true)
 	c.Status(200)
 }
