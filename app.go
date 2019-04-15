@@ -85,6 +85,7 @@ func (instance *App) GetDBConnection() error {
 		TLSConfig: nil,
 	}
 	conn, err := pgx.Connect(conf)
+	fmt.Print(err)
 	if err != nil {
 		return err
 	}
@@ -94,7 +95,6 @@ func (instance *App) GetDBConnection() error {
 
 func (instance *App) Initialize() {
 	err := instance.GetDBConnection()
-	//fmt.Println(err)
 	err = instance.CreateTables()
 	fmt.Println(err)
 	instance.Router = gin.New()
