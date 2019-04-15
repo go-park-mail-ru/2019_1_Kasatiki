@@ -39,7 +39,7 @@ func (instance *App) initializeRoutes() {
 	m := melody.New()
 	instance.Router.Use(gin.Logger())
 	instance.Router.Use(gin.Recovery())
-	instance.Router.Use(CORSMiddleware)
+	//instance.Router.Use(CORSMiddleware)
 
 	api := instance.Router.Group("/api")
 	{
