@@ -75,7 +75,6 @@ func (instance *App) UpdateUser(id float64, user models.EditUser) (err error) {
 `
 	_, err = instance.Connection.Exec(sql, int(id), user.Nickname, user.Email, user.Password, user.Age, user.ImgUrl, user.Region, user.About)
 	fmt.Println(err)
-	//row.Close()
 	return err
 }
 
@@ -90,9 +89,8 @@ func (instance *App) GetUser(id float64) (user models.PublicUser, err error) {
 
 func (instance *App) GetUsers(order string, offsetdb int64, limitdb int64) (users []models.LeaderboardUsers, err error) {
 	var rows *pgx.Rows
-	sql := ``
 	fmt.Println(offsetdb, limitdb)
-	sql = `
+	sql := `
 		SELECT nickname, email, points FROM users ORDER BY points DESC LIMIT $1 OFFSET $2;
 	`
 	rows, err = instance.Connection.Query(sql, limitdb, offsetdb)
@@ -115,4 +113,14 @@ func (instance *App) LoginCheck(data models.LoginInfo) (user models.PublicUser, 
 `
 	err = instance.Connection.QueryRow(sql, data.Nickname, data.Password).Scan(&id, &user.Nickname, &user.Email, &user.Points, &user.Age, &user.ImgUrl, &user.Region, &user.About)
 	return user, id, err
+}
+
+func (instance *App) ImgUpdate(id int, img string) (err error) {
+	sql := `
+		UPDATE users SET imgurl = $2
+			WHERE id = $1;
+`
+	_, err = instance.Connection.Exec(sql, int(id), img)
+	fmt.Println(err)
+	return err
 }

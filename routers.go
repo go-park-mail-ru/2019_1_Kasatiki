@@ -7,9 +7,11 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx"
+	"io"
 	"io/ioutil"
 	"models"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -158,6 +160,7 @@ func (instance *App) login(c *gin.Context) {
 	var data models.LoginInfo
 	err := json.NewDecoder(c.Request.Body).Decode(&data)
 	if err != nil {
+		fmt.Println(err)
 		c.Status(400)
 		return
 	}
@@ -172,42 +175,42 @@ func (instance *App) login(c *gin.Context) {
 }
 
 func (instance *App) upload(c *gin.Context) {
-	//// Tacking file from request
-	//fmt.Println("UPLOAD")
-	//_ = c.Request.ParseMultipartForm(32 << 20)
-	//fmt.Println(c.Request)
-	//file, _, err := c.Request.FormFile("uploadfile")
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//defer file.Close()
-	//fmt.Println("FILE IS HERE")
-	//
-	//// Tacking cookie of current user
-	//cookie, err := c.Request.Cookie("session_id")
-	//if err != nil {
-	//	c.JSON(404, "error")
-	//	return
-	//}
-	//claims,err := instance.checkAuth(cookie)
-	//// Path to Users avatar
-	//picpath := "./static/img/" + claims["id"].(string) + ".jpeg"
-	//f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//
-	//// Changing ImgURL field in current user
-	//for i, user := range Users {
-	//	if user.ID == claims["id"].(string) {
-	//		u := &Users[i]
-	//		u.ImgUrl = "https://advhater.ru/img/" + claims["id"].(string) + ".jpeg"
-	//	}
-	//}
-	//defer f.Close()
-	//io.Copy(f, file)
+	err := c.Request.ParseMultipartForm(32 << 20)
+	if err != nil {
+		c.Status(409)
+		return
+	}
+	file, _, err := c.Request.FormFile("avatar")
+	if err != nil {
+		c.Status(409)
+		return
+	}
+	defer file.Close()
+
+	cookie, err := c.Request.Cookie("session_id")
+	if err != nil {
+		c.Status(404)
+		return
+	}
+	claims, err := instance.checkAuth(cookie)
+	id := int(claims["id"].(float64))
+	// Может падать из-за отсутствия этой папки
+	picpath := "./static/img" + strconv.Itoa(id) + ".jpeg"
+	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
+
+	if err != nil {
+		c.Status(404)
+		return
+	}
+	ImgUrl := "https://advhater.ru/img/" + strconv.Itoa(id) + ".jpeg"
+	err = instance.ImgUpdate(id, ImgUrl)
+	if err != nil {
+		c.Status(404)
+		return
+	}
+	c.Status(200)
+	defer f.Close()
+	io.Copy(f, file)
 }
 
 func (instance *App) logout(c *gin.Context) {
