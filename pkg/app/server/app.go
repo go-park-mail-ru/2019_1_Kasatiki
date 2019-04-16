@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -24,9 +24,9 @@ import (
 var Users []models.User
 
 type App struct {
-	Router     		*gin.Engine
-	DB 				*dbhandler.DBHandler
-	Middleware   	*middleware.Middlewares
+	Router     *gin.Engine
+	DB         *dbhandler.DBHandler
+	Middleware *middleware.Middlewares
 }
 
 func CORSMiddleware(c *gin.Context) {

@@ -1,4 +1,4 @@
-package main
+package server
 
 import "C"
 import (
@@ -14,7 +14,6 @@ import (
 	"os"
 	"strconv"
 )
-
 
 func (instance *App) createUser(c *gin.Context) {
 	var newUser models.User
