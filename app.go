@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/jackc/pgx"
+	"github.com/sirupsen/logrus"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gopkg.in/olahol/melody.v1"
+	"os"
 )
 import (
 	"github.com/gin-contrib/static"
@@ -19,6 +21,7 @@ var Users []models.User
 type App struct {
 	Router     *gin.Engine
 	Connection *pgx.Conn
+	Logger     *logrus.Logger
 }
 
 func CORSMiddleware(c *gin.Context) {
@@ -36,8 +39,22 @@ func AuthMiddleware(c *gin.Context) {
 
 func (instance *App) initializeRoutes() {
 
+	loggerFilename := "logfile.log"
+	loggerFile, err := os.OpenFile(loggerFilename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	Formatter := new(logrus.TextFormatter)
+	Formatter.TimestampFormat = "02-01-2006 15:04:05"
+	Formatter.FullTimestamp = true
+	log := logrus.New()
+	log.SetFormatter(Formatter)
+	log.SetOutput(loggerFile)
+	instance.Logger = log
+
 	m := melody.New()
-	instance.Router.Use(gin.Logger())
+	instance.Router.Use(instance.LoggerMiddleware)
 	instance.Router.Use(gin.Recovery())
 	//instance.Router.Use(CORSMiddleware)
 
