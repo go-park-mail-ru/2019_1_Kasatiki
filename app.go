@@ -15,8 +15,8 @@ import (
 import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/models"
 	"log"
-	"models"
 )
 
 var Users []models.User

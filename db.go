@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/models"
 	"github.com/jackc/pgx"
 	"math/rand"
-	"models"
 	"time"
 )
 
