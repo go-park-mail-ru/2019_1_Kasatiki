@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gopkg.in/olahol/melody.v1"
+	"io/ioutil"
+	"net/http"
 	"os"
 )
 import (
@@ -25,7 +28,6 @@ type App struct {
 }
 
 func CORSMiddleware(c *gin.Context) {
-	c.Header("Content-Type", "application/json")
 	c.Header("Access-Control-Allow-Origin", "www.advhater.ru")
 	c.Header("Access-Control-Allow-Credentials", "true")
 	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
@@ -33,8 +35,41 @@ func CORSMiddleware(c *gin.Context) {
 	c.Next()
 }
 
-func AuthMiddleware(c *gin.Context) {
+func checkAuth(cookie *http.Cookie) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		spiceSalt, _ := ioutil.ReadFile("secret.conf")
+		return spiceSalt, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	claims, _ := token.Claims.(jwt.MapClaims)
+	// ToDo: Handle else case
+	return claims, nil
+}
 
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cookie, err := c.Request.Cookie("session_id")
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("!!!")
+		claims, err := checkAuth(cookie)
+		if err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+			return
+		}
+		id := claims["id"].(float64)
+		c.Set("id", id)
+		c.Next()
+	}
 }
 
 func (instance *App) initializeRoutes() {
@@ -45,11 +80,8 @@ func (instance *App) initializeRoutes() {
 		fmt.Println(err)
 		return
 	}
-	Formatter := new(logrus.TextFormatter)
-	Formatter.TimestampFormat = "02-01-2006 15:04:05"
-	Formatter.FullTimestamp = true
+
 	log := logrus.New()
-	log.SetFormatter(Formatter)
 	log.SetOutput(loggerFile)
 	instance.Logger = log
 
@@ -60,10 +92,15 @@ func (instance *App) initializeRoutes() {
 
 	api := instance.Router.Group("/api")
 	{
+		auth := api.Use(AuthMiddleware())
+		{
+			auth.GET("/isauth", instance.isAuth)
+			auth.DELETE("/logout", instance.logout)
+
+		}
 		api.GET("/leaderboard", instance.getLeaderboard)
-		api.GET("/isauth", instance.isAuth)
+		//api.
 		//api.GET("/me", instance.getMe)
-		api.DELETE("/logout", instance.logout)
 
 		// POST ( create new data )
 		api.POST("/signup", instance.createUser)

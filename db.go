@@ -44,12 +44,7 @@ func (instance *App) CreateTables() (err error) {
 	age				SMALLINT,
 	imgurl			TEXT,
 	region			TEXT,
-	about			TEXT
-
-
-)
-
-;`
+	about			TEXT) ;`
 	_, err = instance.Connection.Exec(sql)
 	// Mocked users
 	instance.dataCreating(100)
@@ -64,7 +59,6 @@ func (instance *App) InsertUser(user models.User) (ret models.User, err error) {
 			RETURNING nickname, email;
 `
 	err = instance.Connection.QueryRow(sql, user.Nickname, user.Email, user.Password, user.Points, user.Age, user.ImgUrl, user.Region, user.About).Scan(&ret.Nickname, &ret.Email)
-	fmt.Println(ret, err)
 	return ret, err
 }
 
@@ -74,16 +68,15 @@ func (instance *App) UpdateUser(id float64, user models.EditUser) (err error) {
 			WHERE id = $1 RETURNING *;
 `
 	_, err = instance.Connection.Exec(sql, int(id), user.Nickname, user.Email, user.Password, user.Age, user.ImgUrl, user.Region, user.About)
-	fmt.Println(err)
 	return err
 }
 
-func (instance *App) GetUser(id float64) (user models.PublicUser, err error) {
+func (instance *App) GetUser(id int) (user models.PublicUser, err error) {
 	sql := `
 		SELECT nickname, email, points, age, imgurl, region, about FROM users 
 			WHERE id = $1;
 `
-	err = instance.Connection.QueryRow(sql, int(id)).Scan(&user.Nickname, &user.Email, &user.Points, &user.Age, &user.ImgUrl, &user.Region, &user.About)
+	err = instance.Connection.QueryRow(sql, id).Scan(&user.Nickname, &user.Email, &user.Points, &user.Age, &user.ImgUrl, &user.Region, &user.About)
 	return user, err
 }
 
@@ -102,7 +95,6 @@ func (instance *App) GetUsers(order string, offsetdb int64, limitdb int64) (user
 			return nil, err
 		}
 	}
-	fmt.Println(len(users))
 	return users, err
 }
 
@@ -121,6 +113,5 @@ func (instance *App) ImgUpdate(id int, img string) (err error) {
 			WHERE id = $1;
 `
 	_, err = instance.Connection.Exec(sql, int(id), img)
-	fmt.Println(err)
 	return err
 }

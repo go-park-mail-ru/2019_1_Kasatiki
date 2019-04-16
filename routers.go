@@ -96,18 +96,18 @@ func (instance *App) checkAuth(cookie *http.Cookie) (jwt.MapClaims, error) {
 }
 
 func (instance *App) isAuth(c *gin.Context) {
-	cookie, err := c.Request.Cookie("session_id")
-	if err != nil {
-		c.Status(404)
-		return
-	}
-	claims, err := instance.checkAuth(cookie)
-	if err != nil {
-
-		c.Status(404)
-		return
-	}
-	user, err := instance.GetUser(claims["id"].(float64))
+	//cookie, err := c.Request.Cookie("session_id")
+	//if err != nil {
+	//	c.Status(404)
+	//	return
+	//}
+	//claims, err := instance.checkAuth(cookie)
+	//if err != nil {
+	//
+	//	c.Status(404)
+	//	return
+	//}
+	user, err := instance.GetUser(c.GetInt("id"))
 	if err != nil {
 		c.Status(404)
 		return
@@ -166,6 +166,7 @@ func (instance *App) login(c *gin.Context) {
 	}
 	_, id, err := instance.LoginCheck(data)
 	if err != nil {
+		fmt.Println(err)
 		c.Status(404)
 		return
 	}
@@ -177,11 +178,15 @@ func (instance *App) login(c *gin.Context) {
 func (instance *App) upload(c *gin.Context) {
 	err := c.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
+		instance.Logger.Warn(err)
+		fmt.Println(err)
 		c.Status(409)
 		return
 	}
 	file, _, err := c.Request.FormFile("avatar")
 	if err != nil {
+		instance.Logger.Warn(err)
+		fmt.Println(err)
 		c.Status(409)
 		return
 	}
@@ -202,6 +207,7 @@ func (instance *App) upload(c *gin.Context) {
 		c.Status(404)
 		return
 	}
+
 	ImgUrl := "https://advhater.ru/img/" + strconv.Itoa(id) + ".jpeg"
 	err = instance.ImgUpdate(id, ImgUrl)
 	if err != nil {
@@ -214,11 +220,11 @@ func (instance *App) upload(c *gin.Context) {
 }
 
 func (instance *App) logout(c *gin.Context) {
-	_, err := c.Request.Cookie("session_id")
-	if err != nil {
-		c.Status(404)
-		return
-	}
+	//_, err := c.Request.Cookie("session_id")
+	//if err != nil {
+	//	c.Status(404)
+	//	return
+	//}
 	c.SetCookie("session_id", "", -1, "/", "", false, true)
 	c.Status(200)
 }

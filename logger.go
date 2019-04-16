@@ -14,7 +14,7 @@ func (instance *App) LoggerMiddleware(c *gin.Context) {
 	var timeFormat = "02/Jan/2006:15:04:05 -0700"
 	hostname, err := os.Hostname()
 	if err != nil {
-		hostname = "unknow"
+		hostname = "unknown"
 	}
 	path := c.Request.URL.Path
 	start := time.Now()
