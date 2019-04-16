@@ -1,8 +1,10 @@
-package server
+package main
 
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/middleware"
 	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
 	"github.com/swaggo/gin-swagger"
@@ -22,9 +24,9 @@ import (
 var Users []models.User
 
 type App struct {
-	Router     *gin.Engine
-	Connection *pgx.Conn
-	Logger     *logrus.Logger
+	Router     		*gin.Engine
+	DB 				*dbhandler.DBHandler
+	Middleware   	*middleware.Middlewares
 }
 
 func CORSMiddleware(c *gin.Context) {
@@ -75,19 +77,8 @@ func AuthMiddleware(handlerFunc gin.HandlerFunc) gin.HandlerFunc {
 
 func (instance *App) initializeRoutes() {
 
-	loggerFilename := "logfile.log"
-	loggerFile, err := os.OpenFile(loggerFilename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	log := logrus.New()
-	log.SetOutput(loggerFile)
-	instance.Logger = log
-
 	m := melody.New()
-	instance.Router.Use(instance.LoggerMiddleware)
+	instance.Router.Use(instance.Middleware.LoggerMiddleware)
 	instance.Router.Use(gin.Recovery())
 	//instance.Router.Use(CORSMiddleware)
 
@@ -142,13 +133,20 @@ func (instance *App) GetDBConnection() error {
 	if err != nil {
 		return err
 	}
-	instance.Connection = conn
+	instance.DB = &dbhandler.DBHandler{conn}
+
+	loggerFilename := "logs/logfile.log"
+	loggerFile, err := os.OpenFile(loggerFilename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	log := logrus.New()
+	log.SetOutput(loggerFile)
+	instance.Middleware = &middleware.Middlewares{log}
+	fmt.Print(instance.DB)
 	return err
 }
 
 func (instance *App) Initialize() {
 	err := instance.GetDBConnection()
-	err = instance.CreateTables()
+	err = instance.DB.CreateTables()
 	fmt.Println(err)
 	instance.Router = gin.New()
 	instance.initializeRoutes()

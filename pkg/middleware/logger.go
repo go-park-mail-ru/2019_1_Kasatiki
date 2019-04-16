@@ -3,23 +3,14 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/app"
-	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
 	"math"
 	"os"
 	"time"
 )
 
-type App struct {
-	Router     *gin.Engine
-	Connection *pgx.Conn
-	Logger     *logrus.Logger
-}
-
-
 // Logger is the logrus logger handler
-func (instance *App) LoggerMiddleware(c *gin.Context) {
+func (instance *Middlewares) LoggerMiddleware(c *gin.Context) {
 	var timeFormat = "02/Jan/2006:15:04:05 -0700"
 	hostname, err := os.Hostname()
 	if err != nil {

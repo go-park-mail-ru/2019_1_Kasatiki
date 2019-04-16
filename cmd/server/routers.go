@@ -1,4 +1,4 @@
-package app
+package main
 
 import "C"
 import (
@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
-	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -17,11 +15,6 @@ import (
 	"strconv"
 )
 
-type App struct {
-	Router     *gin.Engine
-	Connection *DBHandler
-	Logger     *logrus.Logger
-}
 
 func (instance *App) createUser(c *gin.Context) {
 	var newUser models.User
@@ -33,7 +26,7 @@ func (instance *App) createUser(c *gin.Context) {
 		return
 	}
 
-	_, err = instance.InsertUser(newUser)
+	_, err = instance.DB.InsertUser(newUser)
 	if err != nil {
 		if err.(pgx.PgError).Code == "23505" {
 			c.Status(409)
@@ -47,7 +40,7 @@ func (instance *App) createUser(c *gin.Context) {
 	var data models.LoginInfo
 	data.Nickname = nickname
 	data.Password = password
-	_, id, err := instance.LoginCheck(data)
+	_, id, err := instance.DB.LoginCheck(data)
 	if err != nil {
 		c.Status(404)
 		return
@@ -67,7 +60,7 @@ func (instance *App) getLeaderboard(c *gin.Context) {
 		return
 	}
 	from := coef * pageSize
-	users, err := instance.GetUsers("DESC", from, pageSize)
+	users, err := instance.DB.GetUsers("DESC", from, pageSize)
 	if getOffset {
 		if len(users) == 0 || err != nil {
 			c.Status(404)
@@ -117,7 +110,7 @@ func (instance *App) isAuth(c *gin.Context) {
 	//}
 	id, _ := c.Get("id")
 
-	user, err := instance.GetUser(id.(int))
+	user, err := instance.DB.GetUser(id.(int))
 	if err != nil {
 		fmt.Println(err)
 		c.Status(404)
@@ -150,7 +143,7 @@ func (instance *App) editUser(c *gin.Context) {
 		c.Status(http.StatusConflict)
 		return
 	}
-	err = instance.UpdateUser(id, edUser)
+	err = instance.DB.UpdateUser(id, edUser)
 	if err != nil {
 		constrain := err.(pgx.PgError).ConstraintName
 		if constrain == "users_nickname_key" {
@@ -175,7 +168,7 @@ func (instance *App) login(c *gin.Context) {
 		c.Status(400)
 		return
 	}
-	_, id, err := instance.LoginCheck(data)
+	_, id, err := instance.DB.LoginCheck(data)
 	if err != nil {
 		fmt.Println(err)
 		c.Status(404)
@@ -189,14 +182,14 @@ func (instance *App) login(c *gin.Context) {
 func (instance *App) upload(c *gin.Context) {
 	err := c.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
-		instance.Logger.Warn(err)
+		instance.Middleware.Logger.Warn(err)
 		fmt.Println(err)
 		c.Status(409)
 		return
 	}
 	file, _, err := c.Request.FormFile("avatar")
 	if err != nil {
-		instance.Logger.Warn(err)
+		instance.Middleware.Logger.Warn(err)
 		fmt.Println(err)
 		c.Status(409)
 		return
@@ -220,7 +213,7 @@ func (instance *App) upload(c *gin.Context) {
 	}
 
 	ImgUrl := "https://advhater.ru/img/" + strconv.Itoa(id) + ".jpeg"
-	err = instance.ImgUpdate(id, ImgUrl)
+	err = instance.DB.ImgUpdate(id, ImgUrl)
 	if err != nil {
 		c.Status(404)
 		return
