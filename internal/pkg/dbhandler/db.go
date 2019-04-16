@@ -1,12 +1,20 @@
-package main
+package dbhandler
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/models"
 	"github.com/jackc/pgx"
+	"github.com/sirupsen/logrus"
 	"math/rand"
 	"time"
 )
+
+type App struct {
+	Router     *gin.Engine
+	Connection *pgx.Conn
+	Logger     *logrus.Logger
+}
 
 func RandStr(n int) string {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
