@@ -19,21 +19,20 @@ import (
 
 type App struct {
 	Router     *gin.Engine
-	Connection *pgx.Conn
+	Connection *DBHandler
 	Logger     *logrus.Logger
 }
-
 
 func (instance *App) createUser(c *gin.Context) {
 	var newUser models.User
 	decoder := json.NewDecoder(c.Request.Body)
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&newUser)
-
 	if err != nil || newUser.Validation() != nil {
 		c.Status(400)
 		return
 	}
+
 	_, err = instance.InsertUser(newUser)
 	if err != nil {
 		if err.(pgx.PgError).Code == "23505" {

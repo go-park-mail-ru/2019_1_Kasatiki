@@ -2,19 +2,11 @@ package dbhandler
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
-	"github.com/sirupsen/logrus"
 	"math/rand"
 	"time"
 )
-
-type App struct {
-	Router     *gin.Engine
-	Connection *pgx.Conn
-	Logger     *logrus.Logger
-}
 
 func RandStr(n int) string {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -25,7 +17,11 @@ func RandStr(n int) string {
 	return string(b)
 }
 
-func (instance *App) dataCreating(lim int) {
+type DBHandler struct {
+	Connection *pgx.Conn
+}
+
+func (instance *DBHandler) dataCreating(lim int) {
 	var u models.User
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
@@ -38,7 +34,7 @@ func (instance *App) dataCreating(lim int) {
 	}
 }
 
-func (instance *App) CreateTables() (err error) {
+func (instance *DBHandler) CreateTables() (err error) {
 	sql := `
 	CREATE EXTENSION IF NOT EXISTS CITEXT;
 	DROP TABLE IF EXISTS users CASCADE;
@@ -60,7 +56,7 @@ func (instance *App) CreateTables() (err error) {
 	return err
 }
 
-func (instance *App) InsertUser(user models.User) (ret models.User, err error) {
+func (instance *DBHandler) InsertUser(user models.User) (ret models.User, err error) {
 	sql := `
 		INSERT INTO users (nickname, email, password, points, age, imgurl, region, about)
 			VALUES ( $1, $2, $3, $4, $5, $6, $7, $8)
@@ -70,7 +66,7 @@ func (instance *App) InsertUser(user models.User) (ret models.User, err error) {
 	return ret, err
 }
 
-func (instance *App) UpdateUser(id float64, user models.EditUser) (err error) {
+func (instance *DBHandler) UpdateUser(id float64, user models.EditUser) (err error) {
 	sql := `
 		UPDATE users SET nickname = $2, email = $3, password = $4, age = $5, imgurl = $6, region = $7, about = $8 
 			WHERE id = $1 RETURNING *;
@@ -79,7 +75,7 @@ func (instance *App) UpdateUser(id float64, user models.EditUser) (err error) {
 	return err
 }
 
-func (instance *App) GetUser(id int) (user models.PublicUser, err error) {
+func (instance *DBHandler) GetUser(id int) (user models.PublicUser, err error) {
 	sql := `
 		SELECT nickname, email, points, age, imgurl, region, about FROM users 
 			WHERE id = $1;
@@ -88,7 +84,7 @@ func (instance *App) GetUser(id int) (user models.PublicUser, err error) {
 	return user, err
 }
 
-func (instance *App) GetUsers(order string, offsetdb int64, limitdb int64) (users []models.LeaderboardUsers, err error) {
+func (instance *DBHandler) GetUsers(order string, offsetdb int64, limitdb int64) (users []models.LeaderboardUsers, err error) {
 	var rows *pgx.Rows
 	fmt.Println(offsetdb, limitdb)
 	sql := `
@@ -106,7 +102,7 @@ func (instance *App) GetUsers(order string, offsetdb int64, limitdb int64) (user
 	return users, err
 }
 
-func (instance *App) LoginCheck(data models.LoginInfo) (user models.PublicUser, id int, err error) {
+func (instance *DBHandler) LoginCheck(data models.LoginInfo) (user models.PublicUser, id int, err error) {
 	sql := `
 		SELECT id, nickname, email, points, age, imgurl, region, about FROM users 
 			WHERE nickname = $1 AND password = $2;
@@ -115,7 +111,7 @@ func (instance *App) LoginCheck(data models.LoginInfo) (user models.PublicUser, 
 	return user, id, err
 }
 
-func (instance *App) ImgUpdate(id int, img string) (err error) {
+func (instance *DBHandler) ImgUpdate(id int, img string) (err error) {
 	sql := `
 		UPDATE users SET imgurl = $2
 			WHERE id = $1;
