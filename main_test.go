@@ -3,6 +3,7 @@ package main_test
 import (
 	"."
 	"encoding/json"
+	//"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -158,4 +159,40 @@ func TestLogout(t *testing.T) {
 	if !strings.Contains(afLogResp.Header()["Set-Cookie"][0], "session_id=;") {
 		t.Errorf("Session id not deleted %s", afLogResp.Header())
 	}
+}
+
+func TestGetMe(t *testing.T) {
+	authGet, _ := http.NewRequest("GET", "/isauth", nil)
+	// Login
+	existUser, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"nickname":"tested","password":"qqq"}`))
+	responseExist := executeRequest(existUser)
+	authGet.Header.Set("Cookie", responseExist.Header()["Set-Cookie"][0])
+	//r := executeRequest(authGet)
+	//fmt.Println(r.Body)
+	getMe, _ := http.NewRequest("GET", "/me", nil)
+	getMe.Header.Set("Cookie", responseExist.Header()["Set-Cookie"][0])
+	responseExist = executeRequest(getMe)
+
+	decoder := json.NewDecoder(responseExist.Body)
+	var userInfo main.User
+	_ = decoder.Decode(&userInfo)
+
+	if userInfo.Nickname != "tested" {
+		t.Errorf("Expected nickname for tested user, got %s", responseExist.Body.String())
+	}
+
+}
+
+func TestUpload(t *testing.T) {
+	uploadGet, _ := http.NewRequest("GET", "/upload", nil)
+	uploadPost, _ := http.NewRequest("POST", "/upload", strings.NewReader(`invalid`))
+	responseGet := executeRequest(uploadGet)
+	responsePost := executeRequest(uploadPost)
+
+	if strings.Compare(responsePost.Body.String(), "") != 0 {
+		t.Errorf(`Expected auth is empty sting, got %s`, responsePost.Body.String())
+	}
+
+	checkResponseCode(t, http.StatusNotFound, responseGet.Code)
+	checkResponseCode(t, http.StatusOK, responsePost.Code)
 }
