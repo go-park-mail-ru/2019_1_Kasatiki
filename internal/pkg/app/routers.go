@@ -1,4 +1,4 @@
-package main
+package app
 
 import "C"
 import (
@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/internal/pkg/dbhandler"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/internal/pkg/models"
 	"github.com/jackc/pgx"
 	"io"
 	"io/ioutil"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/models"
 	"net/http"
 	"os"
 	"strconv"
