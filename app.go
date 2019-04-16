@@ -5,8 +5,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
-	"github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gopkg.in/olahol/melody.v1"
 	"io/ioutil"
 	"net/http"
@@ -55,7 +53,6 @@ func AuthMiddleware(handlerFunc gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cookie, err := c.Request.Cookie("session_id")
 		if err != nil {
-
 			c.AbortWithStatus(404)
 			fmt.Println(err)
 			return
@@ -66,8 +63,7 @@ func AuthMiddleware(handlerFunc gin.HandlerFunc) gin.HandlerFunc {
 			fmt.Println(err)
 			return
 		}
-		id := claims["id"].(float64)
-		c.Set("id", id)
+		c.Set("id", claims["id"])
 		fmt.Println(c.Get("id"))
 		handlerFunc(c)
 	}
@@ -85,30 +81,27 @@ func (instance *App) initializeRoutes() {
 	log := logrus.New()
 	log.SetOutput(loggerFile)
 	instance.Logger = log
-
 	m := melody.New()
+
 	instance.Router.Use(instance.LoggerMiddleware)
 	instance.Router.Use(gin.Recovery())
-	//instance.Router.Use(CORSMiddleware)
+	instance.Router.Use(CORSMiddleware)
 
 	api := instance.Router.Group("/api")
 	{
-
-		api.GET("/isauth", AuthMiddleware(instance.isAuth))
 		api.DELETE("/logout", AuthMiddleware(instance.logout))
 
 		api.GET("/leaderboard", instance.getLeaderboard)
-		//api.
-		//api.GET("/me", instance.getMe)
+		api.GET("/isauth", AuthMiddleware(instance.isAuth))
 
 		// POST ( create new data )
 		api.POST("/signup", instance.createUser)
-		api.POST("/upload", instance.upload)
 		api.POST("/login", instance.login)
+		api.POST("/upload", AuthMiddleware(instance.upload))
 
 		// PUT ( update data )
-		api.PUT("/edit", instance.editUser)
-		api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		api.PUT("/edit", AuthMiddleware(instance.editUser))
+
 		api.GET("/ws", func(c *gin.Context) {
 			m.HandleRequest(c.Writer, c.Request)
 		})
@@ -138,7 +131,6 @@ func (instance *App) GetDBConnection() error {
 		TLSConfig: nil,
 	}
 	conn, err := pgx.Connect(conf)
-	fmt.Print(err)
 	if err != nil {
 		return err
 	}

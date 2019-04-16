@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/models"
 	"github.com/jackc/pgx"
 	"io"
 	"io/ioutil"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/models"
 	"net/http"
 	"os"
 	"strconv"
@@ -22,11 +22,15 @@ func (instance *App) createUser(c *gin.Context) {
 	err := decoder.Decode(&newUser)
 
 	if err != nil || newUser.Validation() != nil {
+		instance.Logger.Warnln("Create user error: ", err)
+		fmt.Println(err)
 		c.Status(400)
 		return
 	}
 	_, err = instance.InsertUser(newUser)
 	if err != nil {
+		instance.Logger.Warnln("Create user error: ", err)
+		fmt.Println(err)
 		if err.(pgx.PgError).Code == "23505" {
 			c.Status(409)
 			return
@@ -41,6 +45,8 @@ func (instance *App) createUser(c *gin.Context) {
 	data.Password = password
 	_, id, err := instance.LoginCheck(data)
 	if err != nil {
+		instance.Logger.Warnln("Create user error: ", err)
+		fmt.Println(err)
 		c.Status(404)
 		return
 	}
@@ -55,6 +61,8 @@ func (instance *App) getLeaderboard(c *gin.Context) {
 	offset, getOffset := c.Request.URL.Query()["offset"]
 	coef, err := strconv.ParseInt(offset[0], 10, 32)
 	if err != nil {
+		instance.Logger.Warnln("Get Leaderboard error: ", err)
+		fmt.Println(err)
 		c.Status(400)
 		return
 	}
@@ -62,6 +70,8 @@ func (instance *App) getLeaderboard(c *gin.Context) {
 	users, err := instance.GetUsers("DESC", from, pageSize)
 	if getOffset {
 		if len(users) == 0 || err != nil {
+			instance.Logger.Warnln("Get Leaderboard error: ", err)
+			fmt.Println(err)
 			c.Status(404)
 			return
 		}
@@ -96,21 +106,10 @@ func (instance *App) checkAuth(cookie *http.Cookie) (jwt.MapClaims, error) {
 }
 
 func (instance *App) isAuth(c *gin.Context) {
-	//cookie, err := c.Request.Cookie("session_id")
-	//if err != nil {
-	//	c.Status(404)
-	//	return
-	//}
-	//claims, err := instance.checkAuth(cookie)
-	//if err != nil {
-	//
-	//	c.Status(404)
-	//	return
-	//}
 	id, _ := c.Get("id")
-
-	user, err := instance.GetUser(id.(int))
+	user, err := instance.GetUser(int(id.(float64)))
 	if err != nil {
+		instance.Logger.Warnln("IsAuth error: ", err)
 		fmt.Println(err)
 		c.Status(404)
 		return
@@ -119,31 +118,22 @@ func (instance *App) isAuth(c *gin.Context) {
 }
 
 func (instance *App) editUser(c *gin.Context) {
-	cookie, err := c.Request.Cookie("session_id")
-	if err != nil {
-		c.Status(404)
-		return
-	}
-	claims, err := instance.checkAuth(cookie)
-	if err != nil {
-
-		c.Status(404)
-		return
-	}
-	id := claims["id"].(float64)
-	_, _, err = c.Request.FormFile("avatar")
-
+	_, _, err := c.Request.FormFile("avatar")
 	var edUser models.EditUser
 	decoder := json.NewDecoder(c.Request.Body)
 	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&edUser)
-	fmt.Println(err)
 	if err != nil {
-		c.Status(http.StatusConflict)
+		instance.Logger.Warnln("Edit User error: ", err)
+		fmt.Println(err)
+		c.Status(409)
 		return
 	}
-	err = instance.UpdateUser(id, edUser)
+	id, _ := c.Get("id")
+	err = instance.UpdateUser(int(id.(float64)), edUser)
 	if err != nil {
+		instance.Logger.Warnln("Edit User error: ", err)
+		fmt.Println(err)
 		constrain := err.(pgx.PgError).ConstraintName
 		if constrain == "users_nickname_key" {
 			c.Status(300)
@@ -163,12 +153,14 @@ func (instance *App) login(c *gin.Context) {
 	var data models.LoginInfo
 	err := json.NewDecoder(c.Request.Body).Decode(&data)
 	if err != nil {
+		instance.Logger.Warnln("Login error: ", err)
 		fmt.Println(err)
 		c.Status(400)
 		return
 	}
 	_, id, err := instance.LoginCheck(data)
 	if err != nil {
+		instance.Logger.Warnln("Login error: ", err)
 		fmt.Println(err)
 		c.Status(404)
 		return
@@ -181,39 +173,33 @@ func (instance *App) login(c *gin.Context) {
 func (instance *App) upload(c *gin.Context) {
 	err := c.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
-		instance.Logger.Warn(err)
+		instance.Logger.Warnln("Upload error: ", err)
 		fmt.Println(err)
 		c.Status(409)
 		return
 	}
 	file, _, err := c.Request.FormFile("avatar")
 	if err != nil {
-		instance.Logger.Warn(err)
+		instance.Logger.Warnln("Upload error: ", err)
 		fmt.Println(err)
 		c.Status(409)
 		return
 	}
 	defer file.Close()
-
-	cookie, err := c.Request.Cookie("session_id")
-	if err != nil {
-		c.Status(404)
-		return
-	}
-	claims, err := instance.checkAuth(cookie)
-	id := int(claims["id"].(float64))
-	// Может падать из-за отсутствия этой папки
-	picpath := "./static/img" + strconv.Itoa(id) + ".jpeg"
+	id, _ := c.Get("id")
+	picpath := "./static/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
-
 	if err != nil {
+		instance.Logger.Warnln("Upload error: ", err)
+		fmt.Println(err)
 		c.Status(404)
 		return
 	}
-
-	ImgUrl := "https://advhater.ru/img/" + strconv.Itoa(id) + ".jpeg"
-	err = instance.ImgUpdate(id, ImgUrl)
+	ImgUrl := "https://advhater.ru/img/" + strconv.Itoa(int(id.(float64))) + ".jpeg"
+	err = instance.ImgUpdate(int(id.(float64)), ImgUrl)
 	if err != nil {
+		instance.Logger.Warnln("Upload error: ", err)
+		fmt.Println(err)
 		c.Status(404)
 		return
 	}
@@ -223,11 +209,6 @@ func (instance *App) upload(c *gin.Context) {
 }
 
 func (instance *App) logout(c *gin.Context) {
-	//_, err := c.Request.Cookie("session_id")
-	//if err != nil {
-	//	c.Status(404)
-	//	return
-	//}
 	c.SetCookie("session_id", "", -1, "/", "", false, true)
 	c.Status(200)
 }

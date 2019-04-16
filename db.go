@@ -62,12 +62,12 @@ func (instance *App) InsertUser(user models.User) (ret models.User, err error) {
 	return ret, err
 }
 
-func (instance *App) UpdateUser(id float64, user models.EditUser) (err error) {
+func (instance *App) UpdateUser(id int, user models.EditUser) (err error) {
 	sql := `
 		UPDATE users SET nickname = $2, email = $3, password = $4, age = $5, imgurl = $6, region = $7, about = $8 
 			WHERE id = $1 RETURNING *;
 `
-	_, err = instance.Connection.Exec(sql, int(id), user.Nickname, user.Email, user.Password, user.Age, user.ImgUrl, user.Region, user.About)
+	_, err = instance.Connection.Exec(sql, id, user.Nickname, user.Email, user.Password, user.Age, user.ImgUrl, user.Region, user.About)
 	return err
 }
 
