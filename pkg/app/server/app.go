@@ -7,8 +7,6 @@ import (
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/middleware"
 	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
-	"github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"gopkg.in/olahol/melody.v1"
 	"io/ioutil"
 	"net/http"
@@ -80,26 +78,23 @@ func (instance *App) initializeRoutes() {
 	m := melody.New()
 	instance.Router.Use(instance.Middleware.LoggerMiddleware)
 	instance.Router.Use(gin.Recovery())
-	//instance.Router.Use(CORSMiddleware)
+	instance.Router.Use(CORSMiddleware)
 
 	api := instance.Router.Group("/api")
 	{
-
-		api.GET("/isauth", AuthMiddleware(instance.isAuth))
 		api.DELETE("/logout", AuthMiddleware(instance.logout))
 
 		api.GET("/leaderboard", instance.getLeaderboard)
-		//api.
-		//api.GET("/me", instance.getMe)
+		api.GET("/isauth", AuthMiddleware(instance.isAuth))
 
 		// POST ( create new data )
 		api.POST("/signup", instance.createUser)
-		api.POST("/upload", instance.upload)
 		api.POST("/login", instance.login)
+		api.POST("/upload", AuthMiddleware(instance.upload))
 
 		// PUT ( update data )
-		api.PUT("/edit", instance.editUser)
-		api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		api.PUT("/edit", AuthMiddleware(instance.editUser))
+
 		api.GET("/ws", func(c *gin.Context) {
 			m.HandleRequest(c.Writer, c.Request)
 		})
@@ -150,17 +145,4 @@ func (instance *App) Initialize() {
 	fmt.Println(err)
 	instance.Router = gin.New()
 	instance.initializeRoutes()
-}
-
-type Order struct {
-	Sequence string `json:"order"`
-}
-
-//ToDo: Move to another package
-var errorLogin = map[string]string{
-	"Error": "User dont exist",
-}
-
-var errorCreateUser = map[string]string{
-	"Error": "Nickname/mail already exists",
 }
