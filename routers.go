@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx"
 	"io"
 	"io/ioutil"
-	"models"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/models"
 	"net/http"
 	"os"
 	"strconv"
@@ -107,8 +107,11 @@ func (instance *App) isAuth(c *gin.Context) {
 	//	c.Status(404)
 	//	return
 	//}
-	user, err := instance.GetUser(c.GetInt("id"))
+	id, _ := c.Get("id")
+
+	user, err := instance.GetUser(id.(int))
 	if err != nil {
+		fmt.Println(err)
 		c.Status(404)
 		return
 	}

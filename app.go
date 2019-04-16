@@ -51,15 +51,15 @@ func checkAuth(cookie *http.Cookie) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(handlerFunc gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cookie, err := c.Request.Cookie("session_id")
 		if err != nil {
+
 			c.AbortWithStatus(404)
 			fmt.Println(err)
 			return
 		}
-		fmt.Println("!!!")
 		claims, err := checkAuth(cookie)
 		if err != nil {
 			c.AbortWithStatus(404)
@@ -68,7 +68,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 		id := claims["id"].(float64)
 		c.Set("id", id)
-		c.Next()
+		fmt.Println(c.Get("id"))
+		handlerFunc(c)
 	}
 }
 
@@ -92,12 +93,10 @@ func (instance *App) initializeRoutes() {
 
 	api := instance.Router.Group("/api")
 	{
-		auth := api.Use(AuthMiddleware())
-		{
-			auth.GET("/isauth", instance.isAuth)
-			auth.DELETE("/logout", instance.logout)
 
-		}
+		api.GET("/isauth", AuthMiddleware(instance.isAuth))
+		api.DELETE("/logout", AuthMiddleware(instance.logout))
+
 		api.GET("/leaderboard", instance.getLeaderboard)
 		//api.
 		//api.GET("/me", instance.getMe)
