@@ -1,8 +1,9 @@
-package main
+package middleware
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/internal/pkg/app"
 	"github.com/sirupsen/logrus"
 	"math"
 	"os"

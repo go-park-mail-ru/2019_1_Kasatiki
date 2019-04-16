@@ -3,7 +3,7 @@ package dbhandler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/models"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/internal/pkg/models"
 	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
 	"math/rand"
