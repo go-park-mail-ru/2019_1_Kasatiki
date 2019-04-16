@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/internal/pkg/models"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"log"
 )
 
