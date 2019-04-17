@@ -28,9 +28,13 @@ func TestPhonePayBody(t *testing.T) {
 }
 
 func TestReadConfig(t *testing.T) {
-	var testedBill *models.Credentials
-	err := ReadConfig("sdfweq", testedBill)
+	var testedBill models.Credentials
+	err := ReadConfig("sdfweq", &testedBill)
 	if err == nil {
 		t.Errorf("Expected nil")
+	}
+	err = ReadConfig("./resources/credentials.json", &testedBill)
+	if testedBill.Wallet != "79851301115" {
+		t.Errorf("Not valid decode")
 	}
 }
