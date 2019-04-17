@@ -28,8 +28,9 @@ func (instance *App) initializeRoutes() {
 
 	m := melody.New()
 	instance.Router.Use(instance.Middleware.LoggerMiddleware)
-	instance.Router.Use(gin.Recovery())
+	//instance.Router.Use(gin.Recovery())
 	instance.Router.Use(instance.Middleware.CORSMiddleware)
+	instance.Router.Use(instance.Middleware.Recovery)
 
 	api := instance.Router.Group("/api")
 	{
@@ -56,6 +57,7 @@ func (instance *App) initializeRoutes() {
 	}
 
 	//Static path
+
 	instance.Router.Use(static.Serve("/", static.LocalFile("/home/evv/GolandProjects/2019_1_Kasatiki/static", true)))
 
 	// Echo websocket for test
