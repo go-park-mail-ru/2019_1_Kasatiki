@@ -132,7 +132,10 @@ func (instance *App) editUser(c *gin.Context) {
 
 func (instance *App) login(c *gin.Context) {
 	var data models.LoginInfo
-	err := json.NewDecoder(c.Request.Body).Decode(&data)
+	decoder := json.NewDecoder(c.Request.Body)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&data)
+	fmt.Println("!#!##!#")
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Login error: ", err)
 		fmt.Println(err)
