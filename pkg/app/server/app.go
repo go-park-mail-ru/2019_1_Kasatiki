@@ -42,6 +42,7 @@ func (instance *App) initializeRoutes() {
 		api.POST("/signup", instance.createUser)
 		api.POST("/login", instance.login)
 		api.POST("/upload", instance.Middleware.AuthMiddleware(instance.upload))
+		api.POST("/payments", instance.payout)
 
 		// PUT ( update data )
 		api.PUT("/edit", instance.Middleware.AuthMiddleware(instance.editUser))

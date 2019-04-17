@@ -6,6 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/payments"
 	"github.com/jackc/pgx"
 	"io"
 	"io/ioutil"
@@ -207,5 +208,7 @@ func (instance *App) payout(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
+	payments.ReadConfig("", payoutBill)
+	payments.GetLastTransactionId(payoutBill)
 
 }
