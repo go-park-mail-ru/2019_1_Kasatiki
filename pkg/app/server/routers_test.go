@@ -129,3 +129,12 @@ func TestLogout(t *testing.T) {
 	response_200 := executeRequest(logout)
 	checkResponseCode(t, http.StatusOK, response_200.Code)
 }
+
+func TestPayout(t *testing.T) {
+	decodeFailed, _ := http.NewRequest("POST", "/api/payments",
+		strings.NewReader(`{"money": "all"}`))
+	decodeFailed.Header.Set("Content-Type", "application/json")
+	//decodeFailed.Header.Set("Cookie", "session_id=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MX0.XF3YG1m_vtJDN6tfO5iKWgZdpIcFgXnpG_fuDVBn0Uc; path=/; domain=0.0.0.0; HttpOnly; Expires=Wed, 17 Apr 2222 03:38:00 GMT;")
+	response_400 := executeRequest(decodeFailed)
+	checkResponseCode(t, http.StatusBadRequest, response_400.Code)
+}

@@ -137,7 +137,6 @@ func (instance *App) login(c *gin.Context) {
 	decoder := json.NewDecoder(c.Request.Body)
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&data)
-	fmt.Println("!#!##!#")
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Login error: ", err)
 		fmt.Println(err)
@@ -201,6 +200,7 @@ func (instance *App) logout(c *gin.Context) {
 
 func (instance *App) payout(c *gin.Context) {
 	var payoutBill models.Payout
+	var payoutCredentials models.Credentials
 	decoder := json.NewDecoder(c.Request.Body)
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&payoutBill)
@@ -208,7 +208,12 @@ func (instance *App) payout(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	payments.ReadConfig("", payoutBill)
-	payments.GetLastTransactionId(payoutBill)
 
+	fmt.Println(payoutBill.Phone, payoutBill.Amount)
+	err = payments.PhonePayout(payoutCredentials, payoutBill.Phone, payoutBill.Amount)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	c.Status(201)
 }
