@@ -55,7 +55,7 @@ func (instance *App) initializeRoutes() {
 	}
 
 	//Static path
-	instance.Router.Use(static.Serve("/", static.LocalFile("./static", true)))
+	instance.Router.Use(static.Serve("/", static.LocalFile("/home/evv/GolandProjects/2019_1_Kasatiki/static", true)))
 
 	// Echo websocket for test
 

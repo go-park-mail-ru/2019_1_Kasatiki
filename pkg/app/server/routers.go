@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strconv"
 )
@@ -195,4 +196,16 @@ func (instance *App) upload(c *gin.Context) {
 func (instance *App) logout(c *gin.Context) {
 	c.SetCookie("session_id", "", -1, "/", "", false, true)
 	c.Status(200)
+}
+
+func (instance *App) payout(c *gin.Context) {
+	var payoutBill models.Payout
+	decoder := json.NewDecoder(c.Request.Body)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&payoutBill)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
 }
