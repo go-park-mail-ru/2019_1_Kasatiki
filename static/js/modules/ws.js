@@ -38,7 +38,7 @@ export default class Ws {
 
             let messageNickname = document.createElement('div');
             messageNickname.className = 'chat__chatbox-message-nickname';
-            messageNickname.innerText = message.Nickname;
+            messageNickname.innerText = message.Nickname + ':';
 
             let messageText = document.createElement('div');
             messageText.className = 'chat__chatbox-message-text';
