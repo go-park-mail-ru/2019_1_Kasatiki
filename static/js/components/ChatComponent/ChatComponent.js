@@ -5,7 +5,9 @@ export default class ChatComponent {
         if (isPage === false) {
             templateScript =`
             <div class="chat">
-                <div class="chat__chatbox"></div>
+                <div class="chat__chatbox">            
+                    <a href="/getMoreMessages" id="chat__get-more" class="">Ещё</a>
+                </div>
                 <form class="chat__form">
                     <input type="text" class="chat__input">
                     <input type="submit" class="chat__submit" value="Allo">
@@ -17,7 +19,9 @@ export default class ChatComponent {
             <a href="/" class="chat__menu-link">Menu</a>
             <div class="chat-section">
                 <div class="chat">
-                    <div class="chat__chatbox"></div>
+                    <div class="chat__chatbox">            
+                        <a href="/getMoreMessages" id="chat__get-more" class="">Ещё</a>
+                    </div>
                     <form class="chat__form">
                         <input type="text" class="chat__input">
                         <input type="submit" class="chat__submit" value="Allo">
