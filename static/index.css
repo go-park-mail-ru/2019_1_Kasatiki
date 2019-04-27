@@ -5,6 +5,7 @@
 @import url('js/components/LeaderboardComponent/LeaderboardComponent.css');
 @import url('js/components/PaymentsComponent/PaymentsComponents.css');
 @import url('js/components/ShopComponent/ShopComponent.css');
+@import url('js/components/ChatComponent/ChatComponent.css');
 @import url('js/game/game.css');
 
 html, body {

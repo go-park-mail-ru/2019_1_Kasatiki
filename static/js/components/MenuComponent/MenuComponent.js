@@ -24,18 +24,13 @@ export default class MenuComponent {
                 </div>
                 <button href="/play" class="menu__play-btn data-section="play"><i class="fas fa-play"></i></button>
                 <div class="options">
+                    <a href="/chat" class="options__link">Chat</a>
                     <a href="#" class="options__link">Report bug</a>
                     <a href="#" class="options__link">Help</a>
                     <a href="#" class="options__link">Hate with us!</a>
                 </div>  
             </div>
-            <div class="chat">
-                <div class="chat__chatbox"></div>
-                <form class="chat__form">
-                    <input type="text" class="chat__input">
-                    <input type="submit" class="chat__submit" value="Allo">
-                </form>
-            </div>
+            <div class="menu__chat-section"></div>
         `;
         } else {
             templateScript = `
