@@ -1,8 +1,8 @@
 package dbhandler
 
 import (
-	"2019_1_Kasatiki/pkg/models"
 	"fmt"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
 	"math/rand"
 	"time"

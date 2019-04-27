@@ -5,9 +5,9 @@
 package main
 
 import (
-	"2019_1_Kasatiki/pkg/dbhandler"
-	"2019_1_Kasatiki/pkg/models"
 	"fmt"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
 )
 
