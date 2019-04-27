@@ -46,7 +46,7 @@ export default class ChatView extends BaseView {
         const chatInput = document.querySelector('.chat__input');
         let chatButton = document.querySelector('#chat__get-more');
 
-        chatButton.addEventListener('click', this.getMoreMessages);
+        // chatButton.addEventListener('click', this.getMoreMessages);
         
         console.log(chatForm);
         this.router.ws.setChatbox(document.querySelector('.chat__chatbox'));
