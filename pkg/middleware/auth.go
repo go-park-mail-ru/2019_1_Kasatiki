@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func checkAuth(cookie *http.Cookie) (jwt.MapClaims, error) {
+func CheckAuth(cookie *http.Cookie) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -33,7 +33,7 @@ func (instance *Middlewares) AuthMiddleware(handlerFunc gin.HandlerFunc) gin.Han
 			fmt.Println(err)
 			return
 		}
-		claims, err := checkAuth(cookie)
+		claims, err := CheckAuth(cookie)
 		if err != nil {
 			c.AbortWithStatus(404)
 			fmt.Println(err)
