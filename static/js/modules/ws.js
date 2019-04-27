@@ -27,6 +27,11 @@ export default class Ws {
         this.ws = new WebSocket('wss://' + wsUrl);
 
         this.ws.onmessage = (evt) => {
+
+            if (this.chatbox == document.body) {
+                return;
+            }
+
             const messageBox = document.createElement("div");
 
             messageBox.className = 'chat__chatbox-message'
