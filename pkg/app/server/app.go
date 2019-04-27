@@ -10,7 +10,6 @@ import (
 	"os"
 )
 import (
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"log"
@@ -60,7 +59,7 @@ func (instance *App) initializeRoutes() {
 
 	//Static path
 
-	instance.Router.Use(static.Serve("/", static.LocalFile("../../static", true)))
+	//instance.Router.Use(static.Serve("/", static.LocalFile("../../static", true)))
 	// Echo websocket for test
 
 }

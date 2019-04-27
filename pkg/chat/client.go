@@ -6,8 +6,10 @@ package main
 
 import (
 	"2019_1_Kasatiki/pkg/middleware"
+	"2019_1_Kasatiki/pkg/models"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -42,21 +44,13 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-type Message struct {
-	Body      string `json: body`
-	Nickname  string `json: nickname`
-	Timestamp string `json: timestamp`
-	Edited    bool   `json: edited`
-	Imgurl    string `json: imgurl`
-}
-
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	hub *Hub
 	// The websocket connection.
 	conn *websocket.Conn
 	// Buffered channel of outbound messages.
-	send     chan Message
+	send     chan models.Message
 	Nickname string
 	ImgUrl   string
 }
@@ -84,13 +78,17 @@ func (c *Client) readPump() {
 		}
 		// Todo:
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		var msg Message
+		var msg models.Message
 		msg.Body = string(message)
 		msg.Nickname = c.Nickname
 		msg.Edited = false
-		msg.Timestamp = "13"
+		t := time.Now()
+		msg.Timestamp = fmt.Sprintf("%02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
 		msg.Imgurl = c.ImgUrl
-
+		err = c.hub.DB.InsertMessage(msg)
+		if err != nil {
+			fmt.Println(err)
+		}
 		c.hub.broadcast <- msg
 	}
 }
@@ -152,27 +150,28 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	nickname := "anonimus"
+	nickname := "anonymous"
 	imgurl := ""
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
-		client := &Client{hub: hub, conn: conn, send: make(chan Message, 256), ImgUrl: imgurl, Nickname: nickname}
+		client := &Client{hub: hub, conn: conn, send: make(chan models.Message, 256), ImgUrl: imgurl, Nickname: nickname}
 		client.hub.register <- client
 		go client.writePump()
 		go client.readPump()
 		return
 	}
-	_, err = middleware.CheckAuth(cookie)
+	claims, err := middleware.CheckAuth(cookie)
 	if err != nil {
-		client := &Client{hub: hub, conn: conn, send: make(chan Message, 256), ImgUrl: imgurl, Nickname: nickname}
+		client := &Client{hub: hub, conn: conn, send: make(chan models.Message, 256), ImgUrl: imgurl, Nickname: nickname}
 		client.hub.register <- client
 		go client.writePump()
 		go client.readPump()
 		return
 	}
-	//id := int(claims["id"].(float64))
-	//client := &Client{hub: hub, conn: conn, send: make(chan Message, 256), ImgUrl:imgurl, Nickname:nickname}
-	//client.hub.register <- client
-	//go client.writePump()
-	//go client.readPump()
+	id := int(claims["id"].(float64))
+	user, err := hub.DB.GetUser(id)
+	client := &Client{hub: hub, conn: conn, send: make(chan models.Message, 256), ImgUrl: user.ImgUrl, Nickname: user.Nickname}
+	client.hub.register <- client
+	go client.writePump()
+	go client.readPump()
 }

@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
+	//"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
+	"2019_1_Kasatiki/pkg/models"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/payments"
 	"github.com/jackc/pgx"
 	"io"
@@ -151,7 +152,7 @@ func (instance *App) login(c *gin.Context) {
 		return
 	}
 	sessionId := instance.createSessionId(id)
-	c.SetCookie("session_id", sessionId, 3600, "/", "", false, true)
+	c.SetCookie("session_id", sessionId, 3600, "/", "", false, false)
 	c.Status(201)
 }
 
