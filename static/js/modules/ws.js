@@ -24,7 +24,7 @@ export default class Ws {
         wsUrl = '172.20.10.10:8080',
     ) {
         this.chatbox = chatbox;
-        this.ws = new WebSocket('ws://' + wsUrl + '/ws');
+        this.ws = new WebSocket('wss://' + wsUrl + '/ws');
 
         this.ws.onmessage = (evt) => {
             const messageBox = document.createElement("div");
