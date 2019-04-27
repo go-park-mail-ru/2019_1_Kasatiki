@@ -13,7 +13,7 @@ export default class Router {
         this.routes = {};
         this.ws = new Ws(
             document.body,
-            '172.20.10.10:8080'
+            'advhater.ru/chat'
         );
     }
 

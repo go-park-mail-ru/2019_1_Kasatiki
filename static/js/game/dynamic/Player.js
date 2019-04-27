@@ -224,17 +224,14 @@ export default class Player extends DynamicEssence {
                     let prevHpCapacity = this.hpCapacity;
                     person.hpCapacity = this.hpCapacity;
                     person.hp *= (1 + this.hpCapacity / prevHpCapacity);
-                    continue;
                 case 'increaseVelocity':
                     person.velocity += buff.value;
                     // console.log(person.velocity);
-                    continue;
             }
         } else {
             switch (buff.name) {
                 case 'health':
                     this._addHp(buff.value);
-                    continue;
             }
         }
     }

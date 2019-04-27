@@ -10,6 +10,7 @@ import CountdownView from './js/views/CountdownView.js';
 import LeaderboardView from './js/views/LeaderboardView.js';
 import GameView from './js/views/GameView.js';
 import PaymentsView from './js/views/PaymentsView.js';
+import ChatView from './js/views/ChatView.js';
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
@@ -30,4 +31,5 @@ router.add('/signup', SignupView);
 router.add('/leaderboard', LeaderboardView);
 router.add('/play', GameView);
 router.add('/payment', PaymentsView);
+router.add('/chat', ChatView);
 router.run();
