@@ -1,6 +1,6 @@
 import Router from './js/modules/Router.js';
 import './js/modules/NetworkHandler.js';
-import './js/modules/ws.js';
+// import './js/modules/ws.js';
 
 import MenuView from './js/views/MenuView.js';
 import LoginView from './js/views/LoginView.js';
