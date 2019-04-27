@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	//"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
-	"2019_1_Kasatiki/pkg/models"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"io/ioutil"
 	"net/http"
 	"strconv"

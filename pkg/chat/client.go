@@ -5,11 +5,11 @@
 package main
 
 import (
-	"2019_1_Kasatiki/pkg/middleware"
-	"2019_1_Kasatiki/pkg/models"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/middleware"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
