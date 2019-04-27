@@ -30,9 +30,28 @@ export default class Ws {
             const messageBox = document.createElement("div");
 
             messageBox.className = 'chat__chatbox-message'
-            messageBox.innerText = evt.data + '\n';
+            let message = JSON.parse(evt.data);
 
-            console.log(evt, evt.data);
+            let messageAvatar = document.createElement('img');
+            messageAvatar.className = 'chat__chatbox-message-avatar';
+            messageAvatar.src = message.Url;
+
+            let messageNickname = document.createElement('div');
+            messageNickname.className = 'chat__chatbox-message-nickname';
+            messageNickname.innerText = message.Nickname;
+
+            let messageText = document.createElement('div');
+            messageText.className = 'chat__chatbox-message-text';
+            messageText.innerText = message.Body;
+
+            let messageTimestamp = document.createElement('div');
+            messageTimestamp.className = 'chat__chatbox-message-timestamp';
+            messageTimestamp.innerText = message.Timestamp;
+
+            messageBox.appendChild(messageAvatar);
+            messageBox.appendChild(messageNickname);
+            messageBox.appendChild(messageText);
+            messageBox.appendChild(messageTimestamp);
 
             this.chatbox.appendChild(messageBox);   
         }

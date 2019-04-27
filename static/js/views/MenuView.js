@@ -32,12 +32,13 @@ export default class MenuView extends BaseView {
                     that.router.ws.setChatbox(document.querySelector('.chat__chatbox'));
 
                     chatForm.addEventListener('click', () => {
-                        console.log('submit')
                         let message = chatInput.value;
 
-                        that.router.ws.send(message);
+                        if (message !== '') {
+                            that.router.ws.send(message);
 
-                        chatInput.value = '';
+                            chatInput.value = '';
+                        }
                     })
 
         
