@@ -1,0 +1,102 @@
+.signup {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    margin: 30vh auto auto auto;
+    width: 450px;
+    height: 154px;
+}
+
+.signup-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    width: 100%;
+}
+
+.signup-btn {
+    font-size: 25px;
+
+    width: 48%;
+    height: 50px;
+
+    border-radius: 5px;
+    border: solid red 1px;
+
+    color: red;
+    background: rgba(255, 255, 255, 0.5);
+
+    transition: 0.2s linear;
+
+    outline: none;
+}
+
+.signup__btn-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+
+    margin: 5px;
+    width: 100%;
+}
+
+.signup-btn:hover {
+    font-size: 30px;
+
+    border: solid white 1px;
+
+    background-color: red;
+    color: white;
+
+    transition: 0.2s linear;
+}
+
+.signup__input {
+    margin: 5px;
+    padding: 10px;
+    width: 100%;
+    height: 30px;
+
+    border: solid 1px red;
+    border-radius: 5px;
+
+    background: rgba(255, 255, 255, 0.5);
+    color: red;
+
+    outline: none;
+
+    transition: 0.2s linear;
+}
+
+.signup__input:valid {
+    background: white;
+    color: red;
+}
+
+.signup__input:invalid {
+    background: red;
+    color: white;
+}
+
+.signup__input:hover {
+    background: rgba(255, 255, 255, 0.5);
+    color: red;
+
+    transition: 0.2s linear;
+}
+
+.signup__title {
+    width: 100%;
+    text-align: center;
+
+    color: red;
+}
+
+.signup_error_text {
+    width: 100%;
+    text-align: center;
+
+    color: red;
+}

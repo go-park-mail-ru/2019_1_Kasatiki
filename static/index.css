@@ -1,0 +1,16 @@
+@import url('js/components/MenuComponent/MenuComponent.css');
+@import url('js/components/LoginComponent/LoginComponent.css');
+@import url('js/components/SignupComponent/SignupComponent.css');
+@import url('js/components/CountdownComponent/CountdownComponent.css');
+@import url('js/components/LeaderboardComponent/LeaderboardComponent.css');
+@import url('js/components/PaymentsComponent/PaymentsComponents.css');
+@import url('js/components/ShopComponent/ShopComponent.css');
+@import url('js/game/game.css');
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+
+    overflow: hidden;
+}

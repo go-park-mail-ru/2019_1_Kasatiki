@@ -1,0 +1,128 @@
+.payments {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    margin: 30vh auto auto auto;
+    width: 650px;
+    height: 154px;
+}
+
+.payments__title {
+    color: red;
+    width: 100%;
+    margin: 0;
+
+    text-align: center;
+}
+
+.payments__input-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    width: 100%;
+    margin: auto;
+}
+
+.payments__input-section-input {
+    margin: 5px;
+    padding: 10px;
+    width: 100%;
+    height: 50px;
+
+    border: solid 1px red;
+    border-radius: 5px;
+
+    background: rgba(255, 255, 255, 0.5);
+    color: red;
+
+    outline: none;
+
+    transition: 0.2s linear;
+}
+
+.payments__input-section-submit {
+    font-size: 25px;
+
+    margin: 5px;
+    width: 48%;
+    height: 50px;
+
+    border-radius: 5px;
+    border: solid red 1px;
+
+    color: red;
+    background: rgba(255, 255, 255, 0.5);
+
+    transition: 0.2s linear;
+
+    outline: none;
+}
+
+.payments__input-section-submit:hover{
+    font-size: 25px;
+
+    border: solid white 1px;
+
+    background-color: red;
+    color: white;
+
+    transition: 0.2s linear;
+}
+
+.payments button {
+    font-size: 25px;
+
+    margin: 5px;
+    width: 48%;
+    height: 50px;
+
+    border-radius: 5px;
+    border: solid red 1px;
+
+    color: red;
+    background: rgba(255, 255, 255, 0.5);
+
+    transition: 0.2s linear;
+
+    outline: none;
+}
+
+.payments button:hover{
+    font-size: 25px;
+
+    border: solid white 1px;
+
+    background-color: red;
+    color: white;
+
+    transition: 0.2s linear;
+}
+
+.chose_btn_pay {
+    text-align: center;
+
+    width: 49%;
+    height: 100%;
+    font-size: 30px;
+    color: red;
+
+    background-color: white;
+
+    border: 1px red solid;
+    border-radius: 5px;
+
+    transition: 0.2s linear;
+}
+
+.chose_btn_pay:hover {
+    font-size: 30px;
+
+    border: solid white 1px;
+
+    background-color: red;
+    color: white;
+
+    transition: 0.2s linear;
+}
