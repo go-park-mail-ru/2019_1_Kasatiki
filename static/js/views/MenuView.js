@@ -1,7 +1,6 @@
 import BaseView from './View.js';
 
 import MenuComponent from '../components/MenuComponent/MenuComponent.js';
-import ws from '../modules/ws.js';
 
 const { NetworkHandler } = window;
 
@@ -30,14 +29,15 @@ export default class MenuView extends BaseView {
                     const chatInput = document.querySelector('.chat__input');
                     
                     console.log(chatForm);
+                    that.router.ws.setChatbox(document.querySelector('.chat__chatbox'));
 
                     chatForm.addEventListener('click', () => {
                         console.log('submit')
                         let message = chatInput.value;
 
-                        ws.send(message);
+                        that.router.ws.send(message);
 
-                       chatInput.value = '';
+                        chatInput.value = '';
                     })
 
         

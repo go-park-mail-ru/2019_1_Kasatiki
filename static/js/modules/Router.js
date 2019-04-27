@@ -1,3 +1,5 @@
+import Ws from './ws.js'
+
 export default class Router {
     /**
      * Конструктор роутера.
@@ -9,6 +11,10 @@ export default class Router {
     ) {
         this.app = app;
         this.routes = {};
+        this.ws = new Ws(
+            document.body,
+            '172.20.10.10:8080'
+        );
     }
 
     run() {

@@ -1,38 +1,50 @@
-const ws = new WebSocket('ws://172.20.10.10:8080/ws');
-// const ws = new WebSocket('https://advhater.ru/ws');
+// // const ws = new WebSocket('https://advhater.ru/ws');
 
-ws.onopen = () => {
-    console.log('ws success connect');
+// ws.onopen = () => {
+//     console.log('ws success connect');
     
+//     const chatbox = document.querySelector('.chat__chatbox');
 
-    ws.onmessage = (evt) => {
-        // console.log('ws message:', message);
+//     ws.onmessage = (evt) => {
+//         // console.log('ws message:', message);
 
-        const messageBox = document.createElement("div");
-        messageBox.className = 'chat__chatbox-message'
-        messageBox.innerText = evt.data + '\n';
+//         const messageBox = document.createElement("div");
+//         messageBox.className = 'chat__chatbox-message'
+//         messageBox.innerText = evt.data + '\n';
 
-        console.log(evt, evt.data);
-        const chatbox = document.querySelector('.chat__chatbox');
+//         console.log(evt, evt.data);
 
+//         chatbox.appendChild(messageBox);   
+//     }
+// }
 
-        chatbox.appendChild(messageBox);
+export default class Ws {
+    constructor(
+        chatbox,
+        wsUrl = '172.20.10.10:8080',
+    ) {
+        this.chatbox = chatbox;
+        this.ws = new WebSocket('ws://' + wsUrl + '/ws');
 
-        // ws.onclose = function (evt) {
-        //     const messageBox = document.createElement("div.chat__chatbox-message");
-        //     messageBox.innerHTML = "<b>Connection closed.</b>";
-            
-        //     chatbox.appendChild(messageBox);
-        // };
-        // ws.onmessage = function (evt) {
-        //     const messageBox = document.createElement("div.chat__chatbox-message");
-        //     messageBox.innerText = evt.data;
+        this.ws.onmessage = (evt) => {
+            const messageBox = document.createElement("div");
 
-        //     console.log(evt, evt.data);
+            messageBox.className = 'chat__chatbox-message'
+            messageBox.innerText = evt.data + '\n';
 
-        //     chatbox.appendChild(messageBox);
-        // };
+            console.log(evt, evt.data);
+
+            this.chatbox.appendChild(messageBox);   
+        }
+    }
+
+    setChatbox(cb) {
+        this.chatbox = cb;
+    }
+
+    send(data) {
+        this.ws.send(data);
     }
 }
 
-export default ws;
+// export default ws;
