@@ -28,12 +28,18 @@ export default class MenuView extends BaseView {
                     // const sendButton = document.querySelector('.chat__submit');
                     const chatForm = document.querySelector('.chat__form');
                     const chatInput = document.querySelector('.chat__input');
-                    console.log(sendButton, chatInput);
-                    chatForm.onsubmit('click', () => {
+                    
+                    console.log(chatForm);
+
+                    chatForm.addEventListener('click', () => {
+                        console.log('submit')
                         let message = chatInput.value;
 
                         ws.send(message);
+
+                       chatInput.value = '';
                     })
+
         
                     function showButtons(e) {
                         // console.log('on');

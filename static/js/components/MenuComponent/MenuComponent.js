@@ -33,7 +33,7 @@ export default class MenuComponent {
                 <div class="chat__chatbox"></div>
                 <form class="chat__form">
                     <input type="text" class="chat__input">
-                    <button type="submit" class="chat__submit">Send</button>
+                    <input type="submit" class="chat__submit" value="Allo">
                 </form>
             </div>
         `;
