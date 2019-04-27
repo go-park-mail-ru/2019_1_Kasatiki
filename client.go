@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -40,6 +41,13 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+type Message struct {
+	Body      string `json: body`
+	Nickname  string `json: nickname`
+	Timestamp string `json: timestamp`
+	Edited    bool   `json: edited`
+}
+
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	hub *Hub
@@ -48,7 +56,7 @@ type Client struct {
 	conn *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	send chan Message
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -72,8 +80,15 @@ func (c *Client) readPump() {
 			}
 			break
 		}
+		// Todo:
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.broadcast <- message
+		var msg Message
+		msg.Body = string(message)
+		msg.Nickname = "tested"
+		msg.Edited = false
+		msg.Timestamp = "13"
+
+		c.hub.broadcast <- msg
 	}
 }
 
@@ -102,13 +117,16 @@ func (c *Client) writePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
 
+			//w.Write()
+			_ = json.NewEncoder(w).Encode(&message)
+			//w.Write()
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
-				w.Write(<-c.send)
+				//w.Write(<-c.conn.ReadJSON(c.send))
+				json.NewEncoder(w).Encode(c.send)
 			}
 
 			if err := w.Close(); err != nil {
@@ -130,7 +148,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &Client{hub: hub, conn: conn, send: make(chan Message, 256)}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
