@@ -75,7 +75,7 @@ func NewRoom(player1, player2 *UserConnection, completedRooms chan RoomId, ownNu
 	go room.WebSocketWriter(0)
 	go room.WebSocketReader(1)
 	go room.WebSocketWriter(1)
-	//go room.GameEngine()
+	go room.GameEngine()
 
 	fmt.Println("Room created with Player_1 = '%s', Player_2 = '%s'", room.Player_1.Token, room.Player_2.Token)
 	return
@@ -140,23 +140,27 @@ func (r *Room) WebSocketReader(role PlayerId) {
 	if role == 0 {
 		for {
 			_, message, err := r.Player_1.Connection.ReadMessage()
+
 			if err != nil {
-				fmt.Println("Error from user role 0 with Token '" + r.Player_1.Token + "': '" + err.Error() + "'.")
+				fmt.Println("Erro sdfsdr from user role 0 with Token '" + r.Player_1.Token + "': '" + err.Error() + "'.")
 				_, stillOpen := <-r.Recovery.Player_1_IsAvailableRead
 				if !stillOpen {
 					close(r.Messenger.Player_1_From)
 					break
 				}
 			} else {
-				log.Print("message from user role 0 with Token '" + r.Player_1.Token + "': '" + string(message) + "'.")
+				// log.Print("message from user role 0 with Token '" + r.Player_1.Token + "': '" + string(message) + "'.")
 				var m mes
-				m.message = string(message)
+
+				json.Unmarshal(message, &m)
+
 				r.Messenger.Player_1_From <- m
 			}
 		}
 	} else {
 		for {
 			_, message, err := r.Player_2.Connection.ReadMessage()
+
 			if err != nil {
 				fmt.Println("Error from user role 1 with Token '" + r.Player_1.Token + "': '" + err.Error() + "'.")
 				_, stillOpen := <-r.Recovery.Player_2_IsAvailableRead
@@ -165,9 +169,11 @@ func (r *Room) WebSocketReader(role PlayerId) {
 					break
 				}
 			} else {
-				log.Print("message from user role 1 with Token '" + r.Player_1.Token + "': '" + string(message) + "'.")
+				// log.Print("message from user role 1 with Token '" + r.Player_1.Token + "': '" + string(message) + "'.")
 				var m mes
-				m.message = string(message)
+				
+				json.Unmarshal(message, &m)
+				
 				r.Messenger.Player_2_From <- m
 			}
 		}
@@ -183,14 +189,16 @@ func (r *Room) WebSocketWriter(role PlayerId) {
 	MessageSending1:
 		for message := range r.Messenger.Player_1_To {
 			for {
-				w, err := r.Player_1.Connection.NextWriter(websocket.TextMessage)
+				// w, err := r.Player_1.Connection.NextWriter(websocket.TextMessage)
+				// _ = json.NewEncoder(w).Encode(&message)
+
+				err := r.Player_2.Connection.WriteJSON(&message)
+
 				if err != nil {
-					fmt.Println(err)
 					_, stillOpen := <-r.Recovery.Player_1_IsAvailableWrite
 					if !stillOpen {
 						break MessageSending1
 					}
-					_ = json.NewEncoder(w).Encode(&message)
 				} else {
 					break
 				}
@@ -201,13 +209,16 @@ func (r *Room) WebSocketWriter(role PlayerId) {
 	MessageSending2:
 		for message := range r.Messenger.Player_2_To {
 			for {
-				w, err := r.Player_2.Connection.NextWriter(websocket.TextMessage)
+				// w, err := r.Player_2.Connection.NextWriter(websocket.TextMessage)
+				// errEncode := json.NewEncoder(w).Encode(&message)
+
+				err := r.Player_2.Connection.WriteJSON(&message)
+
 				if err != nil {
 					_, stillOpen := <-r.Recovery.Player_2_IsAvailableWrite
 					if !stillOpen {
 						break MessageSending2
 					}
-					_ = json.NewEncoder(w).Encode(&message)
 				} else {
 					break
 				}

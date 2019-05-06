@@ -117,6 +117,7 @@ document.querySelector("#connect").addEventListener("click", (event) => {
     socket = new WebSocket("ws://"+location.host+"/game/start");
 
     socket.addEventListener("open", (event) => {
+	console.log("CONNECTED");
         document.querySelector("#incoming-data").value += "// Open socket\n";
     });
 
@@ -131,6 +132,7 @@ document.querySelector("#connect").addEventListener("click", (event) => {
         event.data + "\n";
     });
 
+
     socket.addEventListener("error", (error) => {
         document.querySelector("#incoming-data").value += 
         "// Error: " + error.message + "\n";
@@ -141,7 +143,7 @@ document.querySelector("#disconnect").addEventListener("click", (event) => {
     socket.close();
 });
 
-for (const i of ["0", "1", "2", "3", "4"]){
+for (const i of ["0"]){
     document.querySelector("#send-"+i).addEventListener("click", (event) => {
         socket.send(document.querySelector("#sent-data-"+i).value);
     });
