@@ -12,6 +12,7 @@ type UserConnection struct {
 	Login      string
 	Token      string
 	Connection *websocket.Conn
+	TypeGame   string
 }
 
 type ConnUpgrader struct {
@@ -29,7 +30,7 @@ func NewConnUpgrader() (cu *ConnUpgrader) {
 			CheckOrigin: func(r *http.Request) bool { // Токен не проверяется.
 				return true
 			},
-			EnableCompression: true,
+			//EnableCompression: true,
 		},
 		Queue: make(chan *UserConnection, 50),
 	}
@@ -58,11 +59,16 @@ func (up *ConnUpgrader) StartGame(c *gin.Context) {
 		c.JSON(409, "error of creating WS")
 		return
 	}
+	// Todo убрать хардкод
 	connection := &UserConnection{
 		Login:      login,
 		Token:      sessionID,
 		Connection: WSConnection,
+		TypeGame:   "Multiplayer",
 	}
+	//connection.Connection.SetReadDeadline(time.Now().Add(time.Duration(1 * time.Second)))
+	//connection.Connection.SetWriteDeadline(time.Now().Add(time.Duration(1 * time.Second)))
+
 	up.Queue <- connection
 	return
 }

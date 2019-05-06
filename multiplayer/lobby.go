@@ -89,9 +89,17 @@ func (lb *Lobby) AddPlayer(connection *UserConnection) {
 	if ok {
 		// Если игрок уже был в игре, но по какой-то причине отлетел - восстанавливаем соединение.
 		fmt.Println("Reconnecting player")
-		lb.Rooms[game.Room].Reconnect(connection, game.P_id)
+		lb.Rooms[game.Room].Reconnect(connection)
 		return
 	}
+
+	// Todo SinglePlayer
+	if connection.TypeGame != "Multiplayer" {
+		// Меняем id комнаты
+		lb.LastRoom++
+		return
+	}
+
 	// Если ждущего игрока нет - назначаем игрока
 	if lb.WaitingConnection == nil {
 		fmt.Println("New waiter")
@@ -122,7 +130,9 @@ func CreatingMatch(waiter *UserConnection, current *UserConnection,
 	DeleteRooms chan RoomId, LastRoom RoomId) (room *Room, Conn1 GameToConnect, Conn2 GameToConnect) {
 	fmt.Println("Creating new Room and connects")
 	// Создаем новую комнату
-	room = NewRoom(waiter, current, DeleteRooms, LastRoom)
+	var players []*UserConnection
+	players = append(players, waiter, current)
+	room = NewRoom(players, DeleteRooms, LastRoom)
 	// Создаем коннект для первого игрока(Ждущий)
 	Conn1 = GameToConnect{
 		Room: LastRoom,
@@ -144,10 +154,10 @@ func (lb *Lobby) DeletingRoom(roomId RoomId) {
 		fmt.Print("Deleting room error: wrong roomId:" + roomId.String())
 		return
 	}
-	delete(lb.ProcessedPlayers, room.Player_1.Token)
-	delete(lb.ProcessedPlayers, room.Player_2.Token)
+	for _, p := range room.Players {
+		delete(lb.ProcessedPlayers, p.Login)
+	}
 	delete(lb.Rooms, roomId)
-
 	fmt.Println("Room with roomId" + roomId.String() + "deleted!")
 	return
 }

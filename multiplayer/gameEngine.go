@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 )
 
 type mes struct {
@@ -10,26 +10,49 @@ type mes struct {
 }
 
 func (r *Room) GameEngine() {
-	// var buf mes
-	var message1 mes
-	var message2 mes
-	for {
-		select {
-		case message1 = <-r.Messenger.Player_1_From:
-			// message1.X = buf.X
-			// message1.Y = buf.Y
-		case message2 = <-r.Messenger.Player_2_From:
-			// message2.X = buf.X
-			// message2.Y = buf.Y
-		}
-		// if message2.X != 0 && message2.Y != 0 {
-		// 	r.Messenger.Player_1_To <- message2
-		// }
+	var message mes
 
-		// if message1.X != 0 && message1.Y != 0 {
-		// 	r.Messenger.Player_2_To <- message1
-		// }
+	var keys []string
+	for k, _ := range r.Players {
+		keys = append(keys, k)
 	}
+
+	for {
+
+		// TODO ХАРДКОД НО ЛЕТАЮЩИЙ
+		select {
+		// Если есть сигнал от 1го игрока - оправляем его 2му игроку
+		case message = <-r.Messenger.Player_From[keys[0]]:
+			r.Players[keys[1]].Connection.WriteJSON(&message)
+			//r.Messenger.Player_To[keys[1]] <- message
+		// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
+		case message = <-r.Messenger.Player_From[keys[1]]:
+			r.Players[keys[0]].Connection.WriteJSON(&message)
+			//r.Messenger.Player_To[keys[0]] <- message
+		}
+
+		//TODO ЛАГАЕТ НО ГИБКО
+
+		//for k, from := range r.Messenger.Player_From {
+		//	select {
+		//	// Если есть сигнал от игрока - оправляем сопернику(Todo всем)
+		//	case message, _ := <- from:
+		//		//for _, _ := range keys {
+		//		r.Messenger.Player_To[k] <- message
+		//		//}
+		//
+		//		continue
+		//		//for _, all := range r.Players {
+		//		//	if all.Login != key {
+		//		//		//r.Players[all.Login].Connection.WriteJSON(&message)
+		//		//		r.Messenger.Player_To[all.Login]} <- message
+		//		//	}
+		//		//}
+		//	}
+		//}
+
+	}
+	fmt.Println(message)
 
 	return
 }
