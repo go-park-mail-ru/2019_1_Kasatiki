@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
@@ -28,10 +29,10 @@ type Room struct {
 
 	// Каналы, c помощью которых go room.GameMaster() общается с внешним миром
 	Messenger struct {
-		Player_1_From chan []byte
-		Player_1_To   chan []byte
-		Player_2_From chan []byte
-		Player_2_To   chan []byte
+		Player_1_From chan mes
+		Player_1_To   chan mes
+		Player_2_From chan mes
+		Player_2_To   chan mes
 	}
 
 	// Созданную комнату необходимо будет отправить в канал комнат которые мы собираемся уничтожить
@@ -52,10 +53,10 @@ func NewRoom(player1, player2 *UserConnection, completedRooms chan RoomId, ownNu
 	}
 
 	// Инициализируем каналы
-	room.Messenger.Player_1_From = make(chan []byte, 5)
-	room.Messenger.Player_1_To = make(chan []byte, 5)
-	room.Messenger.Player_2_From = make(chan []byte, 5)
-	room.Messenger.Player_2_To = make(chan []byte, 5)
+	room.Messenger.Player_1_From = make(chan mes, 5)
+	room.Messenger.Player_1_To = make(chan mes, 5)
+	room.Messenger.Player_2_From = make(chan mes, 5)
+	room.Messenger.Player_2_To = make(chan mes, 5)
 
 	room.Recovery.Player_1_IsAvailableRead = make(chan struct{}, 1)
 	room.Recovery.Player_1_IsAvailableWrite = make(chan struct{}, 1)
@@ -148,7 +149,9 @@ func (r *Room) WebSocketReader(role PlayerId) {
 				}
 			} else {
 				log.Print("message from user role 0 with Token '" + r.Player_1.Token + "': '" + string(message) + "'.")
-				r.Messenger.Player_1_From <- message
+				var m mes
+				m.message = string(message)
+				r.Messenger.Player_1_From <- m
 			}
 		}
 	} else {
@@ -163,7 +166,9 @@ func (r *Room) WebSocketReader(role PlayerId) {
 				}
 			} else {
 				log.Print("message from user role 1 with Token '" + r.Player_1.Token + "': '" + string(message) + "'.")
-				r.Messenger.Player_2_From <- message
+				var m mes
+				m.message = string(message)
+				r.Messenger.Player_2_From <- m
 			}
 		}
 	}
@@ -178,13 +183,14 @@ func (r *Room) WebSocketWriter(role PlayerId) {
 	MessageSending1:
 		for message := range r.Messenger.Player_1_To {
 			for {
-				err := r.Player_1.Connection.WriteMessage(websocket.TextMessage, message)
+				w, err := r.Player_1.Connection.NextWriter(websocket.TextMessage)
 				if err != nil {
 					fmt.Println(err)
 					_, stillOpen := <-r.Recovery.Player_1_IsAvailableWrite
 					if !stillOpen {
 						break MessageSending1
 					}
+					_ = json.NewEncoder(w).Encode(&message)
 				} else {
 					break
 				}
@@ -195,12 +201,13 @@ func (r *Room) WebSocketWriter(role PlayerId) {
 	MessageSending2:
 		for message := range r.Messenger.Player_2_To {
 			for {
-				err := r.Player_2.Connection.WriteMessage(websocket.TextMessage, message)
+				w, err := r.Player_2.Connection.NextWriter(websocket.TextMessage)
 				if err != nil {
 					_, stillOpen := <-r.Recovery.Player_2_IsAvailableWrite
 					if !stillOpen {
 						break MessageSending2
 					}
+					_ = json.NewEncoder(w).Encode(&message)
 				} else {
 					break
 				}

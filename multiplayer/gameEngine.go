@@ -1,23 +1,22 @@
 package main
 
-import (
-	"fmt"
-)
+type mes struct {
+	message string `json: message`
+}
 
 func (r *Room) GameEngine() {
-	var message []byte
+	var message mes
 	for {
 		select {
 		case message = <-r.Messenger.Player_1_From:
-			message = append([]byte("message came from the Player_1: "), message...)
-			fmt.Println(string(message))
+			message.message = "By player 1" + message.message
 		case message = <-r.Messenger.Player_2_From:
-			message = append([]byte("message came from the Player_2: "), message...)
+			message.message = "By player 2" + message.message
 		}
-		if message != nil {
+		if message.message != "" {
 			r.Messenger.Player_1_To <- message
 			r.Messenger.Player_2_To <- message
-			message = nil
+			message.message = ""
 		}
 	}
 
