@@ -48,17 +48,20 @@ func (up *ConnUpgrader) StartGame(c *gin.Context) {
 		return
 	}
 
+	//
 	var login string
 	if debug {
 		// просто создаёт случайный логин
 		login = "Anon" + time.Now().Format(time.RFC3339)
 	}
+
 	// Меняет протокол.
 	WSConnection, err := up.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		c.JSON(409, "error of creating WS")
 		return
 	}
+
 	// Todo убрать хардкод
 	connection := &UserConnection{
 		Login:      login,
@@ -66,8 +69,6 @@ func (up *ConnUpgrader) StartGame(c *gin.Context) {
 		Connection: WSConnection,
 		TypeGame:   "Multiplayer",
 	}
-	//connection.Connection.SetReadDeadline(time.Now().Add(time.Duration(1 * time.Second)))
-	//connection.Connection.SetWriteDeadline(time.Now().Add(time.Duration(1 * time.Second)))
 
 	up.Queue <- connection
 	return

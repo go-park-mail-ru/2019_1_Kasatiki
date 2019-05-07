@@ -20,15 +20,17 @@ func (r *Room) GameEngine() {
 	for {
 
 		// TODO ХАРДКОД НО ЛЕТАЮЩИЙ
-		select {
-		// Если есть сигнал от 1го игрока - оправляем его 2му игроку
-		case message = <-r.Messenger.Player_From[keys[0]]:
-			r.Players[keys[1]].Connection.WriteJSON(&message)
-			//r.Messenger.Player_To[keys[1]] <- message
-		// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
-		case message = <-r.Messenger.Player_From[keys[1]]:
-			r.Players[keys[0]].Connection.WriteJSON(&message)
-			//r.Messenger.Player_To[keys[0]] <- message
+		if r.Players[keys[0]].TypeGame == "Multiplayer" {
+			select {
+			// Если есть сигнал от 1го игрока - оправляем его 2му игроку
+			case message = <-r.Messenger.Player_From[keys[0]]:
+				r.Players[keys[1]].Connection.WriteJSON(&message)
+				//r.Messenger.Player_To[keys[1]] <- message
+			// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
+			case message = <-r.Messenger.Player_From[keys[1]]:
+				r.Players[keys[0]].Connection.WriteJSON(&message)
+				//r.Messenger.Player_To[keys[0]] <- message
+			}
 		}
 
 		//TODO ЛАГАЕТ НО ГИБКО
