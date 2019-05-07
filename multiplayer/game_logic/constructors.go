@@ -12,9 +12,9 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (game *Game) {
 }
 
 // Создание карты
-func MapGeneration() (newMap *Map) {
-	return
-}
+//func MapGeneration() (newMap *Map) {
+//	return
+//}
 
 // Создание Игроков
 func PlayersCreate(roomPlayers map[string]*connections.UserConnection) (players []Player) {

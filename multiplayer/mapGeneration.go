@@ -38,8 +38,8 @@ func MapGeneration() Map {
 	// for i := 0; i < m.SizeY; i++ {
 	// 	for j := 0; j < m.SizeX; j++ {
 	// 		if i == 0 || i == m.SizeY-1 || j == 0 || j == m.SizeX -1 {
-    //             m.Field[m.SizeY * i + j] = 1;
-    //         } 
+	//             m.Field[m.SizeY * i + j] = 1;
+	//         }
 	// 	}
 	// }
 
@@ -116,7 +116,6 @@ func MapGeneration() Map {
 		}
 	}
 
-
 	// Отрисовываем результат в консоль
 	// for i := 0; i < 10; i++ {
 	// 	for j := 0; i < 10; j++ {
@@ -129,10 +128,9 @@ func MapGeneration() Map {
 	fmt.Println(m.Field)
 	fmt.Println("succes")
 
-
 	return m
 }
 
-func main() {
-	MapGeneration()
-}
+//func main() {
+//	MapGeneration()
+//}

@@ -1,5 +1,6 @@
 package game_logic
 
+// Эй, детка, ты модель или подделка?
 type Game struct {
 	GameObjects GameObjects `json:"gameobjects"`
 	Map         Map         `json:"map"`
