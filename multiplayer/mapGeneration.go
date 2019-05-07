@@ -35,13 +35,13 @@ func MapGeneration() Map {
 	// Создаем границы карты
 
 	// Генерируем вертикальные границы
-	for i := 0; i < m.SizeY; i++ {
-		for j := 0; j < m.SizeX; j++ {
-			if i == 0 || i == m.SizeY-1 || j == 0 || j == m.SizeX -1 {
-                m.Field[m.SizeY * i + j] = 1;
-            } 
-		}
-	}
+	// for i := 0; i < m.SizeY; i++ {
+	// 	for j := 0; j < m.SizeX; j++ {
+	// 		if i == 0 || i == m.SizeY-1 || j == 0 || j == m.SizeX -1 {
+    //             m.Field[m.SizeY * i + j] = 1;
+    //         } 
+	// 	}
+	// }
 
 	// Задаем массив шаблонов карт:
 	// Каждый шаблон - массив 20x20, заполенный препядствием
@@ -116,16 +116,19 @@ func MapGeneration() Map {
 		}
 	}
 
-	fmt.Println("succes")
 
 	// Отрисовываем результат в консоль
 	// for i := 0; i < 10; i++ {
 	// 	for j := 0; i < 10; j++ {
 	// 		// fmt.Println(i, j)
-	// 		fmt.Print(a[i*10+j])
+	// 		fmt.Print(m.Field[i*10+j])
 	// 	}
-	// 	fmt.Print("\n")
+	// 	fmt.Println("")
 	// }
+
+	fmt.Println(m.Field)
+	fmt.Println("succes")
+
 
 	return m
 }
