@@ -12,7 +12,7 @@ type GameToConnect struct {
 }
 
 type Lobby struct {
-	// Все соединения на данный момент
+	// Все соединения на данный cd ..
 	ProcessedPlayers map[string]GameToConnect
 	// Все созданные комнаты
 	Rooms map[rm.RoomId]*rm.Room

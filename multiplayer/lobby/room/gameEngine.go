@@ -2,13 +2,12 @@ package room
 
 import (
 	"fmt"
-
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
 )
 
 func (r *Room) GameEngine() {
 	// GameIni
-	//game := game_logic.GameIni(r.Players)
+	game, re := game_logic.GameIni(r.Players)
 	var message game_logic.InputMessage
 
 	var keys []string
@@ -16,6 +15,8 @@ func (r *Room) GameEngine() {
 		keys = append(keys, k)
 	}
 
+	r.Players[keys[0]].Connection.WriteJSON(&re)
+	r.Players[keys[1]].Connection.WriteJSON(&re)
 	for {
 
 		// TODO ХАРДКОД НО ЛЕТАЮЩИЙ
@@ -25,14 +26,18 @@ func (r *Room) GameEngine() {
 			case message = <-r.Messenger.Player_From[keys[0]]:
 
 				// EventListener()
+				res := game.EventListener(message, r.Players[keys[0]].Login)
 
+				fmt.Println(res)
 				//Возвращаем структуру Game
-				r.Players[keys[1]].Connection.WriteJSON(&message)
+				r.Players[keys[1]].Connection.WriteJSON(&res)
 				//r.Messenger.Player_To[keys[1]] <- message
 			// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
-
 			case message = <-r.Messenger.Player_From[keys[1]]:
-				r.Players[keys[0]].Connection.WriteJSON(&message)
+
+				res := game.EventListener(message, r.Players[keys[1]].Login)
+
+				r.Players[keys[0]].Connection.WriteJSON(&res)
 				//r.Messenger.Player_To[keys[0]] <- message
 			}
 		}

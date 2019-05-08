@@ -2,17 +2,34 @@ package game_logic
 
 // Эй, детка, ты модель или подделка?
 type Game struct {
-	GameObjects GameObjects `json:"gameobjects"`
-	Map         Map         `json:"map"`
-	Wave        int         `json:"wave"`
-	Url         string      `json:"url"`
-	Stage       string      `json:"stage"`
+	GameObjects *GameObjects `json:"gameobjects"`
+	Map         *Map         `json:"map"`
+	Wave        int          `json:"wave"`
+	Url         string       `json:"url"`
+	Stage       string       `json:"stage"`
+}
+
+type GameStatus struct {
+	Players []PlayerInfo `json:"players"`
+}
+
+type StartGame struct {
+	Map     Map          `json:"map"`
+	Players []PlayerInfo `json:"players"`
+}
+
+type PlayerInfo struct {
+	Object     *DynamycObject `json:"object"`
+	CashPoints float32        `json:"cash"`
+	Nickname   string         `json:"nickname"`
+	Id         int            `json:"id"`
+	Angular    float32        `json:"ang"`
 }
 
 type InputMessage struct {
 	Up      bool    `json:"up"`
 	Down    bool    `json:"down"`
-	Left    bool    `json:"reft"`
+	Left    bool    `json:"left"`
 	Right   bool    `json:"right"`
 	Angular float32 `json:"ang"`
 	Shot    bool    `json:"shot"`
@@ -24,19 +41,19 @@ type DynamycObject struct {
 	Hp    float32 `json:"hp"`
 	HpCap float32 `json:"hpcap"`
 
-	X     float32 `json:"x"`
-	Y     float32 `json:"y"`
-	Xsize float32 `json:"xsize"`
-	Ysize float32 `json:"ysize"`
+	X     int `json:"x"`
+	Y     int `json:"y"`
+	Xsize int `json:"xsize"`
+	Ysize int `json:"ysize"`
 
-	Velocity       float32 `json:"velocity"`
-	VelocityBarior float32
+	Velocity       int `json:"velocity"`
+	VelocityBarior int
 }
 
 type Bullet struct {
 	Object   *DynamycObject `json:"object"`
 	Damage   float32
-	PlayerId int8 `json:"playerid"`
+	PlayerId int `json:"playerid"`
 }
 
 type Weapon struct {
@@ -55,7 +72,7 @@ type Player struct {
 	CashPoints float32        `json:"cash"`
 	Nickname   string         `json:"nickname"`
 	Id         int            `json:"id"`
-	Angular    int            `json:"ang"`
+	Angular    float32        `json:"ang"`
 	Weapon     *Weapon
 	//Inventory 		[]DynamycObject
 }
@@ -82,8 +99,8 @@ type Map struct {
 }
 
 type GameObjects struct {
-	Players []Player `json:"palyers"`
-	Advs    []Adv    `json:"advs"`
-	Bullets []Bullet `json:"bullets"`
-	Bariors []Barior `json:"bariors"`
+	Players map[string]*Player `json:"palyers"`
+	Advs    []*Adv             `json:"advs"`
+	Bullets []*Bullet          `json:"bullets"`
+	Bariors []*Barior          `json:"bariors"`
 }
