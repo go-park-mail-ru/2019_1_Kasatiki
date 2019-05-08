@@ -7,8 +7,8 @@ import (
 
 func (r *Room) GameEngine() {
 	// GameIni
-	//game := game_logic.GameIni(r.Players)
-	var message game_logic.InputMessage
+	game := game_logic.GameIni(r.Players)
+	// var message game_logic.InputMessage
 
 	var keys []string
 	for k, _ := range r.Players {
@@ -26,15 +26,17 @@ func (r *Room) GameEngine() {
 				// EventListener()
 
 				//Возвращаем структуру Game
-				r.Players[keys[1]].Connection.WriteJSON(&message)
+				r.Players[keys[1]].Connection.WriteJSON(&game)
 				//r.Messenger.Player_To[keys[1]] <- message
 			// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
 
 			case message = <-r.Messenger.Player_From[keys[1]]:
-				r.Players[keys[0]].Connection.WriteJSON(&message)
+				r.Players[keys[0]].Connection.WriteJSON(&game)
 				//r.Messenger.Player_To[keys[0]] <- message
 			}
 		}
+
+		// fmt.Println(message)
 
 		//TODO ЛАГАЕТ НО ГИБКО
 
@@ -56,8 +58,9 @@ func (r *Room) GameEngine() {
 		//	}
 		//}
 
+	
+
 	}
-	fmt.Println(message)
 
 	return
 }

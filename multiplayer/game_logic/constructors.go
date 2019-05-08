@@ -1,14 +1,19 @@
 package game_logic
 
-import "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
+import (
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
+	"fmt"
+)
 
 // Создание игры
 // Проинициализировать карту
 // Заполнить массив объектов
-func GameIni(roomPlayers map[string]*connections.UserConnection) (game *Game) {
-	// MapGeneration
-	// Pla
-	return
+func GameIni(roomPlayers map[string]*connections.UserConnection) ( *Game) {
+	var game Game
+	
+	game.Map = *MapGeneration()
+	fmt.Println("game: ", game)
+	return &game
 }
 
 // Создание карты

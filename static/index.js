@@ -1,8 +1,10 @@
 const canvas = document.querySelector('.game');
 const ctx = canvas.getContext('2d');
 
+let mapChange = true;
+
 let map = [];
-const mapSize = 15;
+let mapSize = 15;
 
 let tileSize = 15;
 let gameScreenSize = 25; 
@@ -250,10 +252,22 @@ socket.addEventListener("close", () => {
 });
 
 socket.addEventListener("message", (event) => {
-    let pos = JSON.parse(event.data) 
+    let data = JSON.parse(event.data) 
 
-    enemy.x = pos.x;
-    enemy.y = pos.y;
+    console.log(data)
+
+    if (mapChange) {
+        map = data["map"].field
+        mapSize = data["map"].sizex
+        tileSize = data["map"].tailsize
+    
+        canvas.height = mapSize * tileSize;
+        canvas.width = mapSize * tileSize;
+    }
+
+    mapChange = false
+    // enemy.x = pos.x;
+    // enemy.y = pos.y;
 });
 
 socket.addEventListener("error", (error) => {
