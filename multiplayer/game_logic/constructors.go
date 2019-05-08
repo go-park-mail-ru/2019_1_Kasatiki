@@ -1,6 +1,6 @@
 package game_logic
 
-import "2019_1_Kasatiki/multiplayer/connections"
+import "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 
 // Создание игры
 // Проинициализировать карту

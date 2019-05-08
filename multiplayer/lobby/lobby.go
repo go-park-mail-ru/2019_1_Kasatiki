@@ -1,9 +1,9 @@
 package lobby
 
 import (
-	"2019_1_Kasatiki/multiplayer/connections"
-	rm "2019_1_Kasatiki/multiplayer/lobby/room"
 	"fmt"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
+	rm "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/lobby/room"
 )
 
 type GameToConnect struct {
