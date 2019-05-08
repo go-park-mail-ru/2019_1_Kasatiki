@@ -8,7 +8,7 @@ import (
 func (r *Room) GameEngine() {
 	// GameIni
 	game := game_logic.GameIni(r.Players)
-	var message game_logic.InputMessage
+	// var message game_logic.InputMessage
 
 	var keys []string
 	for k, _ := range r.Players {
@@ -36,7 +36,7 @@ func (r *Room) GameEngine() {
 			}
 		}
 
-		fmt.Println(message)
+		// fmt.Println(message)
 
 		//TODO ЛАГАЕТ НО ГИБКО
 

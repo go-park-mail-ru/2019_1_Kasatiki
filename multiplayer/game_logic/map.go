@@ -16,7 +16,6 @@ func MapGeneration() *Map {
 	m.SizeX = 30
 	m.SizeY = 30
 
-	// blockCount := 4
 
 	// Логика заполнения карты препятствиями:
 	// Делим карту на 16 блоков (4x4 каждый по 25 тайлов)
@@ -99,24 +98,26 @@ func MapGeneration() *Map {
 	// Задаем сид для рандомайзера
 	rand.Seed(time.Now().UnixNano())
 
+	blockCount := 4
+
 	// Билдм мапу
-	// for i := 0; i < blockCount; i++ {
-	// 	for j := 0; j < blockCount; j++ {
-	// 		template := templates[rand.Intn(len(templates))]
-	// 		for k := 0; k < len(template); k++ {
-	// 			m.Field = append(m.Field, template[k])
-	// 		}
-	// 	}
-	// }
+	for i := 0; i < blockCount; i++ {
+		for j := 0; j < blockCount; j++ {
+			// template := templates[rand.Intn(len(templates))]
+			for k := 0; k < len(template); k++ {
+				m.Field = append(m.Field, template[k])
+			}
+		}
+	}
 
 	for i := 0; i < m.SizeY; i++ {
 		for j := 0; j < m.SizeX; j++ {
 			// template := templates[rand.Intn(len(templates))]
             if i == 0 || i == m.SizeY-1 || j == 0 || j == m.SizeX -1 {
 				m.Field = append(m.Field, 1)
-			} else {
-				m.Field = append(m.Field, rand.Intn(2))
-			}
+			// } else {
+			// 	m.Field = append(m.Field, rand.Intn(2))
+			// }
 		}
 	}
 
