@@ -8,9 +8,12 @@ import (
 // Создание игры
 // Проинициализировать карту
 // Заполнить массив объектов
-func GameIni(roomPlayers map[string]*connections.UserConnection) (game *Game) {
-	fmt.Println("GAME STARR")
-	return
+func GameIni(roomPlayers map[string]*connections.UserConnection) ( *Game) {
+	var game Game
+	
+	game.Map = *MapGeneration()
+	fmt.Println("game: ", game)
+	return &game
 }
 
 // Создание карты

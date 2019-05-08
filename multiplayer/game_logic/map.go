@@ -7,16 +7,16 @@ import (
 )
 
 // Создание карты
-func MapGeneration() Map {
+func MapGeneration() *Map {
 
 	var m Map
 
 	// Инициализируем параметры карты
-	m.TileSize = 10
-	m.SizeX = 100
-	m.SizeY = 100
+	m.TileSize = 20
+	m.SizeX = 30
+	m.SizeY = 30
 
-	blockCount := 4
+	// blockCount := 4
 
 	// Логика заполнения карты препятствиями:
 	// Делим карту на 16 блоков (4x4 каждый по 25 тайлов)
@@ -100,11 +100,22 @@ func MapGeneration() Map {
 	rand.Seed(time.Now().UnixNano())
 
 	// Билдм мапу
-	for i := 0; i < blockCount; i++ {
-		for j := 0; j < blockCount; j++ {
-			template := templates[rand.Intn(len(templates))]
-			for k := 0; k < len(template); k++ {
-				m.Field = append(m.Field, template[k])
+	// for i := 0; i < blockCount; i++ {
+	// 	for j := 0; j < blockCount; j++ {
+	// 		template := templates[rand.Intn(len(templates))]
+	// 		for k := 0; k < len(template); k++ {
+	// 			m.Field = append(m.Field, template[k])
+	// 		}
+	// 	}
+	// }
+
+	for i := 0; i < m.SizeY; i++ {
+		for j := 0; j < m.SizeX; j++ {
+			// template := templates[rand.Intn(len(templates))]
+            if i == 0 || i == m.SizeY-1 || j == 0 || j == m.SizeX -1 {
+				m.Field = append(m.Field, 1)
+			} else {
+				m.Field = append(m.Field, rand.Intn(2))
 			}
 		}
 	}
@@ -121,5 +132,5 @@ func MapGeneration() Map {
 	fmt.Println(m.Field)
 	fmt.Println("succes")
 
-	return m
+	return &m
 }
