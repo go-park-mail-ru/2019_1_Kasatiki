@@ -7,7 +7,7 @@ let map = [];
 let mapSize = 15;
 
 let tileSize = 15;
-let gameScreenSize = 25; 
+let gameScreenSize = 25;
 
 canvas.height = mapSize * tileSize;
 canvas.width = mapSize * tileSize;
@@ -18,7 +18,7 @@ class Player {
     ) {
         this.x = x;
         this.y = y;
-        
+
         this.v = 5;
     }
 
@@ -30,18 +30,18 @@ class Player {
     }
 
     move(keyMap) {
-        if (keyMap.up) {
-            this.y -= this.v;
-        }
-        if (keyMap.down) {
-            this.y += this.v;
-        }
-        if (keyMap.left) {
-            this.x -= this.v;
-        }
-        if (keyMap.right) {
-            this.x += this.v;
-        }
+        // if (keyMap.up) {
+        //     this.y -= this.v;
+        // }
+        // if (keyMap.down) {
+        //     this.y += this.v;
+        // }
+        // if (keyMap.left) {
+        //     this.x -= this.v;
+        // }
+        // if (keyMap.right) {
+        //     this.x += this.v;
+        // }
     }
 }
 
@@ -100,7 +100,7 @@ function checkMapSize() {
         if (gameScreenSize < 30) {
             gameScreenSize ++;
             tileSize--;
-        } 
+        }
     } else if (!keyMap.zoom) {
         if (gameScreenSize > 20) {
             gameScreenSize --;
@@ -110,7 +110,7 @@ function checkMapSize() {
 }
 
 let enemy = {
-    x : 48, 
+    x : 48,
     y : 48,
 }
 
@@ -120,25 +120,25 @@ let viewport = {
     screen : [],
     offset : [],
     startTile : [],
-    endTile : [], 
+    endTile : [],
     update : function(px, py) {
         this.offset[0] = Math.floor((this.screen[0]/2) - px * tileSize);
         this.offset[1] = Math.floor((this.screen[1]/2) - py * tileSize);
-        
+
         let tile = [ px, py ];
 
 
-		this.startTile[0] = tile[0] - 1 - Math.ceil((this.screen[0]/2) / tileSize);
+        this.startTile[0] = tile[0] - 1 - Math.ceil((this.screen[0]/2) / tileSize);
         this.startTile[1] = tile[1] - 1 - Math.ceil((this.screen[1]/2) / tileSize);
-        
+
         if(this.startTile[0] < 0) { this.startTile[0] = 0; }
         if(this.startTile[1] < 0) { this.startTile[1] = 0; }
-        
-        this.endTile[0] = tile[0] + 1 + Math.ceil((this.screen[0]/2) / tileSize);
-		this.endTile[1] = tile[1] + 1 + Math.ceil((this.screen[1]/2) / tileSize);
 
-		if(this.endTile[0] >= mapSize) { this.endTile[0] = mapSize; }
-		if(this.endTile[1] >= mapSize) { this.endTile[1] = mapSize; }
+        this.endTile[0] = tile[0] + 1 + Math.ceil((this.screen[0]/2) / tileSize);
+        this.endTile[1] = tile[1] + 1 + Math.ceil((this.screen[1]/2) / tileSize);
+
+        if(this.endTile[0] >= mapSize) { this.endTile[0] = mapSize; }
+        if(this.endTile[1] >= mapSize) { this.endTile[1] = mapSize; }
     }
 }
 
@@ -157,11 +157,11 @@ function createMap() {
 function drawTile(tile, x, y) {
     let color;
     switch (tile) {
-        case 0: 
-            color = '#979797'; 
+        case 0:
+            color = '#979797';
             break;
-        case 1: 
-            color = '#5B5B5B';  
+        case 1:
+            color = '#5B5B5B';
             break;
     }
 
@@ -200,7 +200,7 @@ function drawMap(x, y) {
     // let a = 0;
     // let b = 0;
     // for (i = iStart; i < iEnd; i++) {
-        
+
     //     for (j = jStart; j < jEnd; j++) {
     //         drawTile(map[mapSize * i + j], a * tileSize, b * tileSize);
     //         b++;
@@ -232,17 +232,17 @@ function renderEnemy() {
     ctx.fillStyle = '#F52B00';
     ctx.fillRect(enemy.x, enemy.y, tileSize, tileSize);
     ctx.closePath();
-} 
- 
+}
+
 var socket = new WebSocket("ws://"+location.host+"/game/start");
 var socketOpen = false;
 
 let d = new Date();
 d.setDate(d.getDate()+1);
-document.cookie = 
+document.cookie =
     "session_id="+Math.round(Math.random()*2**32).toString()+"; "+
     "path=/; "+
-    "expires="+d.toUTCString()+";"; 
+    "expires="+d.toUTCString()+";";
 
 socket.addEventListener("open", (event) => {
     socketOpen = true;
@@ -252,7 +252,7 @@ socket.addEventListener("close", () => {
 });
 
 socket.addEventListener("message", (event) => {
-    let data = JSON.parse(event.data) 
+    let data = JSON.parse(event.data)
 
     console.log(data)
 
@@ -260,14 +260,18 @@ socket.addEventListener("message", (event) => {
         map = data["map"].field
         mapSize = data["map"].sizex
         tileSize = data["map"].tailsize
-    
+
         canvas.height = mapSize * tileSize;
         canvas.width = mapSize * tileSize;
+        mapChange = false
     }
 
-    mapChange = false
-    // enemy.x = pos.x;
-    // enemy.y = pos.y;
+    player.x = data["players"][0].object.x
+    player.y = data["players"][0].object.y
+
+    enemy.x = data["players"][1].object.x
+    enemy.y = data["players"][1].object.y
+
 });
 
 socket.addEventListener("error", (error) => {
@@ -277,19 +281,16 @@ socket.addEventListener("error", (error) => {
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    player.move(keyMap);
+    // player.move(keyMap);
     // checkMapSize();
     let y = Math.floor(player.y/tileSize);
     let x = Math.floor(player.x/tileSize);
     drawMap( x, y );
 
-    player.draw(x, y);
+    player.draw();
     renderEnemy();
 
-    let json = JSON.stringify({
-        x : player.x,
-        y : player.y,
-    });
+    let json = JSON.stringify(keyMap);
 
     if (socketOpen) {
         socket.send(json);

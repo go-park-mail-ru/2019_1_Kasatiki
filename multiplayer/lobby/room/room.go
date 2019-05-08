@@ -136,7 +136,7 @@ func (r *Room) Reconnect(user *connections.UserConnection) {
 func (r *Room) WebSocketReader(Nickname string) {
 	for {
 		_, message, err := r.Players[Nickname].Connection.ReadMessage()
-		// fmt.Println(Nickname)
+		fmt.Println(Nickname)
 		if err != nil {
 			fmt.Println("Erro sdfsdr from user role 0 with Token '" + r.Players[Nickname].Token + "': '" + err.Error() + "'.")
 			_, stillOpen := <-r.Recovery.Player_IsAvailableRead[Nickname]

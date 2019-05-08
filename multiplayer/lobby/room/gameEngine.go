@@ -7,14 +7,16 @@ import (
 
 func (r *Room) GameEngine() {
 	// GameIni
-	game := game_logic.GameIni(r.Players)
-	// var message game_logic.InputMessage
+	game, re := game_logic.GameIni(r.Players)
+	var message game_logic.InputMessage
 
 	var keys []string
 	for k, _ := range r.Players {
 		keys = append(keys, k)
 	}
 
+	r.Players[keys[0]].Connection.WriteJSON(&re)
+	r.Players[keys[1]].Connection.WriteJSON(&re)
 	for {
 
 		// TODO ХАРДКОД НО ЛЕТАЮЩИЙ
@@ -24,19 +26,21 @@ func (r *Room) GameEngine() {
 			case message = <-r.Messenger.Player_From[keys[0]]:
 
 				// EventListener()
+				res := game.EventListener(message, r.Players[keys[0]].Login)
 
+				fmt.Println(res)
 				//Возвращаем структуру Game
-				r.Players[keys[1]].Connection.WriteJSON(&game)
+				r.Players[keys[1]].Connection.WriteJSON(&res)
 				//r.Messenger.Player_To[keys[1]] <- message
 			// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
-
 			case message = <-r.Messenger.Player_From[keys[1]]:
-				r.Players[keys[0]].Connection.WriteJSON(&game)
+
+				res := game.EventListener(message, r.Players[keys[1]].Login)
+
+				r.Players[keys[0]].Connection.WriteJSON(&res)
 				//r.Messenger.Player_To[keys[0]] <- message
 			}
 		}
-
-		// fmt.Println(message)
 
 		//TODO ЛАГАЕТ НО ГИБКО
 
@@ -58,9 +62,8 @@ func (r *Room) GameEngine() {
 		//	}
 		//}
 
-	
-
 	}
+	fmt.Println("salaaam")
 
 	return
 }
