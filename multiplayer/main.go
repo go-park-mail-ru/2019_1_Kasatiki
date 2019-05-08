@@ -1,8 +1,8 @@
 package main
 
 import (
-	"2019_1_Kasatiki/multiplayer/connections"
-	"2019_1_Kasatiki/multiplayer/lobby"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/lobby"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )

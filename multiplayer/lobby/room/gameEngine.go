@@ -57,7 +57,7 @@ func (r *Room) GameEngine() {
 		//}
 
 	}
-	fmt.Println(message)
+	fmt.Println("salaaam")
 
 	return
 }
