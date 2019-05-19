@@ -48,5 +48,11 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
 	}
+	for _, adv := range g.GameObjects.Advs {
+		adv.MoveToPlayer()
+		var info AdvInfo
+		info.Object = adv.Object
+		res.Advs = append(res.Advs, info)
+	}
 	return
 }

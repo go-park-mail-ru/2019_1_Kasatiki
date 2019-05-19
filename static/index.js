@@ -12,6 +12,29 @@ let gameScreenSize = 25;
 canvas.height = mapSize * tileSize;
 canvas.width = mapSize * tileSize;
 
+class Adv {
+    constructor(
+        x, y
+    ) {
+        this.x = x;
+        this.y = y;
+
+        this.v = 5;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(this.x, this.y, tileSize * 2, tileSize * 2);
+        ctx.closePath();
+    }
+}
+
+advs = [];
+for (let i = 0; i < 10; i++) {
+    advs[i] = new Adv(0, 0);
+}
+
 class Player {
     constructor(
         x, y
@@ -254,8 +277,6 @@ socket.addEventListener("close", () => {
 socket.addEventListener("message", (event) => {
     let data = JSON.parse(event.data)
 
-    console.log(data)
-
     if (mapChange) {
         map = data["map"].field
         mapSize = data["map"].sizex
@@ -264,6 +285,11 @@ socket.addEventListener("message", (event) => {
         canvas.height = mapSize * tileSize;
         canvas.width = mapSize * tileSize;
         mapChange = false
+    }
+
+    for (let i = 0; i < advs.length; i++) {
+        advs[i].x = data['advs'][i].object.x;
+        advs[i].y = data['advs'][i].object.y;
     }
 
     player.x = data["players"][0].object.x
@@ -289,6 +315,9 @@ function loop() {
 
     player.draw();
     renderEnemy();
+    for (let i = 0; i < advs.length; i++) {
+        advs[i].draw();
+    }
 
     let json = JSON.stringify(keyMap);
 

@@ -18,7 +18,6 @@ func (r *Room) GameEngine() {
 	r.Players[keys[0]].Connection.WriteJSON(&re)
 	r.Players[keys[1]].Connection.WriteJSON(&re)
 	for {
-
 		// TODO ХАРДКОД НО ЛЕТАЮЩИЙ
 		if r.Players[keys[0]].TypeGame == "Multiplayer" {
 			select {

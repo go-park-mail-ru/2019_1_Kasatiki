@@ -2,6 +2,7 @@ package game_logic
 
 import (
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
+	"reflect"
 )
 
 // Создание игры
@@ -12,8 +13,8 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 	var res StartGame
 	game.Map = MapGeneration()
 	game.GameObjects = &GameObjects{}
-	game.GameObjects.Players = make(map[string]*Player)
 	game.GameObjects.Players = PlayersCreate(roomPlayers, game.Map)
+	game.GameObjects.Advs = AdvsCreate(10, game.Map, game.GameObjects.Players)
 	res.Map = *game.Map
 	for _, p := range game.GameObjects.Players {
 		var info PlayerInfo
@@ -23,6 +24,11 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 		info.Nickname = p.Nickname
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
+	}
+	for _, p := range game.GameObjects.Advs {
+		var info AdvInfo
+		info.Object = p.Object
+		res.Advs = append(res.Advs, info)
 	}
 	return &game, res
 }
@@ -64,7 +70,20 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 }
 
 // Создание рекламы
-func AdvsCreate() (advs []Adv) {
+func AdvsCreate(count int, gameMap *Map, players map[string]*Player) (advs map[int]*Adv) {
+	advs = make(map[int]*Adv, count)
+	var id int
+	// Достаем все ключи плееров
+	keys := reflect.ValueOf(players).MapKeys()
+	for i := 0; i < count; i++ {
+		id++
+		advs[i] = &Adv{
+			// Сетим плеера в качестве цели
+			// каждому плееру одинаковое количество реклам.
+			Player: players[keys[len(keys) * i / count].Interface().(string)],
+		}
+		advs[i].Spawn(gameMap.SizeX/2, gameMap.SizeY/2)
+	}
 	return
 }
 

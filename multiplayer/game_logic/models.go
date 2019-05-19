@@ -11,11 +11,13 @@ type Game struct {
 
 type GameStatus struct {
 	Players []PlayerInfo `json:"players"`
+	Advs []AdvInfo 		 `json:"advs"`
 }
 
 type StartGame struct {
 	Map     Map          `json:"map"`
 	Players []PlayerInfo `json:"players"`
+	Advs []AdvInfo 		 `json:"advs"`
 }
 
 type PlayerInfo struct {
@@ -24,6 +26,10 @@ type PlayerInfo struct {
 	Nickname   string         `json:"nickname"`
 	Id         int            `json:"id"`
 	Angular    float32        `json:"ang"`
+}
+
+type AdvInfo struct {
+	Object     *DynamycObject `json:"object"`
 }
 
 type InputMessage struct {
@@ -81,9 +87,10 @@ type Adv struct {
 	Object  *DynamycObject `json:"object"`
 	Url     string
 	Pict    string `json:"pict"`
-	XTarget float32
-	YTarget float32
-	Angular float32 `json:"ang"`
+	// XTarget float32
+	// YTarget float32
+	// Angular float32 `json:"ang"`
+	Player *Player
 }
 
 type Barior struct {
@@ -100,7 +107,7 @@ type Map struct {
 
 type GameObjects struct {
 	Players map[string]*Player `json:"palyers"`
-	Advs    []*Adv             `json:"advs"`
+	Advs    map[int]*Adv		`json:"advs"`
 	Bullets []*Bullet          `json:"bullets"`
 	Bariors []*Barior          `json:"bariors"`
 }
