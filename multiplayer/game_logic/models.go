@@ -15,6 +15,7 @@ type GameStatus struct {
 
 type StartGame struct {
 	Map     Map          `json:"map"`
+	Barrier []*Barrier   `json:"barriers"`
 	Players []PlayerInfo `json:"players"`
 }
 
@@ -74,7 +75,16 @@ type Player struct {
 	Id         int            `json:"id"`
 	Angular    float32        `json:"ang"`
 	Weapon     *Weapon
+	Stepback   *Moves
 	//Inventory 		[]DynamycObject
+}
+
+// Нужна для отката движений игрока
+type Moves struct {
+	Up    bool
+	Down  bool
+	Left  bool
+	Right bool
 }
 
 type Adv struct {
@@ -86,21 +96,21 @@ type Adv struct {
 	Angular float32 `json:"ang"`
 }
 
-type Barior struct {
+type Barrier struct {
 	Id     int            `json:"id"`
 	Object *DynamycObject `json:"object"`
 }
 
 type Map struct {
-	TileSize int   `json:"tailsize"`
-	SizeX    int   `json:"sizex"`
-	SizeY    int   `json:"sizey"`
-	Field    []int `json:"field"`
+	TileSize int           `json:"tailsize"`
+	SizeX    int           `json:"sizex"`
+	SizeY    int           `json:"sizey"`
+	Field    [100][100]int `json:"field"`
 }
 
 type GameObjects struct {
 	Players map[string]*Player `json:"palyers"`
 	Advs    []*Adv             `json:"advs"`
 	Bullets []*Bullet          `json:"bullets"`
-	Bariors []*Barior          `json:"bariors"`
+	Barrier []*Barrier         `json:"barrier"`
 }

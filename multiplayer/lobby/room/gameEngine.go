@@ -24,22 +24,22 @@ func (r *Room) GameEngine() {
 			select {
 			// Если есть сигнал от 1го игрока - оправляем его 2му игроку
 			case message = <-r.Messenger.Player_From[keys[0]]:
-
-				// EventListener()
+				//start := time.Now()
 				res := game.EventListener(message, r.Players[keys[0]].Login)
-
-				fmt.Println(res)
 				//Возвращаем структуру Game
+				//end := time.Now()
+				//potracheno := start.Nanosecond() - end.Nanosecond()
+				//fmt.Println("Time : ", potracheno , " Size: ",unsafe.Sizeof(res))
+				//fmt.Println(res.Players[0].Object.X , " ", res.Players[0].Object.Y)
 				r.Players[keys[1]].Connection.WriteJSON(&res)
 				//r.Messenger.Player_To[keys[1]] <- message
 			// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
 			case message = <-r.Messenger.Player_From[keys[1]]:
-
 				res := game.EventListener(message, r.Players[keys[1]].Login)
-
 				r.Players[keys[0]].Connection.WriteJSON(&res)
 				//r.Messenger.Player_To[keys[0]] <- message
 			}
+
 		}
 
 		//TODO ЛАГАЕТ НО ГИБКО

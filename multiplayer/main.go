@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/lobby"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/lobby"
 )
 
 func main() {
@@ -20,5 +20,5 @@ func main() {
 	// Преобразование HTTP запроса в ws
 	gameService.Use(static.Serve("/", static.LocalFile("../static/", true)))
 	gameService.GET("/game/start", upgrader.StartGame)
-	gameService.Run(":8080")
+	gameService.Run(":8081")
 }
