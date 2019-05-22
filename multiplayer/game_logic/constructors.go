@@ -1,7 +1,6 @@
 package game_logic
 
 import (
-	"fmt"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 )
 
@@ -13,9 +12,6 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 	var res StartGame
 	game.GameObjects = &GameObjects{}
 	game.Map, game.GameObjects.Barrier = MapGeneration()
-	for _, b := range game.GameObjects.Barrier {
-		fmt.Println("Barier X :", b.Object.X, "Y :", b.Object.Y, " Xsize ", b.Object.Xsize, " Ysize ", b.Object.Y)
-	}
 	game.GameObjects.Players = make(map[string]*Player)
 	game.GameObjects.Players = PlayersCreate(roomPlayers, game.Map)
 	res.Map = *game.Map
@@ -65,7 +61,7 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 			Nickname: p.Login,
 			Id:       id,
 		}
-		players[p.Login].Spawn(gameMap.SizeX/2*id, gameMap.SizeY/2*id, gameMap.TileSize, gameMap.TileSize)
+		players[p.Login].Spawn(gameMap.SizeX * gameMap.TileSize / 2 + 5 * gameMap.TileSize / 2, gameMap.SizeX * gameMap.TileSize / 2 + 5 * gameMap.TileSize / 2, gameMap.TileSize, gameMap.TileSize)
 		players[p.Login].CreateDefaultWeapon()
 	}
 	return

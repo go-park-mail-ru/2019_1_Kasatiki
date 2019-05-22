@@ -1,7 +1,7 @@
 package game_logic
 
 import (
-	"fmt"
+	// "fmt"
 	"math/rand"
 	"time"
 )
@@ -29,7 +29,7 @@ func MapGeneration() (*Map, []*Barrier) {
 	var b []*Barrier
 
 	// Инициализируем параметры карты
-	m.TileSize = 10
+	m.TileSize = 5
 	m.SizeX = 100
 	m.SizeY = 100
 
@@ -219,24 +219,62 @@ func MapGeneration() (*Map, []*Barrier) {
 		}
 	}
 
+	borderLeft := Barrier {}
+	borderLeft.Object = &DynamycObject {
+		X : 0,
+		Y : 0,
+		Xsize : m.TileSize,
+		Ysize : m.TileSize * m.SizeY,
+	}
+
+	borderTop := Barrier {}
+	borderTop.Object = &DynamycObject {
+		X : 0,
+		Y : 0,
+		Xsize : m.TileSize * m.SizeX,
+		Ysize : m.TileSize,
+	}
+
+	borderRight := Barrier {}
+	borderRight.Object = &DynamycObject {
+		X : m.TileSize * (m.SizeX - 1),
+		Y : 0,
+		Xsize : m.TileSize,
+		Ysize : m.TileSize * m.SizeY,
+	}
+
+	borderBottom := Barrier {}
+	borderBottom.Object = &DynamycObject {
+		X : 0,
+		Y : m.TileSize * (m.SizeY - 1),
+		Xsize : m.TileSize * m.SizeX,
+		Ysize : m.TileSize,
+	}
+
+	b = append(b, &borderTop)
+	b = append(b, &borderLeft)
+	b = append(b, &borderRight)
+	b = append(b, &borderBottom)
+
 	for i := 0; i < blockCount; i++ {
 		for j := 0; j < blockCount; j++ {
-			template := templates[rand.Intn(len(templates))]
-			for g := 0; g < len(template.Barriers); g++ {
-				bar := Barrier{}
-				bar.Object = &DynamycObject{
-					X:     j*blockSize*m.TileSize + template.Barriers[g][0],
-					Y:     i*blockSize*m.TileSize + template.Barriers[g][1],
-					Xsize: template.Barriers[g][2],
-					Ysize: template.Barriers[g][3],
+			if !(i == blockCount / 2 && j == blockCount / 2) {
+				template := templates[rand.Intn(len(templates))]
+				for g := 0; g < len(template.Barriers); g++ {
+					bar := Barrier{}
+					bar.Object = &DynamycObject{
+						X:     j*blockSize*m.TileSize + template.Barriers[g][0],
+						Y:     i*blockSize*m.TileSize + template.Barriers[g][1],
+						Xsize: template.Barriers[g][2],
+						Ysize: template.Barriers[g][3],
+					}
+					// bar.Object.X = template.Barriers[g][0]
+					b = append(b, &bar)
 				}
-				// bar.Object.X = template.Barriers[g][0]
-				b = append(b, &bar)
-				fmt.Println("Barrier: ", template.Barriers[g])
-			}
-			for k := 0; k < blockSize; k++ {
-				for l := 0; l < blockSize; l++ {
-					m.Field[k+i*blockSize][l+j*blockSize] = template.Tmp[k*blockSize+l]
+				for k := 0; k < blockSize; k++ {
+					for l := 0; l < blockSize; l++ {
+						m.Field[k+i*blockSize][l+j*blockSize] = template.Tmp[k*blockSize+l]
+					}
 				}
 			}
 		}
@@ -250,21 +288,6 @@ func MapGeneration() (*Map, []*Barrier) {
 			}
 		}
 	}
-
-	// Отрисовываем результат в консоль
-	// for i := 0; i < 10; i++ {
-	//  for j := 0; i < 10; j++ {
-	//      // fmt.Println(i, j)
-	//      fmt.Print(m.Field[i*10+j])
-	//  }
-	//  fmt.Println("")
-	// }
-
-	// for i := 0; i < 50; i++ {
-	//  m.Field = append(m.Field, field[i])
-	// }
-
-	// fmt.Println(m.Field)
 
 	return &m, b
 }
