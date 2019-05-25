@@ -1,8 +1,9 @@
 package game_logic
 
 import (
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 	"reflect"
+
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 )
 
 // Создание игры
@@ -11,10 +12,13 @@ import (
 func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGame) {
 	var game Game
 	var res StartGame
-	game.Map = MapGeneration()
 	game.GameObjects = &GameObjects{}
+	game.Map, game.GameObjects.Barrier = MapGeneration()
+	// for _, b := range game.GameObjects.Barrier {
+	// 	fmt.Println("Barier X :", b.Object.X, "Y :", b.Object.Y, " Xsize ", b.Object.Xsize, " Ysize ", b.Object.Y)
+	// }
+	game.GameObjects.Players = make(map[string]*Player)
 	game.GameObjects.Players = PlayersCreate(roomPlayers, game.Map)
-	game.GameObjects.Advs = AdvsCreate(10, game.Map, game.GameObjects.Players)
 	res.Map = *game.Map
 	for _, p := range game.GameObjects.Players {
 		var info PlayerInfo
@@ -25,11 +29,16 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
 	}
+	game.GameObjects.Advs = AdvsCreate(10, game.Map, game.GameObjects.Players)
 	for _, p := range game.GameObjects.Advs {
 		var info AdvInfo
 		info.Object = p.Object
 		res.Advs = append(res.Advs, info)
 	}
+	res.Barrier = game.GameObjects.Barrier
+	//for _, b := range res.Barrier {
+	//	fmt.Println(b.Object.X)
+	//}
 	return &game, res
 }
 
@@ -63,7 +72,7 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 			Nickname: p.Login,
 			Id:       id,
 		}
-		players[p.Login].Spawn(gameMap.SizeX/2, gameMap.SizeY/2)
+		players[p.Login].Spawn(gameMap.SizeX/2*id, gameMap.SizeY/2*id, gameMap.TileSize, gameMap.TileSize)
 		players[p.Login].CreateDefaultWeapon()
 	}
 	return
@@ -80,13 +89,9 @@ func AdvsCreate(count int, gameMap *Map, players map[string]*Player) (advs map[i
 		advs[i] = &Adv{
 			// Сетим плеера в качестве цели
 			// каждому плееру одинаковое количество реклам.
-			Player: players[keys[len(keys) * i / count].Interface().(string)],
+			Player: players[keys[len(keys)*i/count].Interface().(string)],
 		}
 		advs[i].Spawn(gameMap.SizeX/2, gameMap.SizeY/2)
 	}
-	return
-}
-
-func BariorsCreate() (bariors []Barior) {
 	return
 }

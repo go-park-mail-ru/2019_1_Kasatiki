@@ -4,13 +4,15 @@ const ctx = canvas.getContext('2d');
 let mapChange = true;
 
 let map = [];
-let mapSize = 15;
+let barriers = [];
+let mapSize = 100;
 
-let tileSize = 15;
-let gameScreenSize = 25;
+let tileSize = 20;
+let gameScreenSize = 10;
 
 canvas.height = mapSize * tileSize;
 canvas.width = mapSize * tileSize;
+
 
 class Adv {
     constructor(
@@ -25,7 +27,7 @@ class Adv {
     draw() {
         ctx.beginPath();
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(this.x, this.y, tileSize * 2, tileSize * 2);
+        ctx.fillRect(this.x, this.y, tileSize, tileSize);
         ctx.closePath();
     }
 }
@@ -49,6 +51,7 @@ class Player {
         ctx.beginPath();
         ctx.fillStyle = '#45FF70';
         ctx.fillRect(this.x, this.y, tileSize, tileSize);
+        ctx.fillRect(5, 5, tileSize, tileSize);
         ctx.closePath();
     }
 
@@ -144,12 +147,11 @@ let viewport = {
     offset : [],
     startTile : [],
     endTile : [],
-    update : function(px, py) {
-        this.offset[0] = Math.floor((this.screen[0]/2) - px * tileSize);
-        this.offset[1] = Math.floor((this.screen[1]/2) - py * tileSize);
+    update	: function(px, py) {
+        this.offset[0] = Math.floor((this.screen[0]/2) - px);
+        this.offset[1] = Math.floor((this.screen[1]/2) - py);
 
-        let tile = [ px, py ];
-
+        var tile = [px, py]
 
         this.startTile[0] = tile[0] - 1 - Math.ceil((this.screen[0]/2) / tileSize);
         this.startTile[1] = tile[1] - 1 - Math.ceil((this.screen[1]/2) / tileSize);
@@ -160,8 +162,8 @@ let viewport = {
         this.endTile[0] = tile[0] + 1 + Math.ceil((this.screen[0]/2) / tileSize);
         this.endTile[1] = tile[1] + 1 + Math.ceil((this.screen[1]/2) / tileSize);
 
-        if(this.endTile[0] >= mapSize) { this.endTile[0] = mapSize; }
-        if(this.endTile[1] >= mapSize) { this.endTile[1] = mapSize; }
+        if(this.endTile[0] >= mapSize) { this.endTile[0] = mapSize-1; }
+        if(this.endTile[1] >= mapSize) { this.endTile[1] = mapSize-1; }
     }
 }
 
@@ -189,52 +191,35 @@ function drawTile(tile, x, y) {
     }
 
     ctx.fillStyle = color;
-    ctx.fillRect(x, y, tileSize, tileSize);
+    ctx.fillRect(y, x, tileSize, tileSize);
+}
+
+function drawBarier() {
+    for (let i = 0; i < barriers.length; i++) {
+        ctx.strokeStyle = '#000000';
+        ctx.strokeRect(barriers[i].object.x, barriers[i].object.y, barriers[i].object.xsize, barriers[i].object.ysize);
+
+        // console.log(barriers[i].object.x, barriers[i].object.y, barriers[i].object.xsize, barriers[i].object.ysize);
+    }
 }
 
 function drawMap(x, y) {
-    // let iStart;
-    // let iEnd;
-    // let jStart;
-    // let jEnd;
+    // console.log('x: ', x, 'y: ', y);
+    // viewport.update(y, x);
 
-    // if (x - Math.floor(gameScreenSize) / 2 < 0) {
-    //     iStart = 0;
-    //     iEnd = gameScreenSize;
-    // } else if (x + Math.ceil(gameScreenSize) / 2 > mapSize) {
-    //     iStart = mapSize - gameScreenSize;
-    //     iEnd = mapSize;
-    // } else if (0 < x < mapSize) {
-    //     iStart = x - Math.floor(gameScreenSize) / 2;
-    //     iEnd = x + Math.ceil(gameScreenSize) / 2;
-    // }
+    // console.log(viewport.startTile, viewport.endTile);
 
-    // if (y - Math.floor(gameScreenSize) / 2 < 0) {
-    //     jStart = 0;
-    //     jEnd = gameScreenSize;
-    // } else if (y + Math.ceil(gameScreenSize) / 2> mapSize) {
-    //     jStart = mapSize - gameScreenSize;
-    //     jEnd = mapSize;
-    // } else if (0 < y < mapSize) {
-    //     jStart = y - Math.floor(gameScreenSize) / 2;
-    //     jEnd = y + Math.ceil(gameScreenSize) / 2;
-    // }
-
-    // let a = 0;
-    // let b = 0;
-    // for (i = iStart; i < iEnd; i++) {
-
-    //     for (j = jStart; j < jEnd; j++) {
-    //         drawTile(map[mapSize * i + j], a * tileSize, b * tileSize);
-    //         b++;
+    // for(var i = viewport.startTile[1]; i <= viewport.endTile[1]; ++i)
+    // {
+    //     for(var j = viewport.startTile[0]; j <= viewport.endTile[0]; ++j)
+    //     {
+    //         drawTile(map[i][j], i * tileSize, j * tileSize);
     //     }
-    //     b = 0;
-    //     a++;
     // }
 
     for (i = 0; i < mapSize; i++) {
         for (j = 0; j < mapSize; j++) {
-            drawTile(map[mapSize * i + j], i * tileSize, j * tileSize);
+            drawTile(map[i][j], i * tileSize, j * tileSize);
         }
     }
 }
@@ -282,21 +267,37 @@ socket.addEventListener("message", (event) => {
         mapSize = data["map"].sizex
         tileSize = data["map"].tailsize
 
-        canvas.height = mapSize * tileSize;
-        canvas.width = mapSize * tileSize;
+        barriers = data["barriers"]
+
+        // console.log(barriers[0]);
+
+        console.log(barriers[0].object.x, barriers[0].object.y, barriers[0].object);
+
+        // canvas.height = mapSize * tileSize;
+        // canvas.width = mapSize * tileSize;
         mapChange = false
+        // console.log(data)
     }
 
+    if (data["players"][0].id == 1) {
+        player.x = data["players"][0].object.x
+        player.y = data["players"][0].object.y
+
+        enemy.x = data["players"][1].object.x
+        enemy.y = data["players"][1].object.y
+    } else {
+        player.x = data["players"][1].object.x
+        player.y = data["players"][1].object.y
+
+        enemy.x = data["players"][0].object.x
+        enemy.y = data["players"][0].object.y
+    }
+    
     for (let i = 0; i < advs.length; i++) {
         advs[i].x = data['advs'][i].object.x;
         advs[i].y = data['advs'][i].object.y;
     }
 
-    player.x = data["players"][0].object.x
-    player.y = data["players"][0].object.y
-
-    enemy.x = data["players"][1].object.x
-    enemy.y = data["players"][1].object.y
 
 });
 
@@ -311,7 +312,10 @@ function loop() {
     // checkMapSize();
     let y = Math.floor(player.y/tileSize);
     let x = Math.floor(player.x/tileSize);
+
     drawMap( x, y );
+    drawBarier();
+
 
     player.draw();
     renderEnemy();
@@ -329,6 +333,9 @@ function loop() {
 
 function gameStart() {
     createMap();
+
+    // viewport.screen = [gameScreenSize * tileSize, gameScreenSize * tileSize]
+
     requestAnimationFrame(loop);
 }
 

@@ -1,10 +1,14 @@
 package game_logic
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
+
+type Template struct {
+	Tmp      []int
+	Barriers [][]int
+}
 
 func Insert(slice []int, index, value int) []int {
 	// Увеличиваем срез на один элемент
@@ -18,14 +22,15 @@ func Insert(slice []int, index, value int) []int {
 }
 
 // Создание карты
-func MapGeneration() *Map {
+func MapGeneration() (*Map, []*Barrier) {
 
 	var m Map
+	var b []*Barrier
 
 	// Инициализируем параметры карты
 	m.TileSize = 10
-	m.SizeX = 50
-	m.SizeY = 50
+	m.SizeX = 100
+	m.SizeY = 100
 
 	// Логика заполнения карты препятствиями:
 	// Делим карту на 16 блоков (4x4 каждый по 25 тайлов)
@@ -48,85 +53,189 @@ func MapGeneration() *Map {
 	// Задаем массив шаблонов карт:
 	// Каждый шаблон - массив 20x20, заполенный препядствием
 
-	tmp1 := []int{
-		0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
-		0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
-		0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
-		0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
-		1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-		1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-		1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-		0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-		0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+	tmp1 := Template{
+		Tmp: []int{
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+		},
+		Barriers: [][]int{
+			[]int{
+				7 * m.TileSize, 0, 3 * m.TileSize, 2 * m.TileSize,
+			},
+			[]int{
+				0, 4 * m.TileSize, 6 * m.TileSize, 3 * m.TileSize,
+			},
+			[]int{
+				0, 4 * m.TileSize, 6 * m.TileSize, 3 * m.TileSize,
+			},
+		},
 	}
 
-	tmp2 := []int{
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-		0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-		0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	tmp2 := Template{
+		Tmp: []int{
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+			0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+			0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+		},
+		Barriers: [][]int{
+			[]int{
+				0, 0, 6 * m.TileSize, 3 * m.TileSize,
+			},
+			[]int{
+				3 * m.TileSize, 7 * m.TileSize, 3 * m.TileSize, 3 * m.TileSize,
+			},
+		},
 	}
 
-	tmp3 := []int{
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 1, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 1, 1, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	tmp3 := Template{
+		Tmp: []int{
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		},
+		Barriers: [][]int{
+			[]int{
+				0, 0, 3 * m.TileSize, 2 * m.TileSize,
+			},
+			[]int{
+				0, 4 * m.TileSize, 6 * m.TileSize, 3 * m.TileSize,
+			},
+		},
 	}
 
-	tmp4 := []int{
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 1, 0,
-		0, 0, 0, 1, 1, 1, 1, 1, 1, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	tmp4 := Template{
+		Tmp: []int{
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+		},
+		Barriers: [][]int{
+			[]int{
+				4 * m.TileSize, 0, 6 * m.TileSize, 3 * m.TileSize,
+			},
+			[]int{
+				7 * m.TileSize, 3 * m.TileSize, 3 * m.TileSize, 3 * m.TileSize,
+			},
+			[]int{
+				0, 7 * m.TileSize, 3 * m.TileSize, 3 * m.TileSize,
+			},
+		},
 	}
 
-	var templates [][]int
+	tmp5 := Template{
+		Tmp: []int{
+			1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+			1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+			0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+		},
+		Barriers: [][]int{
+			[]int{
+				0, 0, 2 * m.TileSize, 3 * m.TileSize,
+			},
+			[]int{
+				4 * m.TileSize, 4 * m.TileSize, 6 * m.TileSize, 3 * m.TileSize,
+			},
+			[]int{
+				7 * m.TileSize, 7 * m.TileSize, 3 * m.TileSize, 3 * m.TileSize,
+			},
+		},
+	}
+
+	tmp6 := Template{
+		Tmp: []int{
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		},
+		Barriers: [][]int{},
+	}
+
+	var templates []Template
 
 	templates = append(templates, tmp1)
 	templates = append(templates, tmp2)
 	templates = append(templates, tmp3)
 	templates = append(templates, tmp4)
-	fmt.Println(templates[0])
+	templates = append(templates, tmp5)
+	templates = append(templates, tmp6)
 	// templates = append(templates, template5)
 	// templates = append(templates, template6)
 
 	// Задаем сид для рандомайзера
 	rand.Seed(time.Now().UnixNano())
 
-	blockCount := 5
 	blockSize := 10
-	mapSize := m.SizeX
-	// templates[rand.Intn(len(templates))]
+	blockCount := m.SizeX / blockSize
+
 	// Билдм мапу
-	for i := 0; i < 2500; i++ {
-		m.Field = append(m.Field, 0)
+
+	for i := 0; i < m.SizeY; i++ {
+		for j := 0; j < m.SizeX; j++ {
+			m.Field[i][j] = 0
+		}
 	}
+
 	for i := 0; i < blockCount; i++ {
 		for j := 0; j < blockCount; j++ {
 			template := templates[rand.Intn(len(templates))]
+			for g := 0; g < len(template.Barriers); g++ {
+				bar := Barrier{}
+				bar.Object = &DynamycObject{
+					X:     j*blockSize*m.TileSize + template.Barriers[g][0],
+					Y:     i*blockSize*m.TileSize + template.Barriers[g][1],
+					Xsize: template.Barriers[g][2],
+					Ysize: template.Barriers[g][3],
+				}
+				// bar.Object.X = template.Barriers[g][0]
+				b = append(b, &bar)
+				// fmt.Println("Barrier: ", template.Barriers[g])
+			}
 			for k := 0; k < blockSize; k++ {
 				for l := 0; l < blockSize; l++ {
-					Insert(m.Field, i*mapSize*blockSize+j*blockSize+(k*mapSize+l), template[k*blockSize+l])
+					m.Field[k+i*blockSize][l+j*blockSize] = template.Tmp[k*blockSize+l]
 				}
 			}
 		}
@@ -136,7 +245,7 @@ func MapGeneration() *Map {
 		for j := 0; j < m.SizeX; j++ {
 			// template := templates[rand.Intn(len(templates))]
 			if i == 0 || i == m.SizeY-1 || j == 0 || j == m.SizeX-1 {
-				Insert(m.Field, i*mapSize+j, 1)
+				m.Field[i][j] = 1
 			}
 		}
 	}
@@ -150,8 +259,11 @@ func MapGeneration() *Map {
 	//  fmt.Println("")
 	// }
 
-	fmt.Println(m.Field)
-	fmt.Println("succes")
+	// for i := 0; i < 50; i++ {
+	//  m.Field = append(m.Field, field[i])
+	// }
 
-	return &m
+	// fmt.Println(m.Field)
+
+	return &m, b
 }

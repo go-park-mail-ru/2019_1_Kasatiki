@@ -47,13 +47,15 @@ func (p *Player) ChangeWeapon() (w *Weapon) {
 	return
 }
 
-func (p *Player) Spawn(x int, y int) {
+func (p *Player) Spawn(x int, y int, sizeX int, sizeY int) {
 	p.Object = &DynamycObject{
 		Name:     "Player",
 		Hp:       100,
 		X:        x,
 		Y:        y,
-		Velocity: 3,
+		Velocity: 10,
+		Xsize:    sizeX,
+		Ysize:    sizeY,
 	}
 }
 
