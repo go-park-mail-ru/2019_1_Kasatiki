@@ -65,9 +65,10 @@ func (instance *App) initializeRoutes() {
 }
 
 func (instance *App) Run(port string) {
-	log.Fatal(instance.Router.Run()) // ToDO change logFatal?
+	log.Fatal(instance.Router.Run())
 }
 
+// Todo Обернуть в конфиг
 func (instance *App) GetDBConnection() error {
 	conf := pgx.ConnConfig{
 		User:      "sayonara",
@@ -77,7 +78,11 @@ func (instance *App) GetDBConnection() error {
 		Database:  "kasatiki",
 		TLSConfig: nil,
 	}
-	conn, err := pgx.Connect(conf)
+	confPool := pgx.ConnPoolConfig{
+		ConnConfig:     conf,
+		MaxConnections: 16,
+	}
+	conn, err := pgx.NewConnPool(confPool)
 	fmt.Print(err)
 	if err != nil {
 		return err
@@ -97,6 +102,9 @@ func (instance *App) Initialize() {
 	err := instance.GetDBConnection()
 	err = instance.DB.CreateTables()
 	fmt.Println(err)
+	err = instance.DB.CreateAdvTable()
+	fmt.Println(err)
+	instance.DB.AdvsIserting()
 	instance.Router = gin.New()
 	instance.initializeRoutes()
 }
