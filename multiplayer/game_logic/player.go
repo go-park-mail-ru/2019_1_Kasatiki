@@ -53,7 +53,7 @@ func (p *Player) Spawn(x int, y int, sizeX int, sizeY int) {
 		Hp:       100,
 		X:        x,
 		Y:        y,
-		Velocity: 10,
+		Velocity: 3,
 		Xsize:    sizeX,
 		Ysize:    sizeY,
 	}
@@ -68,6 +68,11 @@ func (p *Player) BulletsCreate() (bs []Bullet) {
 func (p *Player) Shot() {
 
 }
+
+func (p1 *Player) PlayerToPlayer(p2 *DynamycObject, moves Moves) {
+	SimpleCollisionEvent(p1.Object, p2, moves)
+}
+
 
 func (p Player) SetAngular(ang float32) {
 	p.Angular = ang

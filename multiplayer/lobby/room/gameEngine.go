@@ -14,8 +14,9 @@ func (r *Room) GameEngine() {
 	for k, _ := range r.Players {
 		keys = append(keys, k)
 	}
-
+	re.Id = 1
 	r.Players[keys[0]].Connection.WriteJSON(&re)
+	re.Id = 2
 	r.Players[keys[1]].Connection.WriteJSON(&re)
 	for {
 

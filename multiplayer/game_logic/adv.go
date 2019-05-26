@@ -114,12 +114,11 @@ func (adv *Adv) MoveToPlayer(m *Map) {
 		YCell: player.Object.Y / m.TileSize,
 	}
 	way, isExist := AStar(start, goal, m)
-	// if len(way) > 1 {
-	// 	log.Println("G", start.XCell, start.YCell, goal.XCell, goal.YCell)
-	// 	log.Println("1", way[len(way)-1].XCell, way[len(way)-1].YCell, way[0].XCell, way[0].YCell)
-	// 	log.Println("2", way[len(way)-2].XCell, way[len(way)-2].YCell)
-	// }
-	// return
+	for i := 0; i < len(way); i++ {
+		if m.Field[way[i].YCell][way[i].XCell] == 1 {
+			log.Println("gavno", way[i].XCell, way[i].YCell)
+		}
+	}
 	if isExist {
 		adv.MoveWithWay_with_one_step(way, m)
 	}

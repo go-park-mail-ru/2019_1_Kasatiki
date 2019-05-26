@@ -2,23 +2,34 @@ package game_logic
 
 // Эй, детка, ты модель или подделка?
 type Game struct {
-	GameObjects *GameObjects `json:"gameobjects"`
-	Map         *Map         `json:"map"`
-	Wave        int          `json:"wave"`
-	Url         string       `json:"url"`
-	Stage       string       `json:"stage"`
+	GameObjects      *GameObjects `json:"gameobjects"`
+	Map              *Map         `json:"map"`
+	Wave             int          `json:"wave"`
+	Url              string       `json:"url"`
+	Stage            string       `json:"stage"`
+	Zones            []*Zone
+	StaticCollection map[int][]*DynamycObject
+}
+
+type Zone struct {
+	StartX int
+	StartY int
+	EndX   int
+	EndY   int
+	Number int
 }
 
 type GameStatus struct {
 	Players []PlayerInfo `json:"players"`
-	Advs []AdvInfo 		 `json:"advs"`
+	Advs    []AdvInfo    `json:"advs"`
 }
 
 type StartGame struct {
 	Map     Map          `json:"map"`
 	Barrier []*Barrier   `json:"barriers"`
 	Players []PlayerInfo `json:"players"`
-	Advs []AdvInfo 		 `json:"advs"`
+	Id      int          `json:"id"`
+	Advs    []AdvInfo    `json:"advs"`
 }
 
 type PlayerInfo struct {
@@ -30,7 +41,7 @@ type PlayerInfo struct {
 }
 
 type AdvInfo struct {
-	Object     *DynamycObject `json:"object"`
+	Object *DynamycObject `json:"object"`
 }
 
 type InputMessage struct {
@@ -94,13 +105,15 @@ type Moves struct {
 }
 
 type Adv struct {
-	Object  *DynamycObject `json:"object"`
-	Url     string
-	Pict    string `json:"pict"`
-	// XTarget float32
-	// YTarget float32
-	// Angular float32 `json:"ang"`
+	Object *DynamycObject `json:"object"`
+	Url    string
+	Pict   string `json:"pict"`
+	//XTarget float32
+	//YTarget float32
+	//Angular float32 `json:"ang"`
 	Player *Player
+
+	AStarCount int // служебное поле, для того, чтобы хранить здесь количество тиком после пересчета астар
 }
 
 type Barrier struct {
@@ -117,7 +130,7 @@ type Map struct {
 
 type GameObjects struct {
 	Players map[string]*Player `json:"palyers"`
-	Advs    map[int]*Adv		`json:"advs"`
+	Advs    map[int]*Adv       `json:"advs"`
 	Bullets []*Bullet          `json:"bullets"`
 	Barrier []*Barrier         `json:"barrier"`
 }
