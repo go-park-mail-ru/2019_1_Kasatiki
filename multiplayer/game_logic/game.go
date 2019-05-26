@@ -1,5 +1,7 @@
 package game_logic
 
+import "fmt"
+
 // Колизии
 
 // Логика такая - сущность переместилась, проверяем для нее кализии
@@ -27,63 +29,71 @@ func (g *Game) IsEndOfWave() {
 
 }
 
-func SimpleCollisionEvent(obj1, obj2 *DynamycObject, moves Moves) {
-	if moves.Up || moves.Down {
-		if obj1.Y-(obj2.Y-obj2.Ysize) > obj2.Y+obj2.Ysize-obj1.Y && (obj1.X < obj2.X-obj1.Xsize && obj1.X > obj2.X+obj2.Xsize) {
-			obj1.Y = obj2.Y + obj2.Ysize
-		} else {
-			obj1.Y = obj2.Y - obj1.Ysize
-		}
-	}
-	if moves.Left || moves.Right {
-		if obj1.X-(obj2.X-obj2.Xsize) > obj2.X+obj2.Xsize-obj1.X {
-			obj1.X = obj2.X + obj2.Xsize
-		} else {
-			obj1.X = obj2.X - obj1.Xsize
-		}
-	}
-}
-
-func (p1 *Player) PlayerToPlayer(p2 *DynamycObject, moves Moves) {
-	SimpleCollisionEvent(p1.Object, p2, moves)
-}
-
-func IsCollision(obj1, obj2 *DynamycObject) bool {
-	if obj1.Y > obj2.Y-obj1.Ysize && // граница	сверху
-		obj1.Y < obj2.Y+obj2.Ysize && // граница	снизу
-		obj1.X > obj2.X-obj1.Xsize && // граница	справа
-		obj1.X < obj2.X+obj2.Xsize { // граница 	слева
-		//fmt.Println("Colision with Obj_1: ", obj1.Name, " and  Obj_2: ", obj2.Name)
-		return true
-	}
-	return false
-}
-
-func (g *Game) CollectObjectsForPlayer(nickname string) []*DynamycObject {
+// Todo Сделать Динамическую мапу объектов, в которой будут лежать игроки, рекламы и пули после (актуально для рекламы и пуль) но это не точно
+func (g *Game) CollectObjectsForPlayer(nickname string, player *DynamycObject) []*DynamycObject {
 	var objs []*DynamycObject
+
 	for k, v := range g.GameObjects.Players {
 		if k != nickname {
 			objs = append(objs, v.Object)
 		}
 	}
-	for _, v := range g.GameObjects.Barrier {
-		objs = append(objs, v.Object)
+	var count int
+	numbs := []int{}
+	for i, z := range g.Zones {
+		// Создаем DynamicObject из зоны
+		zoneObj := &DynamycObject {
+			Name: fmt.Sprintf("Zone %d", i),
+			X : z.StartX,
+			Y : z.StartY,
+			Xsize : z.EndX - z.StartX,
+			Ysize : z.EndY - z.StartY,
+		}
+		// Если игрок в зоне, то заносим объекты из зоны в слайс вероятных колизий
+		if IsCollision(player, zoneObj) {
+			count++
+			numbs = append(numbs, z.Number)
+			objs = append(objs, g.StaticCollection[z.Number]...)
+		}
 	}
+
+	//fmt.Println("--------------------------------------------------------------------")
+	//for _,n  := range numbs {
+	//	fmt.Println("colision zone is ", n)
+	//}
+	//fmt.Println("--------------------------------------------------------------------")
+	//fmt.Println("Число Зон вошедших с игроком в коллизию",count)
+
+	//fmt.Println("Before objs:", len(objs))
+	//objs = ObjectFilter(objs)
+	//
+	//fmt.Println("--------------------------------------------------------------------")
+	//fmt.Println("After Objs: ", len(objs))
+	//for _, b := range objs {
+	////
+	//	fmt.Printf("Name : %s, StartX : %d, StartY : %d, EndX : %d, EndY : %d \n", b.Name, b.X, b.Y, b.Xsize, b.Ysize)
+	//}
+	//fmt.Println("--------------------------------------------------------------------")
 	return objs
 }
 
 // Входная точка для изменения состояния игры
 // Принимает в себя структуру, которая получилась после разкодирования из json
 func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus) {
+
 	g.GameObjects.Players[nickname].SetAngular(mes.Angular)
-	delta := g.GameObjects.Players[nickname].Object.Velocity
-	//var moves Moves
-	objs := g.CollectObjectsForPlayer(nickname)
+	delta := g.GameObjects.Players[nickname].Object.Velocity + 2
+
+	// Собирем объекты с которыми игрок вероятнее всего столнется
+	objs := g.CollectObjectsForPlayer(nickname, g.GameObjects.Players[nickname].Object)
+
 	if mes.Down {
 		g.GameObjects.Players[nickname].Object.Y += delta
 		for _, obj := range objs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
+
+				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
 				g.GameObjects.Players[nickname].Object.Y -= delta
 			}
 		}
@@ -94,6 +104,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		for _, obj := range objs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
+				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
 				g.GameObjects.Players[nickname].Object.Y += delta
 			}
 		}
@@ -103,6 +114,9 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		for _, obj := range objs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
+				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
+				// fmt.Printf("Obj_1 : X = %d , Y = %d , Xsize = %d, Ysize = %d \n" , g.GameObjects.Players[nickname].Object.X,  g.GameObjects.Players[nickname].Object.Y,  g.GameObjects.Players[nickname].Object.Xsize,  g.GameObjects.Players[nickname].Object.Ysize)
+				// fmt.Printf("Obj_2 : X = %d , Y = %d , Xsize = %d, Ysize = %d \n" ,obj.X, obj.Y, obj.Xsize, obj.Ysize)
 				g.GameObjects.Players[nickname].Object.X += delta
 			}
 		}
@@ -114,6 +128,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		for _, obj := range objs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
+				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
 				g.GameObjects.Players[nickname].Object.X -= delta
 			}
 		}
@@ -125,7 +140,8 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 
 	// Здесь обрабатываем коллизии игрока, который только сходил:
 
-	// 1) Собираем все объекты для этих коллизий (другие игроки, барьеры
+	//
+	// d1) Собираем все объекты для этих коллизий (другие игроки, барьеры
 
 	// 2) Проверяем этого игрока на колизии с этими объектами
 	//for _, obj := range objs {
@@ -144,5 +160,14 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
 	}
+
+	// Reklama
+	for _, adv := range g.GameObjects.Advs {
+		adv.MoveToPlayer(g.Map)
+		var info AdvInfo
+		info.Object = adv.Object
+		res.Advs = append(res.Advs, info)
+	}
+
 	return
 }

@@ -29,7 +29,7 @@ func MapGeneration() (*Map, []*Barrier) {
 	var b []*Barrier
 
 	// Инициализируем параметры карты
-	m.TileSize = 5
+	m.TileSize = 50
 	m.SizeX = 100
 	m.SizeY = 100
 
@@ -75,7 +75,7 @@ func MapGeneration() (*Map, []*Barrier) {
 				0, 4 * m.TileSize, 6 * m.TileSize, 3 * m.TileSize,
 			},
 			[]int{
-				0, 4 * m.TileSize, 6 * m.TileSize, 3 * m.TileSize,
+				0, 7 * m.TileSize, 3 * m.TileSize, 3 * m.TileSize,
 			},
 		},
 	}
@@ -202,8 +202,8 @@ func MapGeneration() (*Map, []*Barrier) {
 	templates = append(templates, tmp4)
 	templates = append(templates, tmp5)
 	templates = append(templates, tmp6)
-	// templates = append(templates, template5)
-	// templates = append(templates, template6)
+	templates = append(templates, tmp6)
+	templates = append(templates, tmp6)
 
 	// Задаем сид для рандомайзера
 	rand.Seed(time.Now().UnixNano())
@@ -221,6 +221,7 @@ func MapGeneration() (*Map, []*Barrier) {
 
 	borderLeft := Barrier {}
 	borderLeft.Object = &DynamycObject {
+		Name: "Left",
 		X : 0,
 		Y : 0,
 		Xsize : m.TileSize,
@@ -229,6 +230,7 @@ func MapGeneration() (*Map, []*Barrier) {
 
 	borderTop := Barrier {}
 	borderTop.Object = &DynamycObject {
+		Name: "Top",
 		X : 0,
 		Y : 0,
 		Xsize : m.TileSize * m.SizeX,
@@ -237,6 +239,7 @@ func MapGeneration() (*Map, []*Barrier) {
 
 	borderRight := Barrier {}
 	borderRight.Object = &DynamycObject {
+		Name: "Right",
 		X : m.TileSize * (m.SizeX - 1),
 		Y : 0,
 		Xsize : m.TileSize,
@@ -245,6 +248,7 @@ func MapGeneration() (*Map, []*Barrier) {
 
 	borderBottom := Barrier {}
 	borderBottom.Object = &DynamycObject {
+		Name: "Bottom",
 		X : 0,
 		Y : m.TileSize * (m.SizeY - 1),
 		Xsize : m.TileSize * m.SizeX,
@@ -263,6 +267,7 @@ func MapGeneration() (*Map, []*Barrier) {
 				for g := 0; g < len(template.Barriers); g++ {
 					bar := Barrier{}
 					bar.Object = &DynamycObject{
+						Name: "Barrier",
 						X:     j*blockSize*m.TileSize + template.Barriers[g][0],
 						Y:     i*blockSize*m.TileSize + template.Barriers[g][1],
 						Xsize: template.Barriers[g][2],

@@ -69,6 +69,11 @@ func (p *Player) Shot() {
 
 }
 
+func (p1 *Player) PlayerToPlayer(p2 *DynamycObject, moves Moves) {
+	SimpleCollisionEvent(p1.Object, p2, moves)
+}
+
+
 func (p Player) SetAngular(ang float32) {
 	p.Angular = ang
 }
