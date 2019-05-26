@@ -125,8 +125,8 @@ document.addEventListener('mousedown', mouseDown, false);
 function mouseDown(evt) {
     if (Date.now() - lastFire > 100) {
         keyMap.shot = true;
-        let x = evt.clientX - bounds.left - canvas.width;
-        let y = evt.clientY - bounds.top - canvas.height;
+        let x = evt.clientX - bounds.left - 400;
+        let y = evt.clientY - bounds.top - 400;
     
         keyMap.angle = Math.atan2(y, x);
 
