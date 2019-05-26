@@ -98,7 +98,7 @@ class Viewport {
                 this.w = this.w - gameScreenW;
                 this.h = this.h - gameScreenH;
             }
-        } 
+        }
 
         // this.x += (x - this.x - this.w * 0.5) * 0.05;
         // this.y += (y - this.y - this.h * 0.5) * 0.05;
@@ -135,7 +135,7 @@ function mouseUp() {
 
 function keyDown(e) {
     if (e.keyCode === 32) {
-       zoom = true;
+        zoom = true;
     }
 
     if (e.keyCode === 65) {
@@ -215,7 +215,7 @@ function drawBarriers() {
         ctx.strokeStyle = '#000000';
 
         // if (barriers[i].object.x > viewport.x && barriers[i].object.y > viewport.y && barriers[i].object.x < (viewport.x + viewport.w) && barriers[i].object.y < (viewport.y + viewport.h)) {
-            ctx.strokeRect(barriers[i].object.x - viewport.x, barriers[i].object.y - viewport.y, barriers[i].object.xsize, barriers[i].object.ysize);
+        ctx.strokeRect(barriers[i].object.x - viewport.x, barriers[i].object.y - viewport.y, barriers[i].object.xsize, barriers[i].object.ysize);
         // }
 
         // console.log(barriers[i].object.x, barriers[i].object.y, barriers[i].object.xsize, barriers[i].object.ysize);
@@ -305,7 +305,7 @@ socket.addEventListener("message", (event) => {
         player.id = data.id;
 
         mapChange = false;
-    // console.log(data);
+        // console.log(data);
 
     }
 
@@ -326,7 +326,7 @@ socket.addEventListener("message", (event) => {
 
     // if (data["bullets"].length != bullets.length) {
     //     bullets.push(data["bullets"][data["bullets"].length - 1]);
-    // } 
+    // }
 
     if (data["players"][0].id == player.id) {
         player.x += (data["players"][0].object.x - player.x) * player.c;
@@ -336,7 +336,7 @@ socket.addEventListener("message", (event) => {
         enemy.y += (data["players"][1].object.y - enemy.y) * player.c;
         // console.log("player: ", data["players"][0].object.x, data["players"][0].object.y);
         // console.log("enemy: ", data["players"][1].object.x, data["players"][1].object.y);
-    // }ss
+        // }ss
     } else {
         player.x += (data["players"][1].object.x - player.x) * player.c;
         player.y += (data["players"][1].object.y - player.y) * player.c;
@@ -347,8 +347,8 @@ socket.addEventListener("message", (event) => {
         // console.log("player: ", data["players"][1].object.x, data["players"][1].object.y);
         // console.log("enemy: ", data["players"][0].object.x, data["players"][0].object.y);
     }
-    
-    
+
+
 });
 
 socket.addEventListener("error", (error) => {
