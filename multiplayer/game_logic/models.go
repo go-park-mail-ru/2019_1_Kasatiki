@@ -32,6 +32,7 @@ type StartGame struct {
 	Map     Map          `json:"map"`
 	Barrier []*Barrier   `json:"barriers"`
 	Players []PlayerInfo `json:"players"`
+	Advs    []AdvInfo    `json:"advs"`
 	Id      int          `json:"id"`
 }
 

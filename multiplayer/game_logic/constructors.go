@@ -2,8 +2,9 @@ package game_logic
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 	"reflect"
+
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 )
 
 // Создание игры
@@ -26,6 +27,12 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 		info.Nickname = p.Nickname
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
+	}
+	game.GameObjects.Advs = AdvsCreate(10, game.Map, game.GameObjects.Players)
+	for _, p := range game.GameObjects.Advs {
+		var info AdvInfo
+		info.Object = p.Object
+		res.Advs = append(res.Advs, info)
 	}
 	res.Barrier = game.GameObjects.Barrier
 
