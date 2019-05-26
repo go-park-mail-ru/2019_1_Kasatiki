@@ -130,7 +130,7 @@ function mouseDown(evt) {
 }
 
 function mouseUp() {
-    keyMap.click = false;
+    keyMap.shot = false;
 }
 
 function keyDown(e) {

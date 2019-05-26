@@ -113,6 +113,7 @@ func (adv *Adv) MoveToPlayer(m *Map) {
 		XCell: player.Object.X / m.TileSize,
 		YCell: player.Object.Y / m.TileSize,
 	}
+	return
 	way, isExist := AStar(start, goal, m)
 	// if len(way) > 1 {
 	// 	log.Println("G", start.XCell, start.YCell, goal.XCell, goal.YCell)
@@ -124,5 +125,3 @@ func (adv *Adv) MoveToPlayer(m *Map) {
 		adv.MoveWithWay_with_one_step(way, m)
 	}
 }
-
-

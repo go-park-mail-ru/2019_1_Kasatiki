@@ -62,11 +62,13 @@ func (r *Room) GameEngine() {
 		//		//}
 		//	}
 		//}
-		res := &BulletStatus{}
-		var bs []*Bullet
+
+		res := &game_logic.BulletStatus{}
+		var bs []*game_logic.Bullet
 		for i, _ := range game.GameObjects.Bullets {
+			fmt.Println("bullet ", i)
 			game.GameObjects.Bullets[i].Run()
-			bs := append(bs, game.GameObjects.Bullets[i])
+			bs = append(bs, game.GameObjects.Bullets[i])
 		}
 		res.Bullets = bs
 		r.Players[keys[0]].Connection.WriteJSON(&res)
