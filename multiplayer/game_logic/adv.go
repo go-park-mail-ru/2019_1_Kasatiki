@@ -59,9 +59,37 @@ func (adv *Adv) MoveWithWay(way Points, m *Map) {
 			adv.Object.Y += distance
 		}
 	} else {
-		if way[approximateStepCount].XCell > way[approximateStepCount].XCell {
+		if way[approximateStepCount].XCell > way[approximateStepCount+1].XCell {
 			adv.Object.X -= distance
 		} else {
+			adv.Object.X += distance
+		}
+	}
+}
+
+func (adv *Adv) MoveWithWay_with_one_step(way Points, m *Map) {
+	if len(way) <= 1 {
+		return
+	}
+	distance := adv.Object.Velocity
+	distanceToNearestCell := int(math.Sqrt(
+		float64((way[len(way)-2].XCell*m.TileSize-adv.Object.X)*(way[len(way)-2].XCell*m.TileSize-adv.Object.X) +
+			(way[len(way)-2].YCell*m.TileSize-adv.Object.Y)*(way[len(way)-2].YCell*m.TileSize-adv.Object.Y))))
+	if distanceToNearestCell <= distance {
+		adv.Object.X = way[len(way)-2].XCell * m.TileSize
+		adv.Object.Y = way[len(way)-2].YCell * m.TileSize
+		return
+	}
+	if way[len(way)-1].XCell == way[len(way)-2].XCell {
+		if way[len(way)-1].YCell > way[len(way)-2].YCell {
+			adv.Object.Y -= distance
+		} else if way[len(way)-1].YCell < way[len(way)-2].YCell {
+			adv.Object.Y += distance
+		}
+	} else {
+		if way[len(way)-1].XCell > way[len(way)-2].XCell {
+			adv.Object.X -= distance
+		} else if way[len(way)-1].XCell < way[len(way)-2].XCell {
 			adv.Object.X += distance
 		}
 	}
@@ -86,7 +114,13 @@ func (adv *Adv) MoveToPlayer(m *Map) {
 		YCell: player.Object.Y / m.TileSize,
 	}
 	way, isExist := AStar(start, goal, m)
+	// if len(way) > 1 {
+	// 	log.Println("G", start.XCell, start.YCell, goal.XCell, goal.YCell)
+	// 	log.Println("1", way[len(way)-1].XCell, way[len(way)-1].YCell, way[0].XCell, way[0].YCell)
+	// 	log.Println("2", way[len(way)-2].XCell, way[len(way)-2].YCell)
+	// }
+	// return
 	if isExist {
-		adv.MoveWithWay(way, m)
+		adv.MoveWithWay_with_one_step(way, m)
 	}
 }
