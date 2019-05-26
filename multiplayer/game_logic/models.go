@@ -11,8 +11,6 @@ type Game struct {
 	StaticCollection	map[int][]*DynamycObject
 }
 
-
-
 type Zone struct {
 	StartX	int
 	StartY	int
@@ -54,7 +52,7 @@ type InputMessage struct {
 	Down    bool    `json:"down"`
 	Left    bool    `json:"left"`
 	Right   bool    `json:"right"`
-	Angular float32 `json:"ang"`
+	Angular float32 `json:"angle"`
 	Shot    bool    `json:"shot"`
 }
 

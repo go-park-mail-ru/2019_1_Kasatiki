@@ -1,6 +1,6 @@
 package game_logic
 
-import "fmt"
+// import "fmt"
 
 // Колизии
 
@@ -40,10 +40,10 @@ func (g *Game) CollectObjectsForPlayer(nickname string, player *DynamycObject) [
 	}
 	var count int
 	numbs := []int{}
-	for i, z := range g.Zones {
+	for _, z := range g.Zones {
 		// Создаем DynamicObject из зоны
 		zoneObj := &DynamycObject{
-			Name:  fmt.Sprintf("Zone %d", i),
+			// Name:  fmt.Sprintf("Zone %d", i),
 			X:     z.StartX,
 			Y:     z.StartY,
 			Xsize: z.EndX - z.StartX,
@@ -93,7 +93,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
 
-				fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
+				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
 				g.GameObjects.Players[nickname].Object.Y -= delta
 			}
 		}
@@ -104,7 +104,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		for _, obj := range objs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
-				fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
+				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
 				g.GameObjects.Players[nickname].Object.Y += delta
 			}
 		}
@@ -114,9 +114,9 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		for _, obj := range objs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
-				fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
-				fmt.Printf("Obj_1 : X = %d , Y = %d , Xsize = %d, Ysize = %d \n", g.GameObjects.Players[nickname].Object.X, g.GameObjects.Players[nickname].Object.Y, g.GameObjects.Players[nickname].Object.Xsize, g.GameObjects.Players[nickname].Object.Ysize)
-				fmt.Printf("Obj_2 : X = %d , Y = %d , Xsize = %d, Ysize = %d \n", obj.X, obj.Y, obj.Xsize, obj.Ysize)
+				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
+				// fmt.Printf("Obj_1 : X = %d , Y = %d , Xsize = %d, Ysize = %d \n", g.GameObjects.Players[nickname].Object.X, g.GameObjects.Players[nickname].Object.Y, g.GameObjects.Players[nickname].Object.Xsize, g.GameObjects.Players[nickname].Object.Ysize)
+				// fmt.Printf("Obj_2 : X = %d , Y = %d , Xsize = %d, Ysize = %d \n", obj.X, obj.Y, obj.Xsize, obj.Ysize)
 				g.GameObjects.Players[nickname].Object.X += delta
 			}
 		}
@@ -128,7 +128,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		for _, obj := range objs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
-				fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
+				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
 				g.GameObjects.Players[nickname].Object.X -= delta
 			}
 		}

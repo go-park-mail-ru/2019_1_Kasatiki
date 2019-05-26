@@ -65,8 +65,9 @@ func (r *Room) GameEngine() {
 
 		res := &game_logic.BulletStatus{}
 		var bs []*game_logic.Bullet
+		// fmt.Println(len(game.GameObjects.Bullets))
 		for i, _ := range game.GameObjects.Bullets {
-			fmt.Println("bullet ", i)
+			// fmt.Println("bullet ", i)
 			game.GameObjects.Bullets[i].Run()
 			bs = append(bs, game.GameObjects.Bullets[i])
 		}

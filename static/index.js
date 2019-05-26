@@ -16,6 +16,9 @@ let tileSize = 50;
 let gameScreenW = 16;
 let gameScreenH = 16;
 
+// Время последнего выстрела
+let lastFire = Date.now();
+
 canvas.height = tileSize * gameScreenH;
 canvas.width = tileSize * gameScreenW;
 
@@ -120,13 +123,17 @@ document.addEventListener('mouseup', mouseUp, false);
 document.addEventListener('mousedown', mouseDown, false);
 
 function mouseDown(evt) {
-    keyMap.shot = true;
-    let x = evt.pageX - bounds.left - 400;
-    let y = evt.pageY - bounds.top - 400;
+    if (Date.now() - lastFire > 100) {
+        keyMap.shot = true;
+        let x = evt.clientX - bounds.left - canvas.width;
+        let y = evt.clientY - bounds.top - canvas.height;
+    
+        keyMap.angle = Math.atan2(y, x);
 
-    keyMap.angle = - Math.atan2(y, x);
-
-    // console.log(x, y, keyMap.angle * 57.3)
+        lastFire = Date.now();
+    } else {
+        keyMap.shot = false;
+    }
 }
 
 function mouseUp() {
@@ -219,6 +226,15 @@ function drawBarriers() {
         // }
 
         // console.log(barriers[i].object.x, barriers[i].object.y, barriers[i].object.xsize, barriers[i].object.ysize);
+    }
+}
+
+function drawBullets() {
+    if ( bullets.length != 0) {
+        for (let i = 0; i < bullets.length; i++) {
+            ctx.strokeStyle = '#000000';
+            ctx.strokeRect(bullets[i].object.x - viewport.x, bullets[i].object.y - viewport.y, 5, 5);
+        }
     }
 }
 
@@ -321,32 +337,35 @@ socket.addEventListener("message", (event) => {
     //     player.y = data["players"][1].object.y;
     // }
 
-    // console.log(data["bullets"])
-    console.log(data)
 
-    // if (data["bullets"].length != bullets.length) {
-    //     bullets.push(data["bullets"][data["bullets"].length - 1]);
-    // }
+    // console.log(data["bullets"], bullets)
 
-    if (data["players"][0].id == player.id) {
-        player.x += (data["players"][0].object.x - player.x) * player.c;
-        player.y += (data["players"][0].object.y - player.y) * player.c;
-
-        enemy.x += (data["players"][1].object.x - enemy.x) * player.c;
-        enemy.y += (data["players"][1].object.y - enemy.y) * player.c;
-        // console.log("player: ", data["players"][0].object.x, data["players"][0].object.y);
-        // console.log("enemy: ", data["players"][1].object.x, data["players"][1].object.y);
-        // }ss
-    } else {
-        player.x += (data["players"][1].object.x - player.x) * player.c;
-        player.y += (data["players"][1].object.y - player.y) * player.c;
-
-        enemy.x += (data["players"][0].object.x - enemy.x) * player.c;
-        enemy.y += (data["players"][0].object.y - enemy.y) * player.c;
-
-        // console.log("player: ", data["players"][1].object.x, data["players"][1].object.y);
-        // console.log("enemy: ", data["players"][0].object.x, data["players"][0].object.y);
+    if (data["bullets"] != null) {
+        bullets = data["bullets"]
     }
+
+    if (data["players"] != null) {
+        if (data["players"][0].id == player.id) {
+            player.x += (data["players"][0].object.x - player.x) * player.c;
+            player.y += (data["players"][0].object.y - player.y) * player.c;
+    
+            enemy.x += (data["players"][1].object.x - enemy.x) * player.c;
+            enemy.y += (data["players"][1].object.y - enemy.y) * player.c;
+            // console.log("player: ", data["players"][0].object.x, data["players"][0].object.y);
+            // console.log("enemy: ", data["players"][1].object.x, data["players"][1].object.y);
+            // }ss
+        } else {
+            player.x += (data["players"][1].object.x - player.x) * player.c;
+            player.y += (data["players"][1].object.y - player.y) * player.c;
+    
+            enemy.x += (data["players"][0].object.x - enemy.x) * player.c;
+            enemy.y += (data["players"][0].object.y - enemy.y) * player.c;
+    
+            // console.log("player: ", data["players"][1].object.x, data["players"][1].object.y);
+            // console.log("enemy: ", data["players"][0].object.x, data["players"][0].object.y);
+        }
+    }
+
 
 
 });
@@ -365,10 +384,11 @@ function loop() {
     player.draw();
     renderEnemy();
     // drawBarriers();
-
-    // console.log(bullets)
+    drawBullets();
 
     let json = JSON.stringify(keyMap);
+
+    console.log(keyMap.shot);
 
     if (socketOpen) {
         socket.send(json);
