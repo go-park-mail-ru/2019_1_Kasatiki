@@ -2,8 +2,9 @@ package game_logic
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 	"reflect"
+
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 )
 
 // Создание игры
@@ -27,10 +28,16 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
 	}
+	game.GameObjects.Advs = AdvsCreate(10, game.Map, game.GameObjects.Players)
+	for _, p := range game.GameObjects.Advs {
+		var info AdvInfo
+		info.Object = p.Object
+		res.Advs = append(res.Advs, info)
+	}
 	res.Barrier = game.GameObjects.Barrier
 
 	game.ZonesIni()
-	fmt.Println("Число барьеров" ,len(game.GameObjects.Barrier))
+	fmt.Println("Число барьеров", len(game.GameObjects.Barrier))
 
 	fmt.Println("Zones:", len(game.Zones))
 
@@ -38,7 +45,7 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 		fmt.Printf("Zone numb : %d, StartX : %d, StartY : %d, EndX : %d, EndY : %d \n", z.Number, z.StartX, z.StartY, z.EndX, z.EndY)
 	}
 	for k, z := range game.StaticCollection {
-		fmt.Println("Zone Numb: " , k, " Numbers: ", len(z))
+		fmt.Println("Zone Numb: ", k, " Numbers: ", len(z))
 		//for _, b := range z {
 		//	fmt.Printf("Name : %s, StartX : %d, StartY : %d, EndX : %d, EndY : %d \n", b.Name, b.X, b.Y, b.Xsize, b.Ysize)
 		//}
@@ -76,7 +83,7 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 			Nickname: p.Login,
 			Id:       id,
 		}
-		players[p.Login].Spawn(gameMap.SizeX * gameMap.TileSize / 2 + id * 5 * gameMap.TileSize, gameMap.SizeX * gameMap.TileSize / 2 , gameMap.TileSize, gameMap.TileSize)
+		players[p.Login].Spawn(gameMap.SizeX*gameMap.TileSize/2+id*5*gameMap.TileSize, gameMap.SizeX*gameMap.TileSize/2, gameMap.TileSize, gameMap.TileSize)
 		fmt.Printf("Player was spawned in X: %d,    Y : %d \n", players[p.Login].Object.X, players[p.Login].Object.Y)
 		players[p.Login].CreateDefaultWeapon()
 	}

@@ -2,21 +2,21 @@ package game_logic
 
 // Эй, детка, ты модель или подделка?
 type Game struct {
-	GameObjects *GameObjects `json:"gameobjects"`
-	Map         *Map         `json:"map"`
-	Wave        int          `json:"wave"`
-	Url         string       `json:"url"`
-	Stage       string       `json:"stage"`
-	Zones		[]*Zone
-	StaticCollection	map[int][]*DynamycObject
+	GameObjects      *GameObjects `json:"gameobjects"`
+	Map              *Map         `json:"map"`
+	Wave             int          `json:"wave"`
+	Url              string       `json:"url"`
+	Stage            string       `json:"stage"`
+	Zones            []*Zone
+	StaticCollection map[int][]*DynamycObject
 }
 
 type Zone struct {
-	StartX	int
-	StartY	int
-	EndX	int
-	EndY	int
-	Number	int
+	StartX int
+	StartY int
+	EndX   int
+	EndY   int
+	Number int
 }
 
 type BulletStatus struct {
@@ -25,14 +25,15 @@ type BulletStatus struct {
 
 type GameStatus struct {
 	Players []PlayerInfo `json:"players"`
-	Advs []AdvInfo `json:"advs"`
+	Advs    []AdvInfo    `json:"advs"`
 }
 
 type StartGame struct {
 	Map     Map          `json:"map"`
 	Barrier []*Barrier   `json:"barriers"`
 	Players []PlayerInfo `json:"players"`
-	Id		int			 `json:"id"`
+	Advs    []AdvInfo    `json:"advs"`
+	Id      int          `json:"id"`
 }
 
 type PlayerInfo struct {
@@ -44,7 +45,7 @@ type PlayerInfo struct {
 }
 
 type AdvInfo struct {
-	Object     *DynamycObject `json:"object"`
+	Object *DynamycObject `json:"object"`
 }
 
 type InputMessage struct {
@@ -74,7 +75,7 @@ type DynamycObject struct {
 type Bullet struct {
 	Object   *DynamycObject `json:"object"`
 	Damage   float32
-	Angle 	 float32
+	Angle    float32
 	PlayerId int `json:"playerid"`
 }
 
@@ -109,9 +110,11 @@ type Moves struct {
 }
 
 type Adv struct {
-	Object  *DynamycObject `json:"object"`
-	Url     string
-	Pict    string `json:"pict"`
+	Object *DynamycObject `json:"object"`
+	Id     int
+	Url    string
+	Pict   string `json:"pict"`
+	Name   string
 	//XTarget float32
 	//YTarget float32
 	//Angular float32 `json:"ang"`
@@ -132,7 +135,7 @@ type Map struct {
 
 type GameObjects struct {
 	Players map[string]*Player `json:"palyers"`
-	Advs    map[int]*Adv             `json:"advs"`
+	Advs    map[int]*Adv       `json:"advs"`
 	Bullets []*Bullet          `json:"bullets"`
 	Barrier []*Barrier         `json:"barrier"`
 }

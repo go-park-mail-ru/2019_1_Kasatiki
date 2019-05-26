@@ -2,11 +2,43 @@ package dbhandler
 
 import (
 	"fmt"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
 	"math/rand"
 	"time"
 )
+
+func (instance *DBHandler) AdvsIserting() {
+	mailAdv := &game_logic.Adv{
+		Name: "Mail.ru",
+		Url:  "https://mail.ru/",
+		Pict: "mail.jpg",
+	}
+	err := instance.InsertAdv(mailAdv)
+	fmt.Println(err)
+	yandexAdv := &game_logic.Adv{
+		Name: "Yandex.ru",
+		Url:  "https://ya.ru/",
+		Pict: "yandex.jpg",
+	}
+	err = instance.InsertAdv(yandexAdv)
+	fmt.Println(err)
+	PHAdv := &game_logic.Adv{
+		Name: "PH",
+		Url:  "https://github.com/go-park-mail-ru/2019_1_Kasatiki",
+		Pict: "ph.jpg",
+	}
+	err = instance.InsertAdv(PHAdv)
+	fmt.Println(err)
+	sberAdv := &game_logic.Adv{
+		Name: "Sberbank",
+		Url:  "https://www.sberbank.ru/",
+		Pict: "sber.jpg",
+	}
+	err = instance.InsertAdv(sberAdv)
+	fmt.Println(err)
+}
 
 func RandStr(n int) string {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -18,7 +50,7 @@ func RandStr(n int) string {
 }
 
 type DBHandler struct {
-	Connection *pgx.Conn
+	Connection *pgx.ConnPool
 }
 
 func (instance *DBHandler) dataCreating(lim int) {
@@ -156,4 +188,39 @@ func (instance *DBHandler) ImgUpdate(id int, img string) (err error) {
 `
 	_, err = instance.Connection.Exec(sql, int(id), img)
 	return err
+}
+
+func (instance *DBHandler) CreateAdvTable() (err error) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS advs (
+	id 				BIGSERIAL						NOT NULL	PRIMARY KEY,
+	name			CITEXT							NOT NULL,
+	url				TEXT							NOT NULL,
+	img				TEXT							NOT NULL) ;`
+	_, err = instance.Connection.Exec(sql)
+	return err
+}
+
+func (instance *DBHandler) InsertAdv(adv *game_logic.Adv) (err error) {
+	sql := ` INSERT INTO advs (name, url, img) VALUES ($1, $2, $3);`
+	_, err = instance.Connection.Exec(sql, adv.Name, adv.Url, adv.Pict)
+	return err
+}
+
+func (instance *DBHandler) GetAdv() (advs []game_logic.Adv, err error) {
+	sql := `
+		SELECT id, name, url, img FROM advs;`
+	rows, err := instance.Connection.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var a game_logic.Adv
+		err = rows.Scan(&a.Id, &a.Name, &a.Url, &a.Pict)
+		advs = append(advs, a)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return
 }
