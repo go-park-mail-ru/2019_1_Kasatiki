@@ -202,8 +202,8 @@ func MapGeneration() (*Map, []*Barrier) {
 	templates = append(templates, tmp4)
 	templates = append(templates, tmp5)
 	templates = append(templates, tmp6)
-	templates = append(templates, tmp6)
-	templates = append(templates, tmp6)
+	// templates = append(templates, template5)
+	// templates = append(templates, template6)
 
 	// Задаем сид для рандомайзера
 	rand.Seed(time.Now().UnixNano())

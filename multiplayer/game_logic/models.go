@@ -21,6 +21,9 @@ type Zone struct {
 	Number	int
 }
 
+type BulletStatus struct {
+	Bullets []*Bullet `json:"bullets"`
+}
 
 type GameStatus struct {
 	Players []PlayerInfo `json:"players"`
@@ -73,6 +76,7 @@ type DynamycObject struct {
 type Bullet struct {
 	Object   *DynamycObject `json:"object"`
 	Damage   float32
+	Angle 	 float32
 	PlayerId int `json:"playerid"`
 }
 

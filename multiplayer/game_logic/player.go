@@ -65,8 +65,12 @@ func (p *Player) BulletsCreate() (bs []Bullet) {
 }
 
 // аппендит пули в массив пулей
-func (p *Player) Shot() {
+func (p *Player) Shot(a float32) (b *Bullet) {
 
+	b = p.Weapon.Bullet
+	b.Angle = a
+
+	return
 }
 
 func (p1 *Player) PlayerToPlayer(p2 *DynamycObject, moves Moves) {
