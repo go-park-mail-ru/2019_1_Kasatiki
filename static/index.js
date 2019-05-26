@@ -1,17 +1,33 @@
 const canvas = document.querySelector('.game');
 const ctx = canvas.getContext('2d');
 
+console.log(canvas);
+
 let mapChange = true;
 
 let map = [];
 let barriers = [];
+let bullets = [];
 let mapSize = 100;
 
-let tileSize = 20;
-let gameScreenSize = 10;
+let bounds = canvas.getBoundingClientRect();
 
-canvas.height = mapSize * tileSize;
-canvas.width = mapSize * tileSize;
+let tileSize = 50;
+let gameScreenW = 16;
+let gameScreenH = 16;
+
+canvas.height = tileSize * gameScreenH;
+canvas.width = tileSize * gameScreenW;
+
+let keyMap = {
+    up : false,
+    left : false,
+    down : false,
+    right : false,
+
+    shot: false,
+    angle: 0,
+}
 
 class Player {
     constructor(
@@ -20,48 +36,106 @@ class Player {
         this.x = x;
         this.y = y;
 
+        this.id = 1;
+
         this.v = 5;
+
+        this.c = 0.2;
     }
 
     draw() {
         ctx.beginPath();
         ctx.fillStyle = '#45FF70';
-        ctx.fillRect(this.x, this.y, tileSize, tileSize);
-        ctx.fillRect(5, 5, tileSize, tileSize);
+        // if (this.x <= canvas.width / 2 && this.y <= canvas.height / 2) {
+        //     ctx.fillRect(this.x, this.y, tileSize, tileSize);
+        // } else if (this.x > canvas.width / 2 && this.y > canvas.height / 2) {
+        //     ctx.fillRect(canvas.width / 2, canvas.height / 2,  tileSize, tileSize);
+        // } else if (this.x <= canvas.width / 2 && this.y > canvas.height / 2) {
+        //     ctx.fillRect(this.x, canvas.height / 2,  tileSize, tileSize);
+        // } else if (this.x > canvas.width / 2 && this.y <= canvas.height / 2) {
+        //     ctx.fillRect(canvas.width / 2, this.y,  tileSize, tileSize);
+        // }
+        // ctx.fillRect(canvas.width / 2, canvas.height / 2,  tileSize, tileSize);
+        ctx.fillRect(Math.round(this.x - viewport.x), Math.round(this.y - viewport.y), tileSize, tileSize);
         ctx.closePath();
     }
 
     move(keyMap) {
-        // if (keyMap.up) {
-        //     this.y -= this.v;
-        // }
-        // if (keyMap.down) {
-        //     this.y += this.v;
-        // }
-        // if (keyMap.left) {
-        //     this.x -= this.v;
-        // }
-        // if (keyMap.right) {
-        //     this.x += this.v;
-        // }
+        if (keyMap.up) {
+            this.y -= this.v;
+        }
+        if (keyMap.down) {
+            this.y += this.v;
+        }
+        if (keyMap.left) {
+            this.x -= this.v;
+        }
+        if (keyMap.right) {
+            this.x += this.v;
+        }
     }
 }
 
-var keyMap = {
-    up : false,
-    left : false,
-    down : false,
-    right : false,
-    zoom : false,
+class Viewport {
+    constructor(x, y, w, h) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+    }
+
+    update(x ,y) {
+
+        if (zoom) {
+            if (this.w < gameScreenH * 2 * 50) {
+                tileSize -= 0.5;
+                this.w = this.w + gameScreenW;
+                this.h = this.h + gameScreenH;
+            }
+        } else if (!zoom) {
+            if (this.w > gameScreenH * 50) {
+                tileSize += 0.5;
+                this.w = this.w - gameScreenW;
+                this.h = this.h - gameScreenH;
+            }
+        } 
+
+        // this.x += (x - this.x - this.w * 0.5) * 0.05;
+        // this.y += (y - this.y - this.h * 0.5) * 0.05;
+
+        this.x = x - this.w / 2;
+        this.y = y - this.h / 2;
+
+        // console.log('port', this.x, this.y, this.w, this.h);
+    }
 }
 
+const viewport = new Viewport(0, 0, gameScreenW * tileSize, gameScreenH * tileSize);
+
+let zoom = false;
 
 document.addEventListener('keydown', keyDown, false);
 document.addEventListener('keyup', keyUp, false);
+document.addEventListener('mouseup', mouseUp, false);
+document.addEventListener('mousedown', mouseDown, false);
+
+function mouseDown(evt) {
+    keyMap.shot = true;
+    let x = evt.pageX - bounds.left - 400;
+    let y = evt.pageY - bounds.top - 400;
+
+    keyMap.angle = - Math.atan2(y, x);
+
+    // console.log(x, y, keyMap.angle * 57.3)
+}
+
+function mouseUp() {
+    keyMap.click = false;
+}
 
 function keyDown(e) {
     if (e.keyCode === 32) {
-        keyMap.zoom = true;
+       zoom = true;
     }
 
     if (e.keyCode === 65) {
@@ -80,7 +154,7 @@ function keyDown(e) {
 
 function keyUp(e) {
     if (e.keyCode === 32) {
-        keyMap.zoom = false;
+        zoom = false;
     }
 
     if (e.keyCode === 65) {
@@ -97,51 +171,12 @@ function keyUp(e) {
     }
 }
 
-function checkMapSize() {
-    if (keyMap.zoom) {
-        if (gameScreenSize < 30) {
-            gameScreenSize ++;
-            tileSize--;
-        }
-    } else if (!keyMap.zoom) {
-        if (gameScreenSize > 20) {
-            gameScreenSize --;
-            tileSize++;
-        }
-    }
-}
-
 let enemy = {
     x : 48,
     y : 48,
 }
 
-const player = new Player(6 * tileSize, 6 * tileSize);
-
-let viewport = {
-    screen : [],
-    offset : [],
-    startTile : [],
-    endTile : [],
-    update	: function(px, py) {
-        this.offset[0] = Math.floor((this.screen[0]/2) - px);
-        this.offset[1] = Math.floor((this.screen[1]/2) - py);
-
-        var tile = [px, py]
-
-        this.startTile[0] = tile[0] - 1 - Math.ceil((this.screen[0]/2) / tileSize);
-        this.startTile[1] = tile[1] - 1 - Math.ceil((this.screen[1]/2) / tileSize);
-
-        if(this.startTile[0] < 0) { this.startTile[0] = 0; }
-        if(this.startTile[1] < 0) { this.startTile[1] = 0; }
-
-        this.endTile[0] = tile[0] + 1 + Math.ceil((this.screen[0]/2) / tileSize);
-        this.endTile[1] = tile[1] + 1 + Math.ceil((this.screen[1]/2) / tileSize);
-
-        if(this.endTile[0] >= mapSize) { this.endTile[0] = mapSize-1; }
-        if(this.endTile[1] >= mapSize) { this.endTile[1] = mapSize-1; }
-    }
-}
+const player = new Player(mapSize * tileSize / 2, mapSize * tileSize / 2);
 
 function createMap() {
     for (let i = 0; i < mapSize; i++) {
@@ -155,7 +190,7 @@ function createMap() {
     }
 }
 
-function drawTile(tile, x, y) {
+function drawTile(tile, x, y, i, j) {
     let color;
     switch (tile) {
         case 0:
@@ -167,35 +202,59 @@ function drawTile(tile, x, y) {
     }
 
     ctx.fillStyle = color;
-    ctx.fillRect(y, x, tileSize, tileSize);
+    ctx.fillRect(x, y, tileSize, tileSize);
+    // ctx.fillStyle = '#000000'
+    // ctx.font = tileSize / 4 + 'px serif';
+    // let text = i + ', ' + j;
+    // ctx.textAlign = 'center';
+    // ctx.fillText(text, y * tileSize, x * tileSize);
 }
 
-function drawBarier() {
+function drawBarriers() {
     for (let i = 0; i < barriers.length; i++) {
         ctx.strokeStyle = '#000000';
-        ctx.strokeRect(barriers[i].object.x, barriers[i].object.y, barriers[i].object.xsize, barriers[i].object.ysize);
+
+        // if (barriers[i].object.x > viewport.x && barriers[i].object.y > viewport.y && barriers[i].object.x < (viewport.x + viewport.w) && barriers[i].object.y < (viewport.y + viewport.h)) {
+            ctx.strokeRect(barriers[i].object.x - viewport.x, barriers[i].object.y - viewport.y, barriers[i].object.xsize, barriers[i].object.ysize);
+        // }
 
         // console.log(barriers[i].object.x, barriers[i].object.y, barriers[i].object.xsize, barriers[i].object.ysize);
     }
 }
 
 function drawMap(x, y) {
-    // console.log('x: ', x, 'y: ', y);
-    // viewport.update(y, x);
+    var x_min = Math.floor((viewport.x) / tileSize);
+    var y_min = Math.floor((viewport.y) / tileSize);
+    var x_max = Math.ceil((viewport.x + viewport.w) / tileSize);
+    var y_max = Math.ceil((viewport.y + viewport.h) / tileSize);
 
-    // console.log(viewport.startTile, viewport.endTile);
+    if (x_min < 0) {
+        x_min = 0;
+        // viewport.x = 0;
+        // x_max = viewport.w / tileSize;
+    }
+    if (y_min < 0) {
+        y_min = 0;
+        // viewport.y = 0;
+        // y_max = viewport.w / tileSize;
+    }
+    if (x_max > mapSize) {
+        x_max = mapSize;
+    }
+    if (y_max > mapSize) {
+        y_max = mapSize;
+    }
 
-    // for(var i = viewport.startTile[1]; i <= viewport.endTile[1]; ++i)
-    // {
-    //     for(var j = viewport.startTile[0]; j <= viewport.endTile[0]; ++j)
-    //     {
-    //         drawTile(map[i][j], i * tileSize, j * tileSize);
-    //     }
-    // }
+    // console.log(x_min, y_min, x_max, y_max,
+    //     'vp:', viewport.x, viewport.y, viewport.w, viewport.h,
+    //     'ts', tileSize);
 
-    for (i = 0; i < mapSize; i++) {
-        for (j = 0; j < mapSize; j++) {
-            drawTile(map[i][j], i * tileSize, j * tileSize);
+    for (let i = x_min; i < x_max; i++) {
+        for (let j = y_min; j < y_max; j++) {
+            let tile_x = Math.floor(i * tileSize - viewport.x);
+            let tile_y = Math.floor(j * tileSize - viewport.y);
+
+            drawTile(map[j][i], tile_x, tile_y, i ,j);
         }
     }
 }
@@ -205,16 +264,15 @@ let cord = {
     y : 0,
 }
 
-const bounds = canvas.getBoundingClientRect();
-document.body.onmousemove = function(evt) {
-    cord.x = evt.clientX - bounds.left;
-    cord.y = evt.clientY - bounds.top;
-}
+// document.body.onmousemove = function(evt) {
+//     cord.x = evt.clientX - bounds.left;
+//     cord.y = evt.clientY - bounds.top;
+// }
 
 function renderEnemy() {
     ctx.beginPath();
     ctx.fillStyle = '#F52B00';
-    ctx.fillRect(enemy.x, enemy.y, tileSize, tileSize);
+    ctx.fillRect(Math.round(enemy.x - viewport.x), Math.round(enemy.y - viewport.y), tileSize, tileSize);
     ctx.closePath();
 }
 
@@ -237,41 +295,60 @@ socket.addEventListener("close", () => {
 
 socket.addEventListener("message", (event) => {
     let data = JSON.parse(event.data)
-
     if (mapChange) {
-        map = data["map"].field
-        mapSize = data["map"].sizex
-        tileSize = data["map"].tailsize
+        map = data.map.field;
+        // mapSize = data.map.sizex;
+        // tileSize = data.map.tailsize;
 
-        barriers = data["barriers"]
+        barriers = data.barriers;
 
-        // console.log(barriers[0]);
+        player.id = data.id;
 
-        console.log(barriers[0].object.x, barriers[0].object.y, barriers[0].object);
+        mapChange = false;
+    // console.log(data);
 
-        // canvas.height = mapSize * tileSize;
-        // canvas.width = mapSize * tileSize;
-        mapChange = false
-        // console.log(data)
     }
 
-    if (data["players"][0].id == 1) {
-        player.x = data["players"][0].object.x
-        player.y = data["players"][0].object.y
 
-        enemy.x = data["players"][1].object.x
-        enemy.y = data["players"][1].object.y
+    // if (data["players"][0].id == 1) {
+    //     player.x = data["players"][0].object.x;
+    //     player.y = data["players"][0].object.y;
+
+    //     // enemy.x = data["players"][1].object.x
+    //     // enemy.y = data["players"][1].object.y
+    // } else {
+    //     player.x = data["players"][1].object.x;
+    //     player.y = data["players"][1].object.y;
+    // }
+
+    // console.log(data["bullets"])
+    console.log(data)
+
+    // if (data["bullets"].length != bullets.length) {
+    //     bullets.push(data["bullets"][data["bullets"].length - 1]);
+    // } 
+
+    if (data["players"][0].id == player.id) {
+        player.x += (data["players"][0].object.x - player.x) * player.c;
+        player.y += (data["players"][0].object.y - player.y) * player.c;
+
+        enemy.x += (data["players"][1].object.x - enemy.x) * player.c;
+        enemy.y += (data["players"][1].object.y - enemy.y) * player.c;
+        // console.log("player: ", data["players"][0].object.x, data["players"][0].object.y);
+        // console.log("enemy: ", data["players"][1].object.x, data["players"][1].object.y);
+    // }ss
     } else {
-        player.x = data["players"][1].object.x
-        player.y = data["players"][1].object.y
+        player.x += (data["players"][1].object.x - player.x) * player.c;
+        player.y += (data["players"][1].object.y - player.y) * player.c;
 
-        enemy.x = data["players"][0].object.x
-        enemy.y = data["players"][0].object.y
+        enemy.x += (data["players"][0].object.x - enemy.x) * player.c;
+        enemy.y += (data["players"][0].object.y - enemy.y) * player.c;
+
+        // console.log("player: ", data["players"][1].object.x, data["players"][1].object.y);
+        // console.log("enemy: ", data["players"][0].object.x, data["players"][0].object.y);
     }
     
     
-
-
 });
 
 socket.addEventListener("error", (error) => {
@@ -281,17 +358,15 @@ socket.addEventListener("error", (error) => {
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // player.move(keyMap);
-    // checkMapSize();
-    let y = Math.floor(player.y/tileSize);
-    let x = Math.floor(player.x/tileSize);
 
-    drawMap( x, y );
-    drawBarier();
-
+    drawMap(player.x, player.y);
+    viewport.update(player.x, player.y);
 
     player.draw();
     renderEnemy();
+    // drawBarriers();
+
+    // console.log(bullets)
 
     let json = JSON.stringify(keyMap);
 
@@ -303,9 +378,6 @@ function loop() {
 
 function gameStart() {
     createMap();
-
-    // viewport.screen = [gameScreenSize * tileSize, gameScreenSize * tileSize]
-
     requestAnimationFrame(loop);
 }
 
