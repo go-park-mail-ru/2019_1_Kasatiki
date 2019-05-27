@@ -137,6 +137,9 @@ func AStar(start *Point, goal *Point, m *Map) (Points, bool) {
 		points = append(points, start)
 		return points, true
 	}
+	if m.Field[goal.YCell][goal.XCell] == 1 || m.Field[start.YCell][start.XCell] == 1 {
+		return nil, false
+	}
 
 	var open Points
 	var closed Points

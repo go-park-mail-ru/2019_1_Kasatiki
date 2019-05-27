@@ -120,6 +120,8 @@ func (adv *Adv) MoveToPlayer(m *Map) {
 		}
 	}
 	if isExist {
+		log.Println("1: ", len(way))
 		adv.MoveWithWay_with_one_step(way, m)
+		log.Println("2: ", len(way))
 	}
 }
