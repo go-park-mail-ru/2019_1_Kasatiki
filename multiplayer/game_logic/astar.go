@@ -115,7 +115,7 @@ func absDist(first *Point, second *Point) int {
 	return int(0.5 + math.Sqrt(math.Pow(float64(first.XCell-second.XCell), 2)+math.Pow(float64(first.YCell-second.YCell), 2)))
 }
 
-func getWay(from map[*Point]*Point, start *Point, curr *Point) Points {
+func getWay(from map[*Point]*Point, start *Point, curr *Point) *Points {
 	var points Points
 	for !from[curr].IsEqual(start) {
 		points = append(points, curr)
@@ -123,7 +123,7 @@ func getWay(from map[*Point]*Point, start *Point, curr *Point) Points {
 	}
 	points = append(points, curr)
 	points = append(points, start)
-	return points
+	return &points
 }
 
 func heuristics(curr *Point, goal *Point) int {
@@ -131,11 +131,11 @@ func heuristics(curr *Point, goal *Point) int {
 	return int(0.5 + math.Sqrt(math.Pow(float64(curr.XCell-goal.XCell), 2)+math.Pow(float64(curr.YCell-goal.YCell), 2)))
 }
 
-func AStar(start *Point, goal *Point, m *Map) (Points, bool) {
+func AStar(start *Point, goal *Point, m *Map) (*Points, bool) {
 	if goal.IsEqual(start) {
 		var points Points
 		points = append(points, start)
-		return points, true
+		return &points, true
 	}
 	if m.Field[goal.YCell][goal.XCell] == 1 || m.Field[start.YCell][start.XCell] == 1 {
 		return nil, false

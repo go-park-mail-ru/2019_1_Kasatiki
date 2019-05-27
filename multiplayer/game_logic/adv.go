@@ -67,29 +67,29 @@ func (adv *Adv) MoveWithWay(way Points, m *Map) {
 	}
 }
 
-func (adv *Adv) MoveWithWay_with_one_step(way Points, m *Map) {
-	if len(way) <= 1 {
+func (adv *Adv) MoveWithWay_with_one_step(way *Points, m *Map) {
+	if len(*way) <= 1 {
 		return
 	}
 	distance := adv.Object.Velocity
 	distanceToNearestCell := int(math.Sqrt(
-		float64((way[len(way)-2].XCell*m.TileSize-adv.Object.X)*(way[len(way)-2].XCell*m.TileSize-adv.Object.X) +
-			(way[len(way)-2].YCell*m.TileSize-adv.Object.Y)*(way[len(way)-2].YCell*m.TileSize-adv.Object.Y))))
+		float64(((*way)[len(*way)-2].XCell*m.TileSize-adv.Object.X)*((*way)[len(*way)-2].XCell*m.TileSize-adv.Object.X) +
+			((*way)[len(*way)-2].YCell*m.TileSize-adv.Object.Y)*((*way)[len(*way)-2].YCell*m.TileSize-adv.Object.Y))))
 	if distanceToNearestCell <= distance {
-		adv.Object.X = way[len(way)-2].XCell * m.TileSize
-		adv.Object.Y = way[len(way)-2].YCell * m.TileSize
+		adv.Object.X = (*way)[len(*way)-2].XCell * m.TileSize
+		adv.Object.Y = (*way)[len(*way)-2].YCell * m.TileSize
 		return
 	}
-	if way[len(way)-1].XCell == way[len(way)-2].XCell {
-		if way[len(way)-1].YCell > way[len(way)-2].YCell {
+	if (*way)[len(*way)-1].XCell == (*way)[len(*way)-2].XCell {
+		if (*way)[len(*way)-1].YCell > (*way)[len(*way)-2].YCell {
 			adv.Object.Y -= distance
-		} else if way[len(way)-1].YCell < way[len(way)-2].YCell {
+		} else if (*way)[len(*way)-1].YCell < (*way)[len(*way)-2].YCell {
 			adv.Object.Y += distance
 		}
 	} else {
-		if way[len(way)-1].XCell > way[len(way)-2].XCell {
+		if (*way)[len(*way)-1].XCell > (*way)[len(*way)-2].XCell {
 			adv.Object.X -= distance
-		} else if way[len(way)-1].XCell < way[len(way)-2].XCell {
+		} else if (*way)[len(*way)-1].XCell < (*way)[len(*way)-2].XCell {
 			adv.Object.X += distance
 		}
 	}
@@ -113,15 +113,11 @@ func (adv *Adv) MoveToPlayer(m *Map) {
 		XCell: player.Object.X / m.TileSize,
 		YCell: player.Object.Y / m.TileSize,
 	}
-	way, isExist := AStar(start, goal, m)
-	for i := 0; i < len(way); i++ {
-		if m.Field[way[i].YCell][way[i].XCell] == 1 {
-			log.Println("gavno", way[i].XCell, way[i].YCell)
-		}
-	}
+	isExist := false
+	adv.way, isExist = AStar(start, goal, m)
 	if isExist {
-		log.Println("1: ", len(way))
-		adv.MoveWithWay_with_one_step(way, m)
-		log.Println("2: ", len(way))
+		log.Println("1: ", len(*adv.way))
+		adv.MoveWithWay_with_one_step(adv.way, m)
+		log.Println("2: ", len(*adv.way))
 	}
 }

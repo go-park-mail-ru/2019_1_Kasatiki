@@ -112,6 +112,8 @@ type Adv struct {
 	//YTarget float32
 	//Angular float32 `json:"ang"`
 	Player *Player
+	tick   int
+	way    *Points
 
 	AStarCount int // служебное поле, для того, чтобы хранить здесь количество тиком после пересчета астар
 }
