@@ -232,8 +232,8 @@ function drawBarriers() {
 function drawBullets() {
     if ( bullets.length != 0) {
         for (let i = 0; i < bullets.length; i++) {
-            ctx.strokeStyle = '#000000';
-            ctx.strokeRect(bullets[i].object.x - viewport.x, bullets[i].object.y - viewport.y, 5, 5);
+            ctx.fillStyle = '#ffff00';
+            ctx.fillRect(bullets[i].object.x - viewport.x, bullets[i].object.y - viewport.y, 5, 5);
         }
     }
 }
