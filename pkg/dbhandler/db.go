@@ -82,7 +82,7 @@ func (instance *DBHandler) msgCreating(lim int) {
 func (instance *DBHandler) CreateTables() (err error) {
 	sql := `
 	CREATE EXTENSION IF NOT EXISTS CITEXT;
-	DROP TABLE IF EXISTS users CASCADE;
+	--DROP TABLE IF EXISTS users CASCADE;
 
 	CREATE TABLE IF NOT EXISTS users (
 	id 				BIGSERIAL						NOT NULL	PRIMARY KEY,
@@ -104,7 +104,7 @@ func (instance *DBHandler) CreateTables() (err error) {
 func (instance *DBHandler) CreateMessageTable() (err error) {
 	sql := `
 	CREATE EXTENSION IF NOT EXISTS CITEXT;
-	DROP TABLE IF EXISTS messages CASCADE;
+	--DROP TABLE IF EXISTS messages CASCADE;
 
 	CREATE TABLE IF NOT EXISTS messages (
 	id 				BIGSERIAL						NOT NULL	PRIMARY KEY,
