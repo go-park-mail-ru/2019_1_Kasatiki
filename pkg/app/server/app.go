@@ -2,17 +2,15 @@ package server
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/middleware"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/olahol/melody.v1"
-	"os"
-)
-import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"log"
+	"os"
 )
 
 var Users []models.User
@@ -24,15 +22,14 @@ type App struct {
 }
 
 func (instance *App) initializeRoutes() {
+	instance.Router.Use(instance.Middleware.Recovery)
+	instance.Router.Use(instance.Middleware.LoggerMiddleware)
+	instance.Router.Use(instance.Middleware.CORSMiddleware)
+
+	//instance.Router.Use(gin.Recovery())
+	//instance.Router.Use(gin.Logger())
 
 	m := melody.New()
-	instance.Router.Use(instance.Middleware.LoggerMiddleware)
-	instance.Router.Use(gin.Recovery())
-	instance.Router.Use(gin.Logger())
-
-	instance.Router.Use(instance.Middleware.CORSMiddleware)
-	//instance.Router.Use(instance.Middleware.Recovery)
-
 	api := instance.Router.Group("/api")
 	{
 		api.DELETE("/logout", instance.Middleware.AuthMiddleware(instance.logout))
@@ -69,15 +66,24 @@ func (instance *App) Run(port string) {
 }
 
 // Todo Обернуть в конфиг
-func (instance *App) GetDBConnection() error {
+func (instance *App) GetDBConnection(config *models.Config) error {
+
 	conf := pgx.ConnConfig{
-		User:      "sayonara",
-		Password:  "boy",
-		Host:      "localhost",
-		Port:      5432,
-		Database:  "kasatiki",
+		User:      config.DBUser,
+		Password:  config.DBPassword,
+		Host:      config.DBHost,
+		Port:      config.DBPort,
+		Database:  config.DBSpace,
 		TLSConfig: nil,
 	}
+	//conf := pgx.ConnConfig {
+	//	User:      "sayonara",
+	//	Password:  "boy",
+	//	Host:      "localhost",
+	//	Port:      5432,
+	//	Database:  "kasatiki",
+	//	TLSConfig: nil,
+	//}
 	confPool := pgx.ConnPoolConfig{
 		ConnConfig:     conf,
 		MaxConnections: 16,
@@ -98,8 +104,8 @@ func (instance *App) GetDBConnection() error {
 	return err
 }
 
-func (instance *App) Initialize() {
-	err := instance.GetDBConnection()
+func (instance *App) Initialize(conf *models.Config) {
+	err := instance.GetDBConnection(conf)
 	err = instance.DB.CreateTables()
 	fmt.Println(err)
 	err = instance.DB.CreateAdvTable()

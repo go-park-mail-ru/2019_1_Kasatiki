@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+//easyjson:json
 type User struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
@@ -12,9 +13,10 @@ type User struct {
 	ImgUrl   string `json:"imgurl"`
 	Region   string `json:"region"`
 	About    string `json:"about"`
-	Points   int    `json"points"`
+	Points   int    `json:"points"`
 }
 
+//easyjson:json
 type EditUser struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
@@ -25,12 +27,14 @@ type EditUser struct {
 	About    string `json:"about"`
 }
 
+//easyjson:json
 type SignupUser struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
+//easyjson:json
 type PublicUser struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
@@ -41,11 +45,13 @@ type PublicUser struct {
 	About    string `json:"about"`
 }
 
+//easyjson:json
 type LoginInfo struct {
 	Nickname string `json:"nickname"`
 	Password string `json:"password"`
 }
 
+//easyjson:json
 type LeaderboardUsers struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`

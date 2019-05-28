@@ -1,26 +1,38 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
+	"io/ioutil"
+
 	//"2019_1_Kasatiki/pkg/models"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/payments"
 	"github.com/jackc/pgx"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
 )
 
 func (instance *App) createUser(c *gin.Context) {
+
 	var newUser models.User
-	decoder := json.NewDecoder(c.Request.Body)
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&newUser)
+
+	req, err := c.GetRawData()
+	if err != nil {
+		instance.Middleware.Logger.Warnln("Create user error: ", err)
+		fmt.Println(err)
+		c.Status(400)
+		return
+	}
+	err = newUser.UnmarshalJSON(req)
+
+	//decoder := json.NewDecoder(c.Request.Body)
+	//decoder.DisallowUnknownFields()
+	//err := decoder.Decode(&newUser)
+
 	if err != nil || newUser.Validation() != nil {
 		instance.Middleware.Logger.Warnln("Create user error: ", err)
 		fmt.Println(err)
@@ -102,11 +114,28 @@ func (instance *App) isAuth(c *gin.Context) {
 }
 
 func (instance *App) editUser(c *gin.Context) {
-	_, _, err := c.Request.FormFile("avatar")
+	c.Request.FormFile("avatar")
+	//if err != nil {
+	//	instance.Middleware.Logger.Warnln("Edit User error: ", err)
+	//	fmt.Println(err)
+	//	c.Status(409)
+	//	return
+	//}
+
 	var edUser models.EditUser
-	decoder := json.NewDecoder(c.Request.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&edUser)
+	req, err := c.GetRawData()
+	if err != nil {
+		instance.Middleware.Logger.Warnln("Edit User error: ", err)
+		fmt.Println(err)
+		c.Status(409)
+		return
+	}
+
+	err = edUser.UnmarshalJSON(req)
+	//decoder := json.NewDecoder(c.Request.Body)
+	//decoder.DisallowUnknownFields()
+	//err = decoder.Decode(&edUser)
+	fmt.Println(edUser.Nickname)
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Edit User error: ", err)
 		fmt.Println(err)
@@ -135,9 +164,17 @@ func (instance *App) editUser(c *gin.Context) {
 
 func (instance *App) login(c *gin.Context) {
 	var data models.LoginInfo
-	decoder := json.NewDecoder(c.Request.Body)
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&data)
+	req, err := c.GetRawData()
+	if err != nil {
+		instance.Middleware.Logger.Warnln("Login error: ", err)
+		fmt.Println(err)
+		c.Status(400)
+		return
+	}
+	err = data.UnmarshalJSON(req)
+	//decoder := json.NewDecoder(c.Request.Body)
+	//decoder.DisallowUnknownFields()
+	//err = decoder.Decode(&data)
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Login error: ", err)
 		fmt.Println(err)
@@ -202,9 +239,15 @@ func (instance *App) logout(c *gin.Context) {
 func (instance *App) payout(c *gin.Context) {
 	var payoutBill models.Payout
 	var payoutCredentials models.Credentials
-	decoder := json.NewDecoder(c.Request.Body)
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&payoutBill)
+	req, err := c.GetRawData()
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	err = payoutBill.UnmarshalJSON(req)
+	//decoder := json.NewDecoder(c.Request.Body)
+	//decoder.DisallowUnknownFields()
+	//err := decoder.Decode(&payoutBill)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		return
