@@ -8,7 +8,7 @@ go:
 script: 
 - scp -r $TRAVIS_BUILD_DIR/  evv@advhater.ru:/home/evv_bmstu/advhater-production
 - ssh evv@advhater.ru cp -r /home/evv_bmstu/credentials/payments/. /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/payments/
-- ssh evv@advhater.ru sudo /home/evv_bmstu/go/src/github.com/mailru/easyjson/easyjson/easyjson -disallow_unknown_fields  /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/message.go /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/payout.go /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/user.go
+- ssh evv@advhater.ru sudo /home/evv_bmstu/go/src/github.com/mailru/easyjson/easyjson/easyjson -disallow_unknown_fields  /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/message.go /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/config.go /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/payout.go /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/user.go
 - ssh evv@advhater.ru sudo systemctl restart advhater-host
 - ssh evv@advhater.ru sudo systemctl status advhater-host
 - ssh evv@advhater.ru sudo chmod -R 777 /home/evv_bmstu/advhater-production
