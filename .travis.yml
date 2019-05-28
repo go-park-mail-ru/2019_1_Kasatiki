@@ -4,7 +4,7 @@ install: true
 language: go
 go:
   - 1.12.5
-script: scp -r $TRAVIS_BUILD_DIR/..  evv@advhater.ru:/home/evv_bmstu/projects/advhater/2019_1_Kasatiki
+script: scp -r $TRAVIS_BUILD_DIR/..  evv@advhater.ru:/home/evv_bmstu/advhater-production
 
 before_install:
 - openssl aes-256-cbc -K $encrypted_a4d1577586d3_key -iv $encrypted_a4d1577586d3_iv -in deploy_rsa.enc -out deploy_rsa -d
