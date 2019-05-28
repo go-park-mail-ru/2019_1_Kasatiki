@@ -8,7 +8,8 @@ go:
 script: 
 - scp -r $TRAVIS_BUILD_DIR/  evv@advhater.ru:/home/evv_bmstu/advhater-production
 - ssh evv@advhater.ru cp -r /home/evv_bmstu/credentials/payments/. /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/payments/
-
+- ssh evv@advhater.ru sudo systemctl restart advhater-host
+- ssh evv@advhater.ru sudo systemctl status advhater-host
 before_install:
 - openssl aes-256-cbc -K $encrypted_b211eb00f26e_key -iv $encrypted_b211eb00f26e_iv
   -in id_rsa.enc -out ./id_rsa -d
