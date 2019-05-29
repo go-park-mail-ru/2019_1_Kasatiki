@@ -46,7 +46,7 @@ func ReadConfig(path string, paymentsInfo *models.Credentials) error {
 }
 
 func PhonePayout(paymentsInfo models.Credentials, inputPhone string, amount string) error {
-	err := ReadConfig("/home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/payments/credentials.json",
+	err := ReadConfig("credentials.json",
 		&paymentsInfo)
 	if err != nil {
 		return errors.New("Unable to get last transaction id")
