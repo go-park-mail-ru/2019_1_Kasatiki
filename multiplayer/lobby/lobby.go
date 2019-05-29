@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
 	rm "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/lobby/room"
@@ -64,21 +65,24 @@ func (lb *Lobby) Run(connectionQueue chan *connections.UserConnection) {
 // 	3) 	Если пользователь новый, но он не первый - он становится текущим,
 //		соответственно создаем новую комнату
 
-func (lb *Lobby) AddPlayer(connection *connections.UserConnection) {
+func (lb *Lobby) AddPlayer(connection *connections.UserConnection) error {
 	// Проверка на то, что пользователь с таким ником в игре
+	if connection.Login == "" {
+		return errors.New("Bad login")
+	}
 	game, ok := lb.ProcessedPlayers[connection.Login]
 	if ok {
 		// Если игрок уже был в игре, но по какой-то причине отлетел - восстанавливаем соединение.
 		fmt.Println("Reconnecting player")
 		lb.Rooms[game.Room].Reconnect(connection)
-		return
+		return nil
 	}
 
 	// Todo SinglePlayer
 	if connection.TypeGame != "Multiplayer" {
 		// Меняем id комнаты
 		lb.LastRoom++
-		return
+		return nil
 	}
 
 	// Если ждущего игрока нет - назначаем игрока
@@ -86,7 +90,7 @@ func (lb *Lobby) AddPlayer(connection *connections.UserConnection) {
 		fmt.Println("New waiter")
 		//log.Printf("Set connection user = '%s' as waiting", connection.Token)
 		lb.WaitingConnection = connection
-		return
+		return nil
 	}
 
 	// Если дошли до сюда - значит у нас есть 2 свободных игрока - ждущий и текущий
@@ -102,7 +106,7 @@ func (lb *Lobby) AddPlayer(connection *connections.UserConnection) {
 	// Меняем id комнаты
 	lb.LastRoom++
 
-	return
+	return nil
 }
 
 // Создаем новую комнату и коннектим двух игроков
