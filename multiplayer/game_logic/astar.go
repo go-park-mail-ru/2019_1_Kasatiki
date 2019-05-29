@@ -131,39 +131,39 @@ func heuristics(curr *Point, goal *Point) int {
 	return int(0.5 + math.Sqrt(math.Pow(float64(curr.XCell-goal.XCell), 2)+math.Pow(float64(curr.YCell-goal.YCell), 2)))
 }
 
-func AStar(start *Point, goal *Point, m *Map) (Points, bool) {
-	if goal.IsEqual(start) {
-		var points Points
-		points = append(points, start)
-		return points, true
-	}
-
-	var open Points
-	var closed Points
-	var from = make(map[*Point]*Point)
-	start.G = 0
-	start.F = start.G + heuristics(start, goal)
-
-	open = append(open, start)
-	for len(open) > 0 {
-		curr := minF(open)
-		if curr.IsEqual(goal) {
-			return getWay(from, start, curr), true
-		}
-		open.Remove(curr)
-		closed.Add(curr)
-		unclosedNeighbours := getUnclosedNeighbours(curr, m, &closed)
-		for _, neighbour := range unclosedNeighbours {
-			var tempG = curr.G + absDist(curr, neighbour)
-			if !open.IsExists(neighbour) || tempG < neighbour.G {
-				from[neighbour] = curr
-				neighbour.G = tempG
-				neighbour.F = neighbour.G + heuristics(neighbour, goal)
-			}
-			if !open.IsExists(neighbour) {
-				open.Add(neighbour)
-			}
-		}
-	}
-	return nil, false
-}
+//func AStar(start *Point, goal *Point, m *Map) (Points, bool) {
+//	if goal.IsEqual(start) {
+//		var points Points
+//		points = append(points, start)
+//		return points, true
+//	}
+//
+//	var open Points
+//	var closed Points
+//	var from = make(map[*Point]*Point)
+//	start.G = 0
+//	start.F = start.G + heuristics(start, goal)
+//
+//	open = append(open, start)
+//	for len(open) > 0 {
+//		curr := minF(open)
+//		if curr.IsEqual(goal) {
+//			return getWay(from, start, curr), true
+//		}
+//		open.Remove(curr)
+//		closed.Add(curr)
+//		unclosedNeighbours := getUnclosedNeighbours(curr, m, &closed)
+//		for _, neighbour := range unclosedNeighbours {
+//			var tempG = curr.G + absDist(curr, neighbour)
+//			if !open.IsExists(neighbour) || tempG < neighbour.G {
+//				from[neighbour] = curr
+//				neighbour.G = tempG
+//				neighbour.F = neighbour.G + heuristics(neighbour, goal)
+//			}
+//			if !open.IsExists(neighbour) {
+//				open.Add(neighbour)
+//			}
+//		}
+//	}
+//	return nil, false
+//}

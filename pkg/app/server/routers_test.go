@@ -1,6 +1,10 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -24,7 +28,10 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 
 func TestMain(m *testing.M) {
 	testInstance = App{}
-	testInstance.Initialize()
+	configBytes, _ := ioutil.ReadFile("../../../cmd/server/config.json")
+	config := &models.Config{}
+	_ = json.NewDecoder(bytes.NewReader(configBytes)).Decode(&config)
+	testInstance.Initialize(config)
 	code := m.Run()
 	os.Exit(code)
 }

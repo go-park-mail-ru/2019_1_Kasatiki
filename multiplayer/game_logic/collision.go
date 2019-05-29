@@ -1,10 +1,10 @@
 package game_logic
 
 func IsCollision(obj1, obj2 *DynamycObject) bool {
-	if obj1.Y > obj2.Y - obj1.Ysize && 			// граница	сверху
-		obj1.Y < obj2.Y + obj2.Ysize && 		// граница	снизу
-		obj1.X > obj2.X - obj1.Xsize && 		// граница	справа
-		obj1.X < obj2.X + obj2.Xsize { 			// граница 	слева
+	if obj1.Y > obj2.Y-obj1.Ysize && // граница	сверху
+		obj1.Y < obj2.Y+obj2.Ysize && // граница	снизу
+		obj1.X > obj2.X-obj1.Xsize && // граница	справа
+		obj1.X < obj2.X+obj2.Xsize { // граница 	слева
 		//fmt.Println("Colision with Obj_1: ", obj1.Name, " and  Obj_2: ", obj2.Name)
 		return true
 	}
@@ -28,6 +28,7 @@ func SimpleCollisionEvent(obj1, obj2 *DynamycObject, moves Moves) {
 	}
 }
 
+/*
 func ObjectFilter(slice []*DynamycObject) []*DynamycObject {
 	keys := make(map[*DynamycObject]bool)
 	list := []*DynamycObject{}
@@ -38,5 +39,4 @@ func ObjectFilter(slice []*DynamycObject) []*DynamycObject {
 		}
 	}
 	return list
-}
-
+}*/

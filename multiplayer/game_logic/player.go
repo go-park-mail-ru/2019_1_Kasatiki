@@ -1,7 +1,7 @@
 package game_logic
 
 import (
-	// "fmt"
+// "fmt"
 )
 
 //type Weapon struct {
@@ -46,10 +46,10 @@ func (p *Player) CreateDefaultWeapon() {
 	p.Weapon.SetBullet(20, *p)
 }
 
-// Обращение к бд для смены оружия(покупка)
-func (p *Player) ChangeWeapon() (w *Weapon) {
-	return
-}
+//// Обращение к бд для смены оружия(покупка)
+//func (p *Player) ChangeWeapon() (w *Weapon) {
+//	return
+//}
 
 func (p *Player) Spawn(x int, y int, sizeX int, sizeY int) {
 	p.Object = &DynamycObject{
@@ -63,21 +63,21 @@ func (p *Player) Spawn(x int, y int, sizeX int, sizeY int) {
 	}
 }
 
-// Создание пули
-func (p *Player) BulletsCreate() (bs []Bullet) {
-	return
-}
+//// Создание пули
+//func (p *Player) BulletsCreate() (bs []Bullet) {
+//	return
+//}
 
 // аппендит пули в массив пулей
-func (p *Player) Shot(a float32)  *Bullet {
+func (p *Player) Shot(a float32) *Bullet {
 
 	var b Bullet
 
 	b.Object = &DynamycObject{
 		Name:     "Bullet",
 		Hp:       0,
-		X:        p.Object.X + p.Object.Xsize / 2,
-		Y:        p.Object.Y + p.Object.Ysize / 2,
+		X:        p.Object.X + p.Object.Xsize/2,
+		Y:        p.Object.Y + p.Object.Ysize/2,
 		Velocity: 15,
 		Xsize:    5,
 		Ysize:    5,
@@ -92,7 +92,6 @@ func (p *Player) Shot(a float32)  *Bullet {
 func (p1 *Player) PlayerToPlayer(p2 *DynamycObject, moves Moves) {
 	SimpleCollisionEvent(p1.Object, p2, moves)
 }
-
 
 func (p Player) SetAngular(ang float32) {
 	p.Angular = ang

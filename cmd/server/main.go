@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/app/server"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
@@ -20,7 +22,7 @@ func main() {
 		os.Exit(1)
 	}
 	config := &models.Config{}
-	err = config.UnmarshalJSON(configBytes)
+	err = json.NewDecoder(bytes.NewReader(configBytes)).Decode(&config)
 	if err != nil {
 		log.Crit("unable to parse configuration file ./config.json : " +
 			"it should be json with all fields : " + err.Error())
