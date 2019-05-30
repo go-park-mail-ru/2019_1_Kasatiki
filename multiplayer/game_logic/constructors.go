@@ -83,7 +83,7 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 			Nickname: p.Login,
 			Id:       id,
 		}
-		players[p.Login].Spawn(gameMap.SizeX*gameMap.TileSize/2+id*5*gameMap.TileSize, gameMap.SizeX*gameMap.TileSize/2, gameMap.TileSize, gameMap.TileSize)
+		players[p.Login].Spawn(gameMap.SizeX*gameMap.TileSize/2+id*gameMap.TileSize, gameMap.SizeX*gameMap.TileSize/2, gameMap.TileSize, gameMap.TileSize)
 		fmt.Printf("Player was spawned in X: %d,    Y : %d \n", players[p.Login].Object.X, players[p.Login].Object.Y)
 		players[p.Login].CreateDefaultWeapon()
 	}

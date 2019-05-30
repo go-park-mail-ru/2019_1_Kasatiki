@@ -57,7 +57,7 @@ func (p *Player) Spawn(x int, y int, sizeX int, sizeY int) {
 		Hp:       100,
 		X:        x,
 		Y:        y,
-		Velocity: 3,
+		Velocity: 5,
 		Xsize:    sizeX,
 		Ysize:    sizeY,
 	}
