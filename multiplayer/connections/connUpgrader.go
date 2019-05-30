@@ -26,12 +26,14 @@ type ConnUpgrader struct {
 func NewConnUpgrader() (cu *ConnUpgrader) {
 	cu = &ConnUpgrader{
 		upgrader: websocket.Upgrader{
+
 			HandshakeTimeout: time.Duration(1 * time.Second),
 			CheckOrigin: func(r *http.Request) bool { // Токен не проверяется.
 				return true
 			},
 			//EnableCompression: true,
 		},
+
 		Queue: make(chan *UserConnection, 50),
 	}
 	return

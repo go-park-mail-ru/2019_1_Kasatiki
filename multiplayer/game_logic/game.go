@@ -168,13 +168,13 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		res.Players = append(res.Players, info)
 	}
 
-	//// Reklama
-	//for _, adv := range g.GameObjects.Advs {
-	//	adv.MoveToPlayer(g.Map)
-	//	var info AdvInfo
-	//	info.Object = adv.Object
-	//	res.Advs = append(res.Advs, info)
-	//}
+	// Reklama
+	for _, adv := range g.GameObjects.Advs {
+		adv.MoveToPlayer(g.Map)
+		var info AdvInfo
+		info.Object = adv.Object
+		res.Advs = append(res.Advs, info)
+	}
 
 	return
 }

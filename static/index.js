@@ -32,6 +32,33 @@ let keyMap = {
     angle: 0,
 }
 
+class Adv {
+    constructor(
+        x, y
+    ) {
+        this.x = x;
+        this.y = y;
+
+        this.v = 5;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(Math.round(this.x - viewport.x), Math.round(this.y - viewport.y), tileSize, tileSize);
+        ctx.closePath();
+    }
+}
+
+function drawAdv(adv) {
+    ctx.beginPath();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(Math.round(adv.object.x - viewport.x), Math.round(adv.object.y - viewport.y), tileSize, tileSize);
+    ctx.closePath();
+}
+
+let advs = [];
+
 class Player {
     constructor(
         x, y
@@ -127,7 +154,7 @@ function mouseDown(evt) {
         keyMap.shot = true;
         let x = evt.clientX - bounds.left - 400;
         let y = evt.clientY - bounds.top - 400;
-    
+
         keyMap.angle = Math.atan2(y, x);
 
         lastFire = Date.now();
@@ -337,8 +364,7 @@ socket.addEventListener("message", (event) => {
     //     player.y = data["players"][1].object.y;
     // }
 
-
-    // console.log(data["bullets"], bullets)
+    advs = data["advs"];
 
     if (data["bullets"] != null) {
         bullets = data["bullets"]
@@ -348,7 +374,7 @@ socket.addEventListener("message", (event) => {
         if (data["players"][0].id == player.id) {
             player.x += (data["players"][0].object.x - player.x) * player.c;
             player.y += (data["players"][0].object.y - player.y) * player.c;
-    
+
             enemy.x += (data["players"][1].object.x - enemy.x) * player.c;
             enemy.y += (data["players"][1].object.y - enemy.y) * player.c;
             // console.log("player: ", data["players"][0].object.x, data["players"][0].object.y);
@@ -357,17 +383,22 @@ socket.addEventListener("message", (event) => {
         } else {
             player.x += (data["players"][1].object.x - player.x) * player.c;
             player.y += (data["players"][1].object.y - player.y) * player.c;
-    
+
             enemy.x += (data["players"][0].object.x - enemy.x) * player.c;
             enemy.y += (data["players"][0].object.y - enemy.y) * player.c;
-    
+
             // console.log("player: ", data["players"][1].object.x, data["players"][1].object.y);
             // console.log("enemy: ", data["players"][0].object.x, data["players"][0].object.y);
         }
     }
-
-
-
+    // console.log(data['advs'])
+    // if (data['advs'] != null) {
+    //     for (let i = 0; i < advs.length; i++) {
+    //         advs[i].x = data['advs'][i].object.x;
+    //         advs[i].y = data['advs'][i].object.y;
+    //
+    //     }
+    // }
 });
 
 socket.addEventListener("error", (error) => {
@@ -388,7 +419,11 @@ function loop() {
 
     let json = JSON.stringify(keyMap);
 
-    console.log(keyMap.shot);
+    for (let i = 0; i < advs.length; i++) {
+        drawAdv(advs[i])
+    }
+
+    // console.log(keyMap.shot);
 
     if (socketOpen) {
         socket.send(json);

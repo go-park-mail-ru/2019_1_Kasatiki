@@ -2,6 +2,7 @@ package room
 
 import (
 	gl "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
+	"time"
 )
 
 func (r *Room) GameEngine() {
@@ -18,19 +19,22 @@ func (r *Room) GameEngine() {
 	if len(keys) > 1 {
 		r.Players[keys[1]].Connection.WriteJSON(&re)
 	}
-
+	ticker := time.NewTicker(time.Second / 30)
+	res := gl.GameStatus{}
 	for {
 		if len(keys) > 1 {
 			if r.Players[keys[0]].TypeGame == "Multiplayer" {
 				select {
 				// Если есть сигнал от 1го игрока - оправляем его 2му игроку
 				case message = <-r.Messenger.Player_From[keys[0]]:
-					res := game.EventListener(message, r.Players[keys[0]].Login)
-					r.Players[keys[1]].Connection.WriteJSON(&res)
+					res = game.EventListener(message, r.Players[keys[0]].Login)
+					//r.Players[keys[1]].Connection.WriteJSON(&res)
 				// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
 				case message = <-r.Messenger.Player_From[keys[1]]:
-					res := game.EventListener(message, r.Players[keys[1]].Login)
+					res = game.EventListener(message, r.Players[keys[1]].Login)
+				case <-ticker.C:
 					r.Players[keys[0]].Connection.WriteJSON(&res)
+					r.Players[keys[1]].Connection.WriteJSON(&res)
 				}
 			}
 

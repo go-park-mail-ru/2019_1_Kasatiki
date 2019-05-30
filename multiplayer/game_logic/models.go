@@ -139,3 +139,13 @@ type GameObjects struct {
 	Bullets []*Bullet          `json:"bullets"`
 	Barrier []*Barrier         `json:"barrier"`
 }
+
+type Point struct {
+	XCell int
+	YCell int
+
+	G int // g(x). Стоимость пути от начальной вершины. У start g(x) = 0
+	F int // f(x) = g(x) + h(x)
+}
+
+type Points []*Point
