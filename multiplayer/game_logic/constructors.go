@@ -37,41 +37,21 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 	res.Barrier = game.GameObjects.Barrier
 
 	game.ZonesIni()
-	fmt.Println("Число барьеров", len(game.GameObjects.Barrier))
-
-	fmt.Println("Zones:", len(game.Zones))
-
-	for _, z := range game.Zones {
-		fmt.Printf("Zone numb : %d, StartX : %d, StartY : %d, EndX : %d, EndY : %d \n", z.Number, z.StartX, z.StartY, z.EndX, z.EndY)
-	}
-	for k, z := range game.StaticCollection {
-		fmt.Println("Zone Numb: ", k, " Numbers: ", len(z))
-		//for _, b := range z {
-		//	fmt.Printf("Name : %s, StartX : %d, StartY : %d, EndX : %d, EndY : %d \n", b.Name, b.X, b.Y, b.Xsize, b.Ysize)
-		//}
-	}
+	//fmt.Println("Число барьеров", len(game.GameObjects.Barrier))
+	//
+	//fmt.Println("Zones:", len(game.Zones))
+	//
+	//for _, z := range game.Zones {
+	//	fmt.Printf("Zone numb : %d, StartX : %d, StartY : %d, EndX : %d, EndY : %d \n", z.Number, z.StartX, z.StartY, z.EndX, z.EndY)
+	//}
+	//for k, z := range game.StaticCollection {
+	//	fmt.Println("Zone Numb: ", k, " Numbers: ", len(z))
+	//	//for _, b := range z {
+	//	//	fmt.Printf("Name : %s, StartX : %d, StartY : %d, EndX : %d, EndY : %d \n", b.Name, b.X, b.Y, b.Xsize, b.Ysize)
+	//	//}
+	//}
 	return &game, res
 }
-
-// Создание карты
-//func MapGeneration() (newMap *Map) {
-//	return
-//}
-
-//type DynamycObject struct {
-//	Name string
-//
-//	Hp    float32 `json:"hp"`
-//	HpCap float32 `json:"hpcap"`
-//
-//	X     float32 `json:"x"`
-//	Y     float32 `json:"y"`
-//	Xsize float32 `json:"xsize"`
-//	Ysize float32 `json:"ysize"`
-//
-//	Velocity       float32 `json:"velocity"`
-//	VelocityBarior float32
-//}
 
 // Создание Игроков
 func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *Map) (players map[string]*Player) {

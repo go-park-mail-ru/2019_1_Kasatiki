@@ -2,7 +2,6 @@ package connections
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -40,16 +39,16 @@ func NewConnUpgrader() (cu *ConnUpgrader) {
 
 var debug = true
 
-func (up *ConnUpgrader) StartGame(c *gin.Context) {
-	log.Printf("New connection: %#v", c.Request)
+func (up *ConnUpgrader) StartGame(res http.ResponseWriter, req *http.Request) {
+	log.Printf("New connection: %#v", req)
 	// Проверяет SessionId из cookie.
-	sessionID, err := c.Cookie("session_id")
+	fmt.Println(req.Cookies())
+	sessionID, err := req.Cookie("session_id")
 	if err != nil {
-		c.JSON(404, "error of cookie")
+		fmt.Println(err)
+		http.Error(res, "wrong cookie", 404)
 		return
 	}
-
-	//
 	var login string
 	if debug {
 		// просто создаёт случайный логин
@@ -57,10 +56,10 @@ func (up *ConnUpgrader) StartGame(c *gin.Context) {
 	}
 
 	// Меняет протокол.
-	WSConnection, err := up.upgrader.Upgrade(c.Writer, c.Request, nil)
+	WSConnection, err := up.upgrader.Upgrade(res, req, nil)
 	if err != nil {
 		fmt.Println(err)
-		c.Status(409)
+		res.WriteHeader(409)
 		//c.JSON(409, "error of creating WS")
 		return
 	}
@@ -68,7 +67,7 @@ func (up *ConnUpgrader) StartGame(c *gin.Context) {
 	// Todo убрать хардкод
 	connection := &UserConnection{
 		Login:      login,
-		Token:      sessionID,
+		Token:      sessionID.Value,
 		Connection: WSConnection,
 		TypeGame:   "Multiplayer",
 	}

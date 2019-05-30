@@ -4,24 +4,7 @@ import (
 // "fmt"
 )
 
-//type Weapon struct {
-//	Id       int
-//	Name     string
-//	FireRate float32
-//	Magazine int
-//	Bullet   *Bullet
-//	Coast    int
-//}
-
-/*
-type Bullet struct {
-	Object   *DynamycObject `json:"object"`
-	Damage   float32
-	PlayerId int8 `json:"playerid"`
-}
-*/
 // Хардкод дефолного оружия
-
 func (w *Weapon) SetBullet(dam float32, player Player) {
 	w.Bullet = &Bullet{}
 	w.Bullet.Object = &DynamycObject{
@@ -93,7 +76,7 @@ func (p1 *Player) PlayerToPlayer(p2 *DynamycObject, moves Moves) {
 	SimpleCollisionEvent(p1.Object, p2, moves)
 }
 
-func (p Player) SetAngular(ang float32) {
+func (p *Player) SetAngular(ang float32) {
 	p.Angular = ang
 }
 

@@ -101,6 +101,7 @@ func (r *Room) StopRoom() {
 		close(r.Messenger.Player_To[p.Login])
 		close(r.Recovery.Player_IsAvailableWrite[p.Login])
 	}
+
 	return
 }
 
@@ -112,7 +113,7 @@ func (r *Room) RemoveRoom() {
 
 // Восстановление соединения
 func (r *Room) Reconnect(user *connections.UserConnection) {
-	fmt.Println("Reconnect sessioni = '%s' as role %d", user.Token, user.Login)
+	fmt.Printf("Reconnect sessioni = '%s' as role %s\n", user.Token, user.Login)
 
 	for _, p := range r.Players {
 		if p != nil {

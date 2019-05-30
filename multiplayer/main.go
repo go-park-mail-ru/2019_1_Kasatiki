@@ -19,6 +19,6 @@ func main() {
 
 	// Преобразование HTTP запроса в ws
 	gameService.Use(static.Serve("/", static.LocalFile("../static/", true)))
-	gameService.GET("/game/start", upgrader.StartGame)
+	gameService.GET("/game/start", gin.WrapF(upgrader.StartGame))
 	gameService.Run(":8080")
 }

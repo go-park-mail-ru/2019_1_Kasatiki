@@ -9,7 +9,6 @@ import (
 	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/olahol/melody.v1"
-	"log"
 	"os"
 )
 
@@ -61,8 +60,9 @@ func (instance *App) initializeRoutes() {
 
 }
 
-func (instance *App) Run(port string) {
-	log.Fatal(instance.Router.Run())
+func (instance *App) Run(port string) (err error) {
+	err = instance.Router.Run()
+	return
 }
 
 // Todo Обернуть в конфиг

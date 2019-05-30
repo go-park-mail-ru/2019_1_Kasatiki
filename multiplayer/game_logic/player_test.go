@@ -1,6 +1,8 @@
 package game_logic
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestPlayer_CreateDefaultWeapon(t *testing.T) {
 	p := &Player{}

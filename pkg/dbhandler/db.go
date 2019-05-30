@@ -66,19 +66,6 @@ func (instance *DBHandler) dataCreating(lim int) {
 	}
 }
 
-func (instance *DBHandler) msgCreating(lim int) {
-	var msg models.Message
-	//s1 := rand.NewSource(time.Now().UnixNano())
-	//r1 := rand.New(s1)
-	for i := 0; i < lim; i++ {
-		msg.Nickname = RandStr(10)
-		msg.Body = RandStr(50)
-		msg.Imgurl = "advhater.ru/" + RandStr(10) + ".jpeg"
-		msg.Timestamp = fmt.Sprintf("%02d:%02d:%02d", time.Now().Hour(), time.Now().Minute(), time.Now().Second())
-		instance.InsertMessage(msg)
-	}
-}
-
 func (instance *DBHandler) CreateTables() (err error) {
 	sql := `
 	CREATE EXTENSION IF NOT EXISTS CITEXT;
@@ -98,31 +85,6 @@ func (instance *DBHandler) CreateTables() (err error) {
 	// Mocked users
 	instance.dataCreating(100)
 
-	return err
-}
-
-func (instance *DBHandler) CreateMessageTable() (err error) {
-	sql := `
-	CREATE EXTENSION IF NOT EXISTS CITEXT;
-	--DROP TABLE IF EXISTS messages CASCADE;
-
-	CREATE TABLE IF NOT EXISTS messages (
-	id 				BIGSERIAL						NOT NULL	PRIMARY KEY,
-	nickname		CITEXT							NOT NULL,
-	message			TEXT							NOT NULL,
-	imgurl			TEXT,
-	time			TEXT) ;`
-	_, err = instance.Connection.Exec(sql)
-	// Mocked users
-	instance.msgCreating(100)
-	return err
-}
-
-func (instance *DBHandler) InsertMessage(msg models.Message) (err error) {
-	sql := `
-		INSERT INTO messages (nickname, message, imgurl, time)
-			VALUES ( $1, $2, $3, $4);`
-	_, err = instance.Connection.Exec(sql, msg.Nickname, msg.Body, msg.Imgurl, msg.Timestamp)
 	return err
 }
 
