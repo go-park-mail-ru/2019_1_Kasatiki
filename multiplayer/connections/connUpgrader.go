@@ -1,6 +1,7 @@
 package connections
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
@@ -58,7 +59,9 @@ func (up *ConnUpgrader) StartGame(c *gin.Context) {
 	// Меняет протокол.
 	WSConnection, err := up.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		c.JSON(409, "error of creating WS")
+		fmt.Println(err)
+		c.Status(409)
+		//c.JSON(409, "error of creating WS")
 		return
 	}
 
