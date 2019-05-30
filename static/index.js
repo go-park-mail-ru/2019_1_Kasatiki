@@ -7,12 +7,17 @@ let mapChange = true;
 
 let map = [];
 let barriers = [];
+let bullets = [];
 let mapSize = 100;
 
+let bounds = canvas.getBoundingClientRect();
 
 let tileSize = 50;
 let gameScreenW = 16;
 let gameScreenH = 16;
+
+// Время последнего выстрела
+let lastFire = Date.now();
 
 canvas.height = tileSize * gameScreenH;
 canvas.width = tileSize * gameScreenW;
@@ -23,10 +28,9 @@ let keyMap = {
     down : false,
     right : false,
 
-    click: false,
+    shot: false,
     angle: 0,
 }
-
 
 class Adv {
     constructor(
@@ -108,8 +112,6 @@ class Viewport {
     }
 
     update(x ,y) {
-        // this.x = x - this.w / 2;
-        // this.y = y - this.h / 2;
 
         if (zoom) {
             if (this.w < gameScreenH * 2 * 50) {
@@ -125,11 +127,11 @@ class Viewport {
             }
         }
 
-        this.x += (x - this.x - this.w * 0.5) * 0.05;
-        this.y += (y - this.y - this.h * 0.5) * 0.05;
+        // this.x += (x - this.x - this.w * 0.5) * 0.05;
+        // this.y += (y - this.y - this.h * 0.5) * 0.05;
 
-        // this.x = x - this.w / 2;
-        // this.y = y - this.h / 2;
+        this.x = x - this.w / 2;
+        this.y = y - this.h / 2;
 
         // console.log('port', this.x, this.y, this.w, this.h);
     }
@@ -141,16 +143,26 @@ let zoom = false;
 
 document.addEventListener('keydown', keyDown, false);
 document.addEventListener('keyup', keyUp, false);
-// document.addEventListener('mouseup', mouseUp, false);
-// document.addEventListener('mousedown', mouseDown, false);
+document.addEventListener('mouseup', mouseUp, false);
+document.addEventListener('mousedown', mouseDown, false);
 
-// function mouseUp(e) {
-//     keyMap.click = true;
-//     let x = e.pageX - e.bounds.left;
-//     let y = e.pageY - e.bounds.top;
+function mouseDown(evt) {
+    if (Date.now() - lastFire > 100) {
+        keyMap.shot = true;
+        let x = evt.clientX - bounds.left - 400;
+        let y = evt.clientY - bounds.top - 400;
+    
+        keyMap.angle = Math.atan2(y, x);
 
-//     keyMap.angle = Math.atan2(x, y);
-// }
+        lastFire = Date.now();
+    } else {
+        keyMap.shot = false;
+    }
+}
+
+function mouseUp() {
+    keyMap.shot = false;
+}
 
 function keyDown(e) {
     if (e.keyCode === 32) {
@@ -221,7 +233,7 @@ function drawTile(tile, x, y, i, j) {
     }
 
     ctx.fillStyle = color;
-    ctx.fillRect(y, x, tileSize, tileSize);
+    ctx.fillRect(x, y, tileSize, tileSize);
     // ctx.fillStyle = '#000000'
     // ctx.font = tileSize / 4 + 'px serif';
     // let text = i + ', ' + j;
@@ -233,11 +245,20 @@ function drawBarriers() {
     for (let i = 0; i < barriers.length; i++) {
         ctx.strokeStyle = '#000000';
 
-        if (barriers[i].object.x > viewport.x && barriers[i].object.y > viewport.y && barriers[i].object.x < (viewport.x + viewport.w) && barriers[i].object.y < (viewport.y + viewport.h)) {
-            ctx.strokeRect(barriers[i].object.x - viewport.x, barriers[i].object.y - viewport.y, barriers[i].object.xsize, barriers[i].object.ysize);
-        }
+        // if (barriers[i].object.x > viewport.x && barriers[i].object.y > viewport.y && barriers[i].object.x < (viewport.x + viewport.w) && barriers[i].object.y < (viewport.y + viewport.h)) {
+        ctx.strokeRect(barriers[i].object.x - viewport.x, barriers[i].object.y - viewport.y, barriers[i].object.xsize, barriers[i].object.ysize);
+        // }
 
         // console.log(barriers[i].object.x, barriers[i].object.y, barriers[i].object.xsize, barriers[i].object.ysize);
+    }
+}
+
+function drawBullets() {
+    if ( bullets.length != 0) {
+        for (let i = 0; i < bullets.length; i++) {
+            ctx.fillStyle = '#ffff00';
+            ctx.fillRect(bullets[i].object.x - viewport.x, bullets[i].object.y - viewport.y, 5, 5);
+        }
     }
 }
 
@@ -273,7 +294,7 @@ function drawMap(x, y) {
             let tile_x = Math.floor(i * tileSize - viewport.x);
             let tile_y = Math.floor(j * tileSize - viewport.y);
 
-            drawTile(map[i][j], tile_y, tile_x, i ,j);
+            drawTile(map[j][i], tile_x, tile_y, i ,j);
         }
     }
 }
@@ -283,11 +304,10 @@ let cord = {
     y : 0,
 }
 
-const bounds = canvas.getBoundingClientRect();
-document.body.onmousemove = function(evt) {
-    cord.x = evt.clientX - bounds.left;
-    cord.y = evt.clientY - bounds.top;
-}
+// document.body.onmousemove = function(evt) {
+//     cord.x = evt.clientX - bounds.left;
+//     cord.y = evt.clientY - bounds.top;
+// }
 
 function renderEnemy() {
     ctx.beginPath();
@@ -342,30 +362,40 @@ socket.addEventListener("message", (event) => {
     // }
 
 
-    if (data["players"][0].id == player.id) {
-        player.x += (data["players"][0].object.x - player.x) * player.c;
-        player.y += (data["players"][0].object.y - player.y) * player.c;
+    // console.log(data["bullets"], bullets)
 
-        enemy.x += (data["players"][1].object.x - enemy.x) * player.c;
-        enemy.y += (data["players"][1].object.y - enemy.y) * player.c;
-        // console.log("player: ", data["players"][0].object.x, data["players"][0].object.y);
-        // console.log("enemy: ", data["players"][1].object.x, data["players"][1].object.y);
-        // }ss
-    } else {
-        player.x += (data["players"][1].object.x - player.x) * player.c;
-        player.y += (data["players"][1].object.y - player.y) * player.c;
-
-        enemy.x += (data["players"][0].object.x - enemy.x) * player.c;
-        enemy.y += (data["players"][0].object.y - enemy.y) * player.c;
-
-        // console.log("player: ", data["players"][1].object.x, data["players"][1].object.y);
-        // console.log("enemy: ", data["players"][0].object.x, data["players"][0].object.y);
+    if (data["bullets"] != null) {
+        bullets = data["bullets"]
     }
 
-    // console.log(data);
-    for (let i = 0; i < advs.length; i++) {
-        advs[i].x = data['advs'][i].object.x;
-        advs[i].y = data['advs'][i].object.y;
+    if (data["players"] != null) {
+        if (data["players"][0].id == player.id) {
+            player.x += (data["players"][0].object.x - player.x) * player.c;
+            player.y += (data["players"][0].object.y - player.y) * player.c;
+    
+            enemy.x += (data["players"][1].object.x - enemy.x) * player.c;
+            enemy.y += (data["players"][1].object.y - enemy.y) * player.c;
+            // console.log("player: ", data["players"][0].object.x, data["players"][0].object.y);
+            // console.log("enemy: ", data["players"][1].object.x, data["players"][1].object.y);
+            // }ss
+        } else {
+            player.x += (data["players"][1].object.x - player.x) * player.c;
+            player.y += (data["players"][1].object.y - player.y) * player.c;
+    
+            enemy.x += (data["players"][0].object.x - enemy.x) * player.c;
+            enemy.y += (data["players"][0].object.y - enemy.y) * player.c;
+    
+            // console.log("player: ", data["players"][1].object.x, data["players"][1].object.y);
+            // console.log("enemy: ", data["players"][0].object.x, data["players"][0].object.y);
+        }
+    }
+    
+    if (data['advs'] != null) {
+        for (let i = 0; i < advs.length; i++) {
+            advs[i].x = data['advs'][i].object.x;
+            advs[i].y = data['advs'][i].object.y;
+
+        }
     }
 });
 
@@ -377,19 +407,22 @@ socket.addEventListener("error", (error) => {
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawMap( player.x, player.y);
-    drawBarriers();
-
-
+    drawMap(player.x, player.y);
     viewport.update(player.x, player.y);
 
     player.draw();
     renderEnemy();
     for (let i = 0; i < advs.length; i++) {
         advs[i].draw();
+        console.log(advs[i].x, advs[i].x)
+        console.log(player.x, player.y)
     }
+    // drawBarriers();
+    drawBullets();
 
     let json = JSON.stringify(keyMap);
+
+    // console.log(keyMap.shot);
 
     if (socketOpen) {
         socket.send(json);

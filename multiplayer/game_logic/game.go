@@ -1,8 +1,6 @@
 package game_logic
 
-import (
-	"fmt"
-)
+// import "fmt"
 
 // Колизии
 
@@ -42,10 +40,10 @@ func (g *Game) CollectObjectsForPlayer(nickname string, player *DynamycObject) [
 	}
 	var count int
 	numbs := []int{}
-	for i, z := range g.Zones {
+	for _, z := range g.Zones {
 		// Создаем DynamicObject из зоны
 		zoneObj := &DynamycObject{
-			Name:  fmt.Sprintf("Zone %d", i),
+			// Name:  fmt.Sprintf("Zone %d", i),
 			X:     z.StartX,
 			Y:     z.StartY,
 			Xsize: z.EndX - z.StartX,
@@ -79,19 +77,25 @@ func (g *Game) CollectObjectsForPlayer(nickname string, player *DynamycObject) [
 	return objs
 }
 
+var gameObjs []*DynamycObject
+
+func GetGameObjs() []*DynamycObject {
+	return gameObjs
+}
+
 // Входная точка для изменения состояния игры
 // Принимает в себя структуру, которая получилась после разкодирования из json
 func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus) {
 
 	g.GameObjects.Players[nickname].SetAngular(mes.Angular)
-	delta := g.GameObjects.Players[nickname].Object.Velocity
+	delta := g.GameObjects.Players[nickname].Object.Velocity + 5
 
 	// Собирем объекты с которыми игрок вероятнее всего столнется
-	objs := g.CollectObjectsForPlayer(nickname, g.GameObjects.Players[nickname].Object)
+	gameObjs = g.CollectObjectsForPlayer(nickname, g.GameObjects.Players[nickname].Object)
 
 	if mes.Down {
 		g.GameObjects.Players[nickname].Object.Y += delta
-		for _, obj := range objs {
+		for _, obj := range gameObjs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
 
@@ -103,7 +107,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 
 	if mes.Up {
 		g.GameObjects.Players[nickname].Object.Y -= delta
-		for _, obj := range objs {
+		for _, obj := range gameObjs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
 				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
@@ -113,7 +117,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 	}
 	if mes.Left {
 		g.GameObjects.Players[nickname].Object.X -= delta
-		for _, obj := range objs {
+		for _, obj := range gameObjs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
 				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
@@ -127,7 +131,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 	}
 	if mes.Right {
 		g.GameObjects.Players[nickname].Object.X += delta
-		for _, obj := range objs {
+		for _, obj := range gameObjs {
 			// Если произошла коллизия
 			if IsCollision(g.GameObjects.Players[nickname].Object, obj) {
 				// fmt.Println("Colision with Obj_1: ", g.GameObjects.Players[nickname].Object.Name, " and  Obj_2: ", obj.Name)
@@ -137,7 +141,8 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		//moves.Right = true
 	}
 	if mes.Shot {
-		g.GameObjects.Players[nickname].Shot()
+		bullet := g.GameObjects.Players[nickname].Shot(mes.Angular)
+		g.GameObjects.Bullets = append(g.GameObjects.Bullets, bullet)
 	}
 
 	// Здесь обрабатываем коллизии игрока, который только сходил:
@@ -170,5 +175,6 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		info.Object = adv.Object
 		res.Advs = append(res.Advs, info)
 	}
+
 	return
 }

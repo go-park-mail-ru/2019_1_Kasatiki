@@ -11,7 +11,7 @@ func (adv *Adv) Spawn(x int, y int) {
 		Hp:       10,
 		X:        x,
 		Y:        y,
-		Velocity: 1,
+		Velocity: 2,
 	}
 }
 
@@ -67,29 +67,29 @@ func (adv *Adv) MoveWithWay(way Points, m *Map) {
 	}
 }
 
-func (adv *Adv) MoveWithWay_with_one_step(way *Points, m *Map) {
-	if len(*way) <= 1 {
+func (adv *Adv) MoveWithWay_with_one_step(way Points, m *Map) {
+	if len(way) <= 1 {
 		return
 	}
 	distance := adv.Object.Velocity
 	distanceToNearestCell := int(math.Sqrt(
-		float64(((*way)[len(*way)-2].XCell*m.TileSize-adv.Object.X)*((*way)[len(*way)-2].XCell*m.TileSize-adv.Object.X) +
-			((*way)[len(*way)-2].YCell*m.TileSize-adv.Object.Y)*((*way)[len(*way)-2].YCell*m.TileSize-adv.Object.Y))))
+		float64((way[len(way)-2].XCell*m.TileSize-adv.Object.X)*(way[len(way)-2].XCell*m.TileSize-adv.Object.X) +
+			(way[len(way)-2].YCell*m.TileSize-adv.Object.Y)*(way[len(way)-2].YCell*m.TileSize-adv.Object.Y))))
 	if distanceToNearestCell <= distance {
-		adv.Object.X = (*way)[len(*way)-2].XCell * m.TileSize
-		adv.Object.Y = (*way)[len(*way)-2].YCell * m.TileSize
+		adv.Object.X = way[len(way)-2].XCell * m.TileSize
+		adv.Object.Y = way[len(way)-2].YCell * m.TileSize
 		return
 	}
-	if (*way)[len(*way)-1].XCell == (*way)[len(*way)-2].XCell {
-		if (*way)[len(*way)-1].YCell > (*way)[len(*way)-2].YCell {
+	if way[len(way)-1].XCell == way[len(way)-2].XCell {
+		if way[len(way)-1].YCell > way[len(way)-2].YCell {
 			adv.Object.Y -= distance
-		} else if (*way)[len(*way)-1].YCell < (*way)[len(*way)-2].YCell {
+		} else if way[len(way)-1].YCell < way[len(way)-2].YCell {
 			adv.Object.Y += distance
 		}
 	} else {
-		if (*way)[len(*way)-1].XCell > (*way)[len(*way)-2].XCell {
+		if way[len(way)-1].XCell > way[len(way)-2].XCell {
 			adv.Object.X -= distance
-		} else if (*way)[len(*way)-1].XCell < (*way)[len(*way)-2].XCell {
+		} else if way[len(way)-1].XCell < way[len(way)-2].XCell {
 			adv.Object.X += distance
 		}
 	}
@@ -97,27 +97,78 @@ func (adv *Adv) MoveWithWay_with_one_step(way *Points, m *Map) {
 
 func (adv *Adv) MoveToPlayer(m *Map) {
 	player := adv.Player
-	// // Тангенс угла наклона
-	// angular := math.Atan2(float64(player.Object.Y-adv.Object.Y), float64(player.Object.X-adv.Object.X))
+	// Тангенс угла наклона
+	angular := math.Atan2(float64(player.Object.Y-adv.Object.Y), float64(player.Object.X-adv.Object.X))
+	distanceX := int(float64(adv.Object.Velocity) * math.Cos(angular))
+	distanceY := int(float64(adv.Object.Velocity) * math.Sin(angular))
+	if angular > 0.0 {
+		if angular <= math.Pi/2 {
+			if m.Field[(adv.Object.Y+distanceY)/m.TileSize+1][adv.Object.X/m.TileSize] == 1 {
+				distanceX = adv.Object.Velocity
+				distanceY = 0
+				if m.Field[adv.Object.Y/m.TileSize][(adv.Object.X+distanceX)/m.TileSize+1] == 1 {
+					distanceX = 0
+				}
+			} else {
+				if m.Field[adv.Object.Y/m.TileSize][(adv.Object.X+distanceX)/m.TileSize+1] == 1 {
+					distanceY = adv.Object.Velocity
+					distanceX = 0
+				}
+			}
+		} else {
+			if m.Field[(adv.Object.Y+distanceY)/m.TileSize+1][(adv.Object.X+distanceX)/m.TileSize+1] == 1 {
+				distanceX = -adv.Object.Velocity
+				distanceY = 0
+				if m.Field[adv.Object.Y/m.TileSize][(adv.Object.X+distanceX)/m.TileSize-1] == 1 {
+					distanceX = 0
+				}
+			} else {
+				if m.Field[adv.Object.Y/m.TileSize][(adv.Object.X+distanceX)/m.TileSize] == 1 {
+					distanceY = adv.Object.Velocity
+					distanceX = 0
+				}
+			}
+		}
+	} else {
+		// log.Println(distanceY, distanceX)
+		// log.Println("HELLO", time.Now())
+		if angular >= -math.Pi/2 {
+			if m.Field[(adv.Object.Y+distanceY)/m.TileSize-1][adv.Object.X/m.TileSize] == 1 {
+				distanceX = adv.Object.Velocity
+				distanceY = 0
+				if m.Field[(adv.Object.Y+distanceY)/m.TileSize+1][(adv.Object.X+distanceX)/m.TileSize+1] == 1 {
+					distanceX = 0
+				}
+			} else {
+				if m.Field[adv.Object.Y/m.TileSize+1][(adv.Object.X+distanceX)/m.TileSize+1] == 1 {
+					distanceY = -adv.Object.Velocity
+					distanceX = 0
+				}
+			}
+		} else {
+			if m.Field[(adv.Object.Y+distanceY)/m.TileSize][(adv.Object.X+distanceX)/m.TileSize+1] == 1 {
+				distanceX = -adv.Object.Velocity
+				distanceY = 0
+				if m.Field[adv.Object.Y/m.TileSize+1][(adv.Object.X+distanceX)/m.TileSize-1] == 1 {
+					distanceX = 0
+				}
+			} else {
+				if m.Field[adv.Object.Y/m.TileSize][(adv.Object.X+distanceX)/m.TileSize] == 1 {
+					distanceY = -adv.Object.Velocity
+					distanceX = 0
+				}
+			}
+		}
+	}
+	log.Println(distanceX, distanceY, "_______________--")
+	adv.Object.Y += distanceY
+	adv.Object.X += distanceX
 	// if adv.Object.X != player.Object.X {
 	// 	adv.Object.X += int(float64(adv.Object.Velocity) * math.Cos(angular))
 	// }
 	// if adv.Object.Y != player.Object.Y {
 	// 	adv.Object.Y += int(float64(adv.Object.Velocity) * math.Sin(angular))
 	// }
-	var start = &Point{
-		XCell: adv.Object.X / m.TileSize,
-		YCell: adv.Object.Y / m.TileSize,
-	}
-	var goal = &Point{
-		XCell: player.Object.X / m.TileSize,
-		YCell: player.Object.Y / m.TileSize,
-	}
-	isExist := false
-	adv.way, isExist = AStar(start, goal, m)
-	if isExist {
-		log.Println("1: ", len(*adv.way))
-		adv.MoveWithWay_with_one_step(adv.way, m)
-		log.Println("2: ", len(*adv.way))
-	}
+	// log.Println("P", player.Object.Y, player.Object.X)
+	// log.Println("A", adv.Object.Y, adv.Object.X)
 }

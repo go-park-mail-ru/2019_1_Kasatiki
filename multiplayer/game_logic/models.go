@@ -19,6 +19,10 @@ type Zone struct {
 	Number int
 }
 
+type BulletStatus struct {
+	Bullets []*Bullet `json:"bullets"`
+}
+
 type GameStatus struct {
 	Players []PlayerInfo `json:"players"`
 	Advs    []AdvInfo    `json:"advs"`
@@ -28,8 +32,8 @@ type StartGame struct {
 	Map     Map          `json:"map"`
 	Barrier []*Barrier   `json:"barriers"`
 	Players []PlayerInfo `json:"players"`
-	Id      int          `json:"id"`
 	Advs    []AdvInfo    `json:"advs"`
+	Id      int          `json:"id"`
 }
 
 type PlayerInfo struct {
@@ -49,7 +53,7 @@ type InputMessage struct {
 	Down    bool    `json:"down"`
 	Left    bool    `json:"left"`
 	Right   bool    `json:"right"`
-	Angular float32 `json:"ang"`
+	Angular float32 `json:"angle"`
 	Shot    bool    `json:"shot"`
 }
 
@@ -71,6 +75,7 @@ type DynamycObject struct {
 type Bullet struct {
 	Object   *DynamycObject `json:"object"`
 	Damage   float32
+	Angle    float32
 	PlayerId int `json:"playerid"`
 }
 
@@ -106,16 +111,14 @@ type Moves struct {
 
 type Adv struct {
 	Object *DynamycObject `json:"object"`
+	Id     int
 	Url    string
 	Pict   string `json:"pict"`
+	Name   string
 	//XTarget float32
 	//YTarget float32
 	//Angular float32 `json:"ang"`
 	Player *Player
-	tick   int
-	way    *Points
-
-	AStarCount int // служебное поле, для того, чтобы хранить здесь количество тиком после пересчета астар
 }
 
 type Barrier struct {

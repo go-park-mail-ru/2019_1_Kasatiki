@@ -1,0 +1,21 @@
+addons:
+  ssh_known_hosts: advhater.ru
+install: true
+language: go
+go:
+- 1.12.5
+
+script: 
+- scp -r $TRAVIS_BUILD_DIR/  evv@advhater.ru:/home/evv_bmstu/advhater-production
+- ssh evv@advhater.ru cp -r /home/evv_bmstu/credentials/payments/. /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/payments/
+- ssh evv@advhater.ru sudo /home/evv_bmstu/go/src/github.com/mailru/easyjson/easyjson/easyjson -disallow_unknown_fields  /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/message.go /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/config.go /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/payout.go /home/evv_bmstu/advhater-production/2019_1_Kasatiki/pkg/models/user.go
+- ssh evv@advhater.ru sudo systemctl restart advhater-host
+- ssh evv@advhater.ru sudo systemctl status advhater-host
+- ssh evv@advhater.ru sudo chmod -R 777 /home/evv_bmstu/advhater-production
+before_install:
+- openssl aes-256-cbc -K $encrypted_b211eb00f26e_key -iv $encrypted_b211eb00f26e_iv
+  -in id_rsa.enc -out ./id_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 id_rsa
+- ssh-add id_rsa
+- head id_rsa

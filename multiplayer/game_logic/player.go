@@ -1,5 +1,9 @@
 package game_logic
 
+import (
+	// "fmt"
+)
+
 //type Weapon struct {
 //	Id       int
 //	Name     string
@@ -24,7 +28,7 @@ func (w *Weapon) SetBullet(dam float32, player Player) {
 		Name:     w.Name,
 		X:        player.Object.X,
 		Y:        player.Object.Y,
-		Velocity: 3,
+		Velocity: 7,
 	}
 	w.Bullet.Damage = dam
 	w.Bullet.PlayerId = player.Id
@@ -65,8 +69,24 @@ func (p *Player) BulletsCreate() (bs []Bullet) {
 }
 
 // аппендит пули в массив пулей
-func (p *Player) Shot() {
+func (p *Player) Shot(a float32)  *Bullet {
 
+	var b Bullet
+
+	b.Object = &DynamycObject{
+		Name:     "Bullet",
+		Hp:       0,
+		X:        p.Object.X + p.Object.Xsize / 2,
+		Y:        p.Object.Y + p.Object.Ysize / 2,
+		Velocity: 15,
+		Xsize:    5,
+		Ysize:    5,
+	}
+
+	b.Damage = 5
+	b.Angle = a
+
+	return &b
 }
 
 func (p1 *Player) PlayerToPlayer(p2 *DynamycObject, moves Moves) {

@@ -28,8 +28,7 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
 	}
-	// game.GameObjects.Advs = AdvsCreate(10, game.Map, game.GameObjects.Players)
-	game.GameObjects.Advs = AdvsCreate(1, game.Map, game.GameObjects.Players)
+	game.GameObjects.Advs = AdvsCreate(10, game.Map, game.GameObjects.Players)
 	for _, p := range game.GameObjects.Advs {
 		var info AdvInfo
 		info.Object = p.Object
@@ -103,7 +102,7 @@ func AdvsCreate(count int, gameMap *Map, players map[string]*Player) (advs map[i
 			// каждому плееру одинаковое количество реклам.
 			Player: players[keys[len(keys)*i/count].Interface().(string)],
 		}
-		advs[i].Spawn(gameMap.SizeX/2*gameMap.TileSize/2, gameMap.SizeY/2*gameMap.TileSize/2)
+		advs[i].Spawn(gameMap.SizeX/2, gameMap.SizeY/2)
 	}
 	return
 }

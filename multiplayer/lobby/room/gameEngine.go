@@ -2,13 +2,13 @@ package room
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
+	gl "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
 )
 
 func (r *Room) GameEngine() {
 	// GameIni
-	game, re := game_logic.GameIni(r.Players)
-	var message game_logic.InputMessage
+	game, re := gl.GameIni(r.Players)
+	var message gl.InputMessage
 
 	var keys []string
 	for k, _ := range r.Players {
@@ -18,6 +18,7 @@ func (r *Room) GameEngine() {
 	r.Players[keys[0]].Connection.WriteJSON(&re)
 	re.Id = 2
 	r.Players[keys[1]].Connection.WriteJSON(&re)
+
 	for {
 
 		// TODO ХАРДКОД НО ЛЕТАЮЩИЙ
@@ -63,6 +64,32 @@ func (r *Room) GameEngine() {
 		//	}
 		//}
 
+		// Стрельба 
+
+		res := &gl.BulletStatus{}
+		var bs []*gl.Bullet
+		objs := gl.GetGameObjs()
+		// fmt.Println(objs[1])
+		for i, _ := range game.GameObjects.Bullets {
+			game.GameObjects.Bullets[i].Run()
+			for j := 0 ; j < len(objs); j++ {
+				if gl.IsCollision(game.GameObjects.Bullets[i].Object, objs[j]) {
+					fmt.Println("arr len: ", len(game.GameObjects.Bullets))
+					fmt.Println("object ", j)
+					if objs[j].Name != "Player" {
+						game.GameObjects.Bullets = append(game.GameObjects.Bullets[:i], game.GameObjects.Bullets[i+1:]...)
+						// game.GameObjects.Bullets[i] = game.GameObjects.Bullets[len(game.GameObjects.Bullets) - 1]
+						fmt.Println("get 1")
+						// game.GameObjects.Bullets = game.GameObjects.Bullets[:len(game.GameObjects.Bullets) - 1]
+						// fmt.Println("get 2")
+					}
+				}
+			}
+			bs = append(bs, game.GameObjects.Bullets[i])
+		}
+		res.Bullets = bs
+		r.Players[keys[0]].Connection.WriteJSON(&res)
+		r.Players[keys[1]].Connection.WriteJSON(&res)
 	}
 	fmt.Println("salaaam")
 

@@ -75,7 +75,7 @@ func MapGeneration() (*Map, []*Barrier) {
 				0, 4 * m.TileSize, 6 * m.TileSize, 3 * m.TileSize,
 			},
 			[]int{
-				0, 4 * m.TileSize, 6 * m.TileSize, 3 * m.TileSize,
+				0, 7 * m.TileSize, 3 * m.TileSize, 3 * m.TileSize,
 			},
 		},
 	}
@@ -219,40 +219,40 @@ func MapGeneration() (*Map, []*Barrier) {
 		}
 	}
 
-	borderLeft := Barrier {}
-	borderLeft.Object = &DynamycObject {
-		Name: "Left",
-		X : 0,
-		Y : 0,
-		Xsize : m.TileSize,
-		Ysize : m.TileSize * m.SizeY,
+	borderLeft := Barrier{}
+	borderLeft.Object = &DynamycObject{
+		Name:  "Left",
+		X:     0,
+		Y:     0,
+		Xsize: m.TileSize,
+		Ysize: m.TileSize * m.SizeY,
 	}
 
-	borderTop := Barrier {}
-	borderTop.Object = &DynamycObject {
-		Name: "Top",
-		X : 0,
-		Y : 0,
-		Xsize : m.TileSize * m.SizeX,
-		Ysize : m.TileSize,
+	borderTop := Barrier{}
+	borderTop.Object = &DynamycObject{
+		Name:  "Top",
+		X:     0,
+		Y:     0,
+		Xsize: m.TileSize * m.SizeX,
+		Ysize: m.TileSize,
 	}
 
-	borderRight := Barrier {}
-	borderRight.Object = &DynamycObject {
-		Name: "Right",
-		X : m.TileSize * (m.SizeX - 1),
-		Y : 0,
-		Xsize : m.TileSize,
-		Ysize : m.TileSize * m.SizeY,
+	borderRight := Barrier{}
+	borderRight.Object = &DynamycObject{
+		Name:  "Right",
+		X:     m.TileSize * (m.SizeX - 1),
+		Y:     0,
+		Xsize: m.TileSize,
+		Ysize: m.TileSize * m.SizeY,
 	}
 
-	borderBottom := Barrier {}
-	borderBottom.Object = &DynamycObject {
-		Name: "Bottom",
-		X : 0,
-		Y : m.TileSize * (m.SizeY - 1),
-		Xsize : m.TileSize * m.SizeX,
-		Ysize : m.TileSize,
+	borderBottom := Barrier{}
+	borderBottom.Object = &DynamycObject{
+		Name:  "Bottom",
+		X:     0,
+		Y:     m.TileSize * (m.SizeY - 1),
+		Xsize: m.TileSize * m.SizeX,
+		Ysize: m.TileSize,
 	}
 
 	b = append(b, &borderTop)
@@ -262,12 +262,12 @@ func MapGeneration() (*Map, []*Barrier) {
 
 	for i := 0; i < blockCount; i++ {
 		for j := 0; j < blockCount; j++ {
-			if !(i == blockCount / 2 && j == blockCount / 2) {
+			if !(i == blockCount/2 && j == blockCount/2) {
 				template := templates[rand.Intn(len(templates))]
 				for g := 0; g < len(template.Barriers); g++ {
 					bar := Barrier{}
 					bar.Object = &DynamycObject{
-						Name: "Barrier",
+						Name:  "Barrier",
 						X:     j*blockSize*m.TileSize + template.Barriers[g][0],
 						Y:     i*blockSize*m.TileSize + template.Barriers[g][1],
 						Xsize: template.Barriers[g][2],
@@ -296,3 +296,7 @@ func MapGeneration() (*Map, []*Barrier) {
 
 	return &m, b
 }
+
+// модели
+// гейм энджин
+// game.go
