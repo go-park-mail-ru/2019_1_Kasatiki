@@ -10,7 +10,6 @@ import (
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/olahol/melody.v1"
 	"os"
 )
 
@@ -32,7 +31,7 @@ func (instance *App) initializeRoutes() {
 	//instance.Router.Use(gin.Recovery())
 	//instance.Router.Use(gin.Logger())
 
-	m := melody.New()
+	//m := melody.New()
 	api := instance.Router.Group("/api")
 	{
 		api.DELETE("/logout", instance.Middleware.AuthMiddleware(instance.logout))
@@ -45,19 +44,19 @@ func (instance *App) initializeRoutes() {
 		api.POST("/login", instance.login)
 		api.POST("/upload", instance.Middleware.AuthMiddleware(instance.upload))
 		api.POST("/payments", instance.payout)
-
+		api.POST("/checkPointHandler", instance.Middleware.AuthMiddleware(instance.checkPoints))
 		// PUT ( update data )
 		api.PUT("/edit", instance.Middleware.AuthMiddleware(instance.editUser))
 
 		api.GET("/game/start", gin.WrapF(instance.Upgrader.StartGame))
 
-		api.GET("/ws", func(c *gin.Context) {
-			m.HandleRequest(c.Writer, c.Request)
-		})
+		//api.GET("/ws", func(c *gin.Context) {
+		//	m.HandleRequest(c.Writer, c.Request)
+		//})
 
-		m.HandleMessage(func(s *melody.Session, msg []byte) {
-			m.Broadcast(msg)
-		})
+		//m.HandleMessage(func(s *melody.Session, msg []byte) {
+		//	m.Broadcast(msg)
+		//})
 
 	}
 
