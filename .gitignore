@@ -22,6 +22,7 @@ _testmain.go
 *.xml
 *.iml
 .vscode
+./vscode
 
 /VERSION.cache
 /bin/
