@@ -2,6 +2,7 @@ package room
 
 import (
 	"fmt"
+
 	gl "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
 )
 
@@ -64,26 +65,31 @@ func (r *Room) GameEngine() {
 		//	}
 		//}
 
-		// Стрельба 
+		// Стрельба
 
 		res := &gl.BulletStatus{}
 		var bs []*gl.Bullet
 		objs := gl.GetGameObjs()
 		// fmt.Println(objs[1])
-		for i, _ := range game.GameObjects.Bullets {
+		for i := 0; i < len(game.GameObjects.Bullets); i++ {
 			game.GameObjects.Bullets[i].Run()
-			for j := 0 ; j < len(objs); j++ {
+			for j := 0; j < len(objs); j++ {
+				if i == len(game.GameObjects.Bullets) {
+					break
+				}
 				if gl.IsCollision(game.GameObjects.Bullets[i].Object, objs[j]) {
-					fmt.Println("arr len: ", len(game.GameObjects.Bullets))
-					fmt.Println("object ", j)
+					// fmt.Println("object ", j, game.GameObjects.Bullets[i].Object.X, game.GameObjects.Bullets[i].Object.Y)
 					if objs[j].Name != "Player" {
 						game.GameObjects.Bullets = append(game.GameObjects.Bullets[:i], game.GameObjects.Bullets[i+1:]...)
 						// game.GameObjects.Bullets[i] = game.GameObjects.Bullets[len(game.GameObjects.Bullets) - 1]
-						fmt.Println("get 1")
+						// fmt.Println("get 1", len(game.GameObjects.Bullets), i)
 						// game.GameObjects.Bullets = game.GameObjects.Bullets[:len(game.GameObjects.Bullets) - 1]
 						// fmt.Println("get 2")
 					}
 				}
+			}
+			if i == len(game.GameObjects.Bullets) {
+				break
 			}
 			bs = append(bs, game.GameObjects.Bullets[i])
 		}
