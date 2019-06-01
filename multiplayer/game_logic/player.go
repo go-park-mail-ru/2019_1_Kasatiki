@@ -1,8 +1,6 @@
 package game_logic
 
-import (
-	// "fmt"
-)
+// "fmt"
 
 //type Weapon struct {
 //	Id       int
@@ -69,21 +67,21 @@ func (p *Player) BulletsCreate() (bs []Bullet) {
 }
 
 // аппендит пули в массив пулей
-func (p *Player) Shot(a float32)  *Bullet {
+func (p *Player) Shot(a float32) *Bullet {
 
 	var b Bullet
 
 	b.Object = &DynamycObject{
 		Name:     "Bullet",
 		Hp:       0,
-		X:        p.Object.X + p.Object.Xsize / 2,
-		Y:        p.Object.Y + p.Object.Ysize / 2,
+		X:        p.Object.X + p.Object.Xsize/2,
+		Y:        p.Object.Y + p.Object.Ysize/2,
 		Velocity: 15,
 		Xsize:    5,
 		Ysize:    5,
 	}
 
-	b.Damage = 5
+	b.Damage = 1
 	b.Angle = a
 
 	return &b
@@ -92,7 +90,6 @@ func (p *Player) Shot(a float32)  *Bullet {
 func (p1 *Player) PlayerToPlayer(p2 *DynamycObject, moves Moves) {
 	SimpleCollisionEvent(p1.Object, p2, moves)
 }
-
 
 func (p Player) SetAngular(ang float32) {
 	p.Angular = ang

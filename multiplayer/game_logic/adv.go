@@ -9,6 +9,7 @@ func (adv *Adv) Spawn(x int, y int, size int) {
 	adv.Object = &DynamycObject{
 		Name:     "Adv",
 		Hp:       10,
+		HpCap:    10,
 		X:        x,
 		Y:        y,
 		Velocity: 2,

@@ -2,6 +2,7 @@ package room
 
 import (
 	"fmt"
+	"log"
 
 	gl "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
 )
@@ -75,6 +76,17 @@ func (r *Room) GameEngine() {
 		for i := 0; i < len(game.GameObjects.Bullets); i++ {
 			for j := 0; j < len(game.GameObjects.Advs); j++ {
 				if i == len(game.GameObjects.Bullets) {
+					break
+				}
+				if game.GameObjects.Bullets[i].IsCollisionInWay(game.GameObjects.Advs[j].Object) {
+					log.Println("KAKAHA", game.GameObjects.Advs[j].Object.Hp)
+					game.GameObjects.Advs[j].Object.Hp -= game.GameObjects.Bullets[i].Damage
+					log.Println("1:", game.GameObjects.Advs[j].Object.Hp)
+					game.GameObjects.Bullets = append(game.GameObjects.Bullets[:i], game.GameObjects.Bullets[i+1:]...)
+					if game.GameObjects.Advs[j].Object.Hp == 0 {
+						game.GameObjects.Advs = append(game.GameObjects.Advs[:j], game.GameObjects.Advs[j+1:]...)
+					}
+					// break чтобы он не декрементил hp у всех реклам
 					break
 				}
 			}
