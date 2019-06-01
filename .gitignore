@@ -21,6 +21,8 @@ _testmain.go
 ./idea
 *.xml
 *.iml
+.vscode
+./vscode
 
 /VERSION.cache
 /bin/
