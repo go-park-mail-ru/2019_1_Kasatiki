@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/connections"
 )
 
 // Создание игры

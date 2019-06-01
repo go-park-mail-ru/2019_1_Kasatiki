@@ -3,8 +3,8 @@ package room
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/connections"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/game_logic"
 	"log"
 	"strconv"
 )

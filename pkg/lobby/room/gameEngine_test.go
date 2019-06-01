@@ -1,7 +1,8 @@
-package game_logic
+package room
 
 import (
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/connections"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/connections"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/game_logic"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestGameIni(t *testing.T) {
+func TestRoom_GameEngine(t *testing.T) {
 	c := connections.NewConnUpgrader()
 
 	// Приконнектился один игрок
@@ -23,7 +24,7 @@ func TestGameIni(t *testing.T) {
 	h.Set("Origin", "http://0.0.0.0:8080")
 	h.Set("Accept-Language", "en-US,en;q=0.5")
 	h.Set("Accept-Encoding", "gzip, deflate")
-	h.Set("Cookie", "session_id=42906iu30630")
+	h.Set("Cookie", "session_id=429r06iu30630")
 	h.Set("Pragma", "no-cache")
 	h.Set("Cache-Control", "no-cache")
 	ws, _, err := websocket.DefaultDialer.Dial(u, h)
@@ -42,7 +43,7 @@ func TestGameIni(t *testing.T) {
 	h2.Set("Origin", "http://0.0.0.0:8080")
 	h2.Set("Accept-Language", "en-US,en;q=0.5")
 	h2.Set("Accept-Encoding", "gzip, deflate")
-	h2.Set("Cookie", "session_id=42963hhh0630")
+	h2.Set("Cookie", "session_id=42963rhhh0630")
 	h2.Set("Pragma", "no-cache")
 	h2.Set("Cache-Control", "no-cache")
 	ws2, _, err := websocket.DefaultDialer.Dial(u2, h2)
@@ -57,9 +58,17 @@ func TestGameIni(t *testing.T) {
 	case connection, _ := <-c.Queue:
 		testPlayers[connection.Login] = connection
 	}
-	g, _ := GameIni(testPlayers)
+	g, _ := game_logic.GameIni(testPlayers)
 	if g == nil {
 		t.Fatalf("%v", "Game initialization failed")
 	}
+	mes := &game_logic.InputMessage{}
+	mes.Up = true
+	mes.Left = true
+	var logins []string
+	for k, _ := range testPlayers {
+		logins = append(logins, k)
+	}
+	g.EventListener(*mes, logins[0])
 
 }

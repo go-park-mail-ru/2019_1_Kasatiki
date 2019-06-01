@@ -3,7 +3,9 @@ package server
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/connections"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/lobby"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/middleware"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
@@ -18,6 +20,8 @@ type App struct {
 	Router     *gin.Engine
 	DB         *dbhandler.DBHandler
 	Middleware *middleware.Middlewares
+	Upgrader   *connections.ConnUpgrader
+	Lobby      *lobby.Lobby
 }
 
 func (instance *App) initializeRoutes() {
@@ -45,12 +49,16 @@ func (instance *App) initializeRoutes() {
 		// PUT ( update data )
 		api.PUT("/edit", instance.Middleware.AuthMiddleware(instance.editUser))
 
+		api.GET("/game/start", gin.WrapF(instance.Upgrader.StartGame))
+
 		api.GET("/ws", func(c *gin.Context) {
 			m.HandleRequest(c.Writer, c.Request)
 		})
+
 		m.HandleMessage(func(s *melody.Session, msg []byte) {
 			m.Broadcast(msg)
 		})
+
 	}
 
 	//Static path
@@ -76,14 +84,6 @@ func (instance *App) GetDBConnection(config *models.Config) error {
 		Database:  config.DBSpace,
 		TLSConfig: nil,
 	}
-	//conf := pgx.ConnConfig {
-	//	User:      "sayonara",
-	//	Password:  "boy",
-	//	Host:      "localhost",
-	//	Port:      5432,
-	//	Database:  "kasatiki",
-	//	TLSConfig: nil,
-	//}
 	confPool := pgx.ConnPoolConfig{
 		ConnConfig:     conf,
 		MaxConnections: 16,
@@ -112,5 +112,8 @@ func (instance *App) Initialize(conf *models.Config) {
 	fmt.Println(err)
 	instance.DB.AdvsIserting()
 	instance.Router = gin.New()
+	instance.Upgrader = connections.NewConnUpgrader()
+	instance.Lobby = lobby.NewLobby()
+	go instance.Lobby.Run(instance.Upgrader.Queue)
 	instance.initializeRoutes()
 }

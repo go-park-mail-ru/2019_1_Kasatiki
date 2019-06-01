@@ -2,7 +2,7 @@ package dbhandler
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/game_logic"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"github.com/jackc/pgx"
 	"math/rand"

@@ -1,7 +1,7 @@
 package room
 
 import (
-	gl "github.com/go-park-mail-ru/2019_1_Kasatiki/multiplayer/game_logic"
+	gl "github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/game_logic"
 	"time"
 )
 
