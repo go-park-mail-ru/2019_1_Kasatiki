@@ -90,19 +90,19 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 	return
 }
 
-func AdvsCreate(count int, gameMap *Map, players map[string]*Player) (advs map[int]*Adv) {
-	advs = make(map[int]*Adv, count)
+func AdvsCreate(count int, gameMap *Map, players map[string]*Player) (advs []*Adv) {
 	var id int
 	// Достаем все ключи плееров
 	keys := reflect.ValueOf(players).MapKeys()
 	for i := 0; i < count; i++ {
 		id++
-		advs[i] = &Adv{
+		adv := &Adv{
 			// Сетим плеера в качестве цели
 			// каждому плееру одинаковое количество реклам.
 			Player: players[keys[len(keys)*i/count].Interface().(string)],
 		}
-		advs[i].Spawn(gameMap.SizeX/2, gameMap.SizeY/2)
+		adv.Spawn(gameMap.SizeX/2, gameMap.SizeY/2, gameMap.TileSize)
+		advs = append(advs, adv)
 	}
 	return
 }
