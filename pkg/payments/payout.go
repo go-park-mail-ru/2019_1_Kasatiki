@@ -95,7 +95,7 @@ func CheckOperator(phoneNumber string) (string, error){
 
 
 func PhonePayout(paymentsInfo models.Credentials, inputPhone string, amount string) error {
-	err := ReadConfig("credentials.json",
+	err := ReadConfig("/mnt/disks/storage/advhater-production/2019_1_Kasatiki/pkg/payments/credentials.json",
 		&paymentsInfo)
 	if err != nil {
 		fmt.Println(err)
