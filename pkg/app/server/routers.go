@@ -214,7 +214,7 @@ func (instance *App) upload(c *gin.Context) {
 		c.Status(404)
 		return
 	}
-	ImgUrl := "https://avdvhater.ru/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
+	ImgUrl := "https://advhater.ru/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	err = instance.DB.ImgUpdate(int(id.(float64)), ImgUrl)
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Upload error: ", err)
