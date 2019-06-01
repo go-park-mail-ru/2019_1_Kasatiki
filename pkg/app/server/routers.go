@@ -34,6 +34,7 @@ func (instance *App) checkPoints(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(408, "Bad points getter")
+		return
 	}
 	fmt.Println("Points from DB before Update: ", gettingPoints)
 	err = instance.DB.UpdatePoints(int(id.(float64)), points)
@@ -41,6 +42,7 @@ func (instance *App) checkPoints(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(408, "Bad points getter")
+		return
 	}
 	fmt.Println("Points from DB after Update: ", gettingPoints)
 	return
@@ -204,7 +206,7 @@ func (instance *App) upload(c *gin.Context) {
 	}
 	defer file.Close()
 	id, _ := c.Get("id")
-	picpath := "./static/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
+	picpath := "../../static/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Upload error: ", err)
@@ -212,7 +214,7 @@ func (instance *App) upload(c *gin.Context) {
 		c.Status(404)
 		return
 	}
-	ImgUrl := "https://advhater.ru/img/" + strconv.Itoa(int(id.(float64))) + ".jpeg"
+	ImgUrl := "https://avdvhater/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	err = instance.DB.ImgUpdate(int(id.(float64)), ImgUrl)
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Upload error: ", err)
@@ -230,6 +232,18 @@ func (instance *App) logout(c *gin.Context) {
 	c.Status(200)
 }
 
+func (instance *App) balance(c *gin.Context) {
+	id, _ := c.Get("id")
+	money, err := instance.DB.GetPoints(int(id.(float64)))
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(408, "Bad points getter")
+		return
+	}
+	c.JSON(201, gin.H{"points": money})
+
+}
+
 func (instance *App) payout(c *gin.Context) {
 	var payoutBill models.Payout
 	var payoutCredentials models.Credentials
@@ -241,6 +255,33 @@ func (instance *App) payout(c *gin.Context) {
 		return
 	}
 	fmt.Println(payoutBill.Phone, payoutBill.Amount)
+
+	// Check balance
+	id, _ := c.Get("id")
+	money, err := instance.DB.GetPoints(int(id.(float64)))
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(408, "Bad points getter")
+		return
+	}
+
+
+	intMoney, err := strconv.Atoi(payoutBill.Amount)
+
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if intMoney > money{
+		c.JSON(http.StatusBadRequest, gin.H{"error":"Want too much, sweety!"})
+		return
+	}
+
+	if intMoney < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error":"Nice joke, boy."})
+	}
+
 	err = payments.PhonePayout(payoutCredentials, payoutBill.Phone, payoutBill.Amount)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
