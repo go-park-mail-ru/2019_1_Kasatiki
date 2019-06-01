@@ -88,6 +88,22 @@ func (instance *DBHandler) CreateTables() (err error) {
 	return err
 }
 
+func (instance *DBHandler) GetPoints(id int) (points int, err error) {
+	sql := `
+		SELECT points FROM users 
+			WHERE id = $1;`
+	err = instance.Connection.QueryRow(sql, id).Scan(&points)
+	return
+}
+
+func (instance *DBHandler) UpdatePoints(id int, points int) (err error) {
+	sql := `
+		UPDATE users SET points = points + $2 
+			WHERE id = $1;`
+	_, err = instance.Connection.Exec(sql, id, points)
+	return
+}
+
 func (instance *DBHandler) InsertUser(user models.User) (ret models.User, err error) {
 	sql := `
 		INSERT INTO users (nickname, email, password, points, age, imgurl, region, about)

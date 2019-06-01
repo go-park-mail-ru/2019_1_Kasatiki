@@ -17,6 +17,35 @@ import (
 	"strconv"
 )
 
+func (instance *App) checkPoints(c *gin.Context) {
+	id, _ := c.Get("id")
+	fmt.Println("Incoming Id: ", id)
+	p := c.Request.Header.Get("UpdatePoints")
+	points, _ := strconv.Atoi(p)
+	fmt.Println("Incoming UpdatePoints Header: ", points)
+	u, err := instance.DB.GetUser(int(id.(float64)))
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(408, "Bad user getter")
+		return
+	}
+	fmt.Println("Getting user: ", u)
+	gettingPoints, err := instance.DB.GetPoints(int(id.(float64)))
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(408, "Bad points getter")
+	}
+	fmt.Println("Points from DB before Update: ", gettingPoints)
+	err = instance.DB.UpdatePoints(int(id.(float64)), points)
+	gettingPoints, err = instance.DB.GetPoints(int(id.(float64)))
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(408, "Bad points getter")
+	}
+	fmt.Println("Points from DB after Update: ", gettingPoints)
+	return
+}
+
 func (instance *App) createUser(c *gin.Context) {
 	var newUser models.User
 	decoder := json.NewDecoder(c.Request.Body)

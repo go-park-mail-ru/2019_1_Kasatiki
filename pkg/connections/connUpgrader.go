@@ -65,8 +65,12 @@ func (up *ConnUpgrader) StartGame(res http.ResponseWriter, req *http.Request) {
 		//c.JSON(409, "error of creating WS")
 		return
 	}
-
+	typeGame := req.Header.Get("Mode")
 	// Todo убрать хардкод
+	if typeGame == "" {
+		res.WriteHeader(400)
+		return
+	}
 	connection := &UserConnection{
 		Login:      login,
 		Token:      sessionID.Value,
