@@ -206,7 +206,7 @@ func (instance *App) upload(c *gin.Context) {
 	}
 	defer file.Close()
 	id, _ := c.Get("id")
-	picpath := "../../static/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
+	picpath := "./static/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Upload error: ", err)
@@ -214,7 +214,7 @@ func (instance *App) upload(c *gin.Context) {
 		c.Status(404)
 		return
 	}
-	ImgUrl := "https://avdvhater/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
+	ImgUrl := "https://avdvhater.ru/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	err = instance.DB.ImgUpdate(int(id.(float64)), ImgUrl)
 	if err != nil {
 		instance.Middleware.Logger.Warnln("Upload error: ", err)
@@ -240,7 +240,7 @@ func (instance *App) balance(c *gin.Context) {
 		c.JSON(408, "Bad points getter")
 		return
 	}
-	c.JSON(201, gin.H{"points": money})
+	c.JSON(200, gin.H{"points": money})
 
 }
 
