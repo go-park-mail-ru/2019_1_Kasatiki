@@ -1,5 +1,7 @@
 package game_logic
 
+import "log"
+
 // import "fmt"
 
 // Колизии
@@ -170,6 +172,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 
 	// Reklama
 	for _, adv := range g.GameObjects.Advs {
+		log.Println(adv.Object.X, adv.Object.Y)
 		adv.MoveToPlayer(g.Map)
 		var info AdvInfo
 		info.Object = adv.Object
