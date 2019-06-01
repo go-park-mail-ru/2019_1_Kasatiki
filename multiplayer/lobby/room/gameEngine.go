@@ -73,6 +73,11 @@ func (r *Room) GameEngine() {
 		// fmt.Println(objs[1])
 		for i := 0; i < len(game.GameObjects.Bullets); i++ {
 			game.GameObjects.Bullets[i].Run()
+			// проверяем, вышла ли пуля за пределы карты
+			if !game.GameObjects.Bullets[i].IsOnMap(game.Map) {
+				game.GameObjects.Bullets = append(game.GameObjects.Bullets[:i], game.GameObjects.Bullets[i+1:]...)
+				continue
+			}
 			for j := 0; j < len(objs); j++ {
 				if i == len(game.GameObjects.Bullets) {
 					break
@@ -82,7 +87,7 @@ func (r *Room) GameEngine() {
 					if objs[j].Name != "Player" {
 						game.GameObjects.Bullets = append(game.GameObjects.Bullets[:i], game.GameObjects.Bullets[i+1:]...)
 						// game.GameObjects.Bullets[i] = game.GameObjects.Bullets[len(game.GameObjects.Bullets) - 1]
-						// fmt.Println("get 1", len(game.GameObjects.Bullets), i)
+						fmt.Println("get 1", len(game.GameObjects.Bullets), i)
 						// game.GameObjects.Bullets = game.GameObjects.Bullets[:len(game.GameObjects.Bullets) - 1]
 						// fmt.Println("get 2")
 					}
