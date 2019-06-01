@@ -240,9 +240,11 @@ function drawBullets() {
 }
 
 function drawAdvs() {
-    for (let i = 0; i < advs.length; i++) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(Math.round(advs[i].object.x - viewport.x), Math.round(advs[i].object.y - viewport.y), tileSize, tileSize);
+    if (advs.length > 1) {
+        for (let i = 0; i < advs.length; i++) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(Math.round(advs[i].object.x - viewport.x), Math.round(advs[i].object.y - viewport.y), tileSize, tileSize);
+        }
     }
 }
 
