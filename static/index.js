@@ -24,8 +24,9 @@ const ws       = new Socket(location.host);
 let objs       = new Objects(cfg, viewport);
 
 function loop() {
-    objs.drawObjs(viewport);    
-    viewport.update(objs.player.x, objs.player.y, keyMap.zoom, {val : objs.map.tileSize});
+    // objs.drawObjs(viewport);    
+    objs.map.drawMap(viewport);
+    viewport.update(objs.player.x, objs.player.y, keyMap.zoom);
 
     objs.drawPlayers(viewport);
 
@@ -41,7 +42,6 @@ function gameStart() {
     objs.map._createMap();
     ws.startServe(objs);
     startListen(keyMap, objs.map.canvas);
-    objs.map.setCanvasWH(viewport.gameScreenH, viewport.gameScreenW);
     requestAnimationFrame(loop);
 }
 

@@ -3,6 +3,7 @@ export default class Viewport {
         x = 0, y = 0, w = 800, h = 800, // начальные и конечные координаты порта
         gameScreenW = 16, // ширина порта в тайлах
         gameScreenH = 16, // высота порта в тайлах
+        tileSize = 50,
     ) {
         this.x = x;
         this.y = y;
@@ -14,24 +15,27 @@ export default class Viewport {
 
         this.scale = 16;
         this.zoom = 0;
+
+        this.tileSize = tileSize;
+        this.baseTileSize = tileSize;
     }
 
-    update(x ,y, zoom, tileSize) {
+    update(x ,y, zoom) {
         if (zoom) {
-            if (tileSize.val > 25) {
+            if (this.tileSize > 25) {
                 this.scale += 2;
-                tileSize.val = 800 / this.scale;
+                this.tileSize = Math.ceil(800 / this.scale);
                 this.zoom += 50;
-                this.w = this.w + this.zoom;
-                this.h = this.h + this.zoom;
+                this.w += this.baseTileSize * 2;
+                this.h += this.baseTileSize * 2;
             }
         } else if (!zoom) {
-            if (tileSize.val < 50) {
+            if (this.tileSize < 50) {
                 this.scale -= 2;
-                tileSize.val = 800 / this.scale;
+                this.tileSize = Math.ceil(800 / this.scale)
                 this.zoom -= 50;
-                this.w = this.w - this.zoom;
-                this.h = this.h - this.zoom;
+                this.w -= this.baseTileSize * 2;
+                this.h -= this.baseTileSize * 2;
             }
         }
 

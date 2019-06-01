@@ -4,7 +4,7 @@ import Player from './player.js';
 export default class Objects {
     constructor(
         cfg,
-        viewport
+        vp
     ) {
         this.objs = {
             'bullets' : [],
@@ -16,16 +16,16 @@ export default class Objects {
         this.cfg = cfg;
 
         this.map = new Map();
-        this.map.setCanvasWH(viewport.gameScreenW * this.map.tileSize, viewport.gameScreenH * this.map.tileSize);
+        this.map.setCanvasWH(vp.gameScreenW * vp.tileSize, vp.gameScreenH * vp.tileSize);
 
-        this.player = new Player(this.map.mapSize * this.map.tileSize / 2, this.map.mapSize * this.map.tileSize / 2, this.map.ctx);
+        this.player = new Player(this.map.mapSize * vp.tileSize / 2, this.map.mapSize * vp.tileSize / 2, this.map.ctx);
         this.enemy = {
             x : 0,
             y : 0,
 
-            draw : (viewport) => {
+            draw : (vp) => {
                 this.map.ctx.fillStyle = '#F52B00';
-                this.map.ctx.fillRect(Math.round(this.x - viewport.x), Math.round(this.y - viewport.y), this.map.tileSize, this.map.tileSize.val);
+                this.map.ctx.fillRect(Math.round(this.x - vp.x), Math.round(this.y - vp.y), vp.tileSize, vp.tileSize);
             }
         }
     }
@@ -35,7 +35,7 @@ export default class Objects {
         this.map.ctx.clearRect(0, 0, this.map.canvas.width, this.map.canvas.height);
 
         // Отрисовываем карту
-        this.map.drawMap(viewport, {val : this.map.tileSize}, {val : this.map.mapSize});
+        this.map.drawMap(viewport);
 
         // this.objs.forEach( obj => {
         //     obj.forEach( ess => {

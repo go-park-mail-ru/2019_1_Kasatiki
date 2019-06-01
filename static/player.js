@@ -15,7 +15,7 @@ export default class Player {
 
     draw(viewport, tileSize) {
         this.ctx.fillStyle = '#45FF70';
-        this.ctx.fillRect(Math.round(this.x - viewport.x - viewport.zoom), Math.round(this.y - viewport.y - viewport.zoom), tileSize.val, tileSize.val);
+        this.ctx.fillRect(Math.round(this.x - viewport.x - viewport.zoom), Math.round(this.y - viewport.y - viewport.zoom), viewport.tileSize, viewport.tileSize);
     }
 
     // move(keyMap) {
