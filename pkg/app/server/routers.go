@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/models"
 	"io/ioutil"
+	//"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
 
 	//"2019_1_Kasatiki/pkg/models"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/payments"
@@ -53,6 +54,8 @@ func (instance *App) createUser(c *gin.Context) {
 	decoder := json.NewDecoder(c.Request.Body)
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&newUser)
+	//newUser.ImgUrl = "http://0.0.0.0:8080/avatars/default.jpeg"
+	newUser.ImgUrl = "https://advhater.ru/avatars/default.jpeg"
 
 	if err != nil || newUser.Validation() != nil {
 		instance.Middleware.Logger.Warnln("Create user error: ", err)
@@ -206,6 +209,10 @@ func (instance *App) upload(c *gin.Context) {
 	}
 	defer file.Close()
 	id, _ := c.Get("id")
+
+	// Check exist
+
+	//picpath := "../../static/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	picpath := "./static/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	f, err := os.OpenFile(picpath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -214,6 +221,7 @@ func (instance *App) upload(c *gin.Context) {
 		c.Status(404)
 		return
 	}
+	//ImgUrl := "http://0.0.0.0:8080/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	ImgUrl := "https://advhater.ru/avatars/img" + strconv.Itoa(int(id.(float64))) + ".jpeg"
 	err = instance.DB.ImgUpdate(int(id.(float64)), ImgUrl)
 	if err != nil {
