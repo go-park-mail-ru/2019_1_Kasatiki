@@ -8,6 +8,7 @@ let mapChange = true;
 let map = [];
 let barriers = [];
 let bullets = [];
+let advs = [];
 let mapSize = 100;
 
 let bounds = canvas.getBoundingClientRect();
@@ -238,6 +239,13 @@ function drawBullets() {
     }
 }
 
+function drawAdvs() {
+    for (let i = 0; i < advs.length; i++) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(Math.round(advs[i].object.x - viewport.x), Math.round(advs[i].object.y - viewport.y), tileSize, tileSize);
+    }
+}
+
 function drawMap(x, y) {
     var x_min = Math.floor((viewport.x) / tileSize);
     var y_min = Math.floor((viewport.y) / tileSize);
@@ -343,6 +351,10 @@ socket.addEventListener("message", (event) => {
     if (data["bullets"] != null) {
         bullets = data["bullets"]
     }
+    
+    if (data['advs'] != null) {
+        advs = data['advs'];
+    }
 
     if (data["players"] != null) {
         if (data["players"][0].id == player.id) {
@@ -365,9 +377,6 @@ socket.addEventListener("message", (event) => {
             // console.log("enemy: ", data["players"][0].object.x, data["players"][0].object.y);
         }
     }
-
-
-
 });
 
 socket.addEventListener("error", (error) => {
@@ -385,10 +394,11 @@ function loop() {
     renderEnemy();
     // drawBarriers();
     drawBullets();
+    drawAdvs();
 
     let json = JSON.stringify(keyMap);
 
-    console.log(keyMap.shot);
+    // console.log(keyMap.shot);
 
     if (socketOpen) {
         socket.send(json);
