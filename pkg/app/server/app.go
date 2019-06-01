@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/connections"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
@@ -38,15 +39,19 @@ func (instance *App) initializeRoutes() {
 
 		api.GET("/leaderboard", instance.getLeaderboard)
 		api.GET("/isauth", instance.Middleware.AuthMiddleware(instance.isAuth))
+		api.GET("/balance", instance.Middleware.AuthMiddleware(instance.balance))
+
 
 		// POST ( create new data )
 		api.POST("/signup", instance.createUser)
 		api.POST("/login", instance.login)
 		api.POST("/upload", instance.Middleware.AuthMiddleware(instance.upload))
-		api.POST("/payments", instance.payout)
+		api.POST("/payments",  instance.Middleware.AuthMiddleware(instance.payout))
 		api.POST("/checkPointHandler", instance.Middleware.AuthMiddleware(instance.checkPoints))
 		// PUT ( update data )
 		api.PUT("/edit", instance.Middleware.AuthMiddleware(instance.editUser))
+
+
 
 		api.GET("/game/start", gin.WrapF(instance.Upgrader.StartGame))
 
@@ -62,7 +67,7 @@ func (instance *App) initializeRoutes() {
 
 	//Static path
 
-	//instance.Router.Use(static.Serve("/", static.LocalFile("../../static", true)))
+	//instance.Router.Use(static.Serve("/", static.LocalFile("/home/evv/GolandProjects/2019_1_Kasatiki/static", true)))
 	// Echo websocket for test
 
 }
