@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/gin-contrib/static"
+	//"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/connections"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
