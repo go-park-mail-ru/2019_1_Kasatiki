@@ -123,7 +123,9 @@ func (r *Room) GameEngine() {
 				gs.Players[0].CashPoints = float32(killed) * 0.1
 			case <-ticker.C:
 				if err != nil {
+
 					if err.Error() == "pause" {
+
 						if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
 							err = nil
 						}
@@ -135,9 +137,11 @@ func (r *Room) GameEngine() {
 			}
 			if err != nil {
 				if err.Error() == "pause" {
+
 					if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
 						err = nil
 					}
+					r.Players[keys[0]].Connection.WriteJSON(&gs)
 					continue
 				}
 				goto EndGame
