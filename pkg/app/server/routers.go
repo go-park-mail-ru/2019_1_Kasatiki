@@ -295,5 +295,7 @@ func (instance *App) payout(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	}
+	amount, err := strconv.Atoi(payoutBill.Amount)
+	instance.DB.UpdatePoints(int(id.(float64)), amount)
 	c.Status(201)
 }
