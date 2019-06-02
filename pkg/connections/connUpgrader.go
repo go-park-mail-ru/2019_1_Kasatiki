@@ -75,7 +75,8 @@ func (up *ConnUpgrader) StartGame(res http.ResponseWriter, req *http.Request) {
 		Login:      login,
 		Token:      sessionID.Value,
 		Connection: WSConnection,
-		TypeGame:   "Multiplayer",
+		//TypeGame:   "Multiplayer",
+		TypeGame: "sp",
 	}
 
 	up.Queue <- connection

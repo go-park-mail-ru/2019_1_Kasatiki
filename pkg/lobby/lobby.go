@@ -80,6 +80,14 @@ func (lb *Lobby) AddPlayer(connection *connections.UserConnection) error {
 
 	// Todo SinglePlayer
 	if connection.TypeGame != "Multiplayer" {
+		var players []*connections.UserConnection
+		players = append(players, connection)
+		lb.Rooms[lb.LastRoom] = rm.NewRoom(players, lb.DeleteRooms, lb.LastRoom)
+		// Создаем коннект для первого игрока(Ждущий)
+		lb.ProcessedPlayers[connection.Token] = GameToConnect{
+			Room: lb.LastRoom,
+			P_id: 0,
+		}
 		// Меняем id комнаты
 		lb.LastRoom++
 		return nil

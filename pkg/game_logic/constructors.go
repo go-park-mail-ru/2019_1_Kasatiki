@@ -15,8 +15,9 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 	var game Game
 	var res StartGame
 	game.GameObjects = &GameObjects{}
+	fmt.Println("Generation of map")
 	game.Map, game.GameObjects.Barrier = MapGeneration()
-	game.GameObjects.Players = make(map[string]*Player)
+	//game.GameObjects.Players = make(map[string]*Player)
 	game.GameObjects.Players = PlayersCreate(roomPlayers, game.Map)
 	res.Map = *game.Map
 	for _, p := range game.GameObjects.Players {
@@ -67,6 +68,7 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 		fmt.Printf("Player was spawned in X: %d,    Y : %d \n", players[p.Login].Object.X, players[p.Login].Object.Y)
 		players[p.Login].CreateDefaultWeapon()
 	}
+
 	return
 }
 
