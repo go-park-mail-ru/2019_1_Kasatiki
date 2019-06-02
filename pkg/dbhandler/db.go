@@ -179,6 +179,15 @@ func (instance *DBHandler) ImgUpdate(id int, img string) (err error) {
 	return err
 }
 
+func (instance *DBHandler) GetPoint(id int) (user models.User, err error) {
+	sql := `
+		SELECT points FROM users 
+			WHERE id = $1;
+`
+	err = instance.Connection.QueryRow(sql, id).Scan(&user.Points)
+	return user, err
+}
+
 func (instance *DBHandler) CreateAdvTable() (err error) {
 	sql := `
 		CREATE TABLE IF NOT EXISTS advs (

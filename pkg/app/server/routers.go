@@ -297,5 +297,6 @@ func (instance *App) payout(c *gin.Context) {
 	}
 	amount, err := strconv.Atoi(payoutBill.Amount)
 	instance.DB.UpdatePoints(int(id.(float64)), amount * -1)
-	c.Status(201)
+	user, err := instance.DB.GetPoint(int(id.(float64)))
+	c.JSON(201, gin.H{"points": user.Points})
 }
