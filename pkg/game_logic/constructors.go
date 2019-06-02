@@ -19,6 +19,7 @@ func GameIni(roomPlayers map[string]*connections.UserConnection, advsData []*Adv
 	game.Map, game.GameObjects.Barrier = MapGeneration()
 	//game.GameObjects.Players = make(map[string]*Player)
 	game.GameObjects.Players = PlayersCreate(roomPlayers, game.Map)
+	game.PausePeriod = 5
 	res.Map = *game.Map
 	for _, p := range game.GameObjects.Players {
 		var info PlayerInfo

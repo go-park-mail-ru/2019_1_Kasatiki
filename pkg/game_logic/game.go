@@ -4,6 +4,7 @@ package game_logic
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 // Колизии
@@ -184,6 +185,9 @@ func (g *Game) EventListener(mes InputMessage, nickname string, advsData []*Adv)
 			if IsCollision(g.GameObjects.Advs[i].Object, p.Object) {
 				fmt.Println(g.GameObjects.Advs[i].Url)
 				p.Object.Hp -= 10
+				g.PauseTime = time.Now()
+				err = errors.New("pause")
+
 				res.Url = "https://mail.ru"
 				g.GameObjects.Advs = append(g.GameObjects.Advs[:i], g.GameObjects.Advs[i+1:]...)
 				break

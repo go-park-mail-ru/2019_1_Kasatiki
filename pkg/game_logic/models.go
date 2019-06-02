@@ -1,14 +1,18 @@
 package game_logic
 
+import "time"
+
 // Эй, детка, ты модель или подделка?
 type Game struct {
-	GameObjects      *GameObjects `json:"gameobjects"`
-	Map              *Map         `json:"map"`
-	Wave             int          `json:"wave"`
-	Url              string       `json:"url"`
-	Stage            string       `json:"stage"`
-	Zones            []*Zone
-	StaticCollection map[int][]*DynamycObject
+	GameObjects      *GameObjects             `json:"gameobjects"`
+	Map              *Map                     `json:"map"`
+	Wave             int                      `json:"wave"`
+	Url              string                   `json:"url"`
+	Stage            string                   `json:"stage"`
+	PausePeriod      int                      `json:"-"`
+	PauseTime        time.Time                `json:"-"`
+	Zones            []*Zone                  `json:"-"`
+	StaticCollection map[int][]*DynamycObject `json:"-"`
 }
 
 type Zone struct {
@@ -57,6 +61,7 @@ type InputMessage struct {
 	Right   bool    `json:"right"`
 	Angular float32 `json:"angle"`
 	Shot    bool    `json:"shot"`
+	Close   bool    `json:"close"`
 }
 
 type DynamycObject struct {

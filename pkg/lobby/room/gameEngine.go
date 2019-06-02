@@ -98,13 +98,49 @@ func (r *Room) GameEngine() {
 			select {
 			// Если есть сигнал от 1го игрока - оправляем его 2му игроку
 			case message = <-r.Messenger.Player_From[keys[0]]:
+				if message.Close {
+					goto EndGame
+				}
+				if err != nil {
+					if err.Error() == "pause" {
+						if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
+							err = nil
+						}
+						continue
+					}
+					goto EndGame
+				}
 				gs, err = game.EventListener(message, r.Players[keys[0]].Login, advsData)
 				if err != nil {
+					if err.Error() == "pause" {
+						if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
+							err = nil
+						}
+						continue
+					}
 					goto EndGame
 				}
 				gs.Players[0].CashPoints = float32(killed) * 0.1
 			case <-ticker.C:
+				if err != nil {
+					if err.Error() == "pause" {
+						if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
+							err = nil
+						}
+						continue
+					}
+					goto EndGame
+				}
 				r.Players[keys[0]].Connection.WriteJSON(&gs)
+			}
+			if err != nil {
+				if err.Error() == "pause" {
+					if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
+						err = nil
+					}
+					continue
+				}
+				goto EndGame
 			}
 			var bs []*gl.Bullet
 			objs := gl.GetGameObjs()
@@ -155,14 +191,17 @@ func (r *Room) GameEngine() {
 		r.Players[keys[0]].Connection.WriteJSON(&res)
 	}
 EndGame:
-	if err.Error() == "Die" {
-		fmt.Println("true", killed, "true")
-		//fmt.Println(gs)
-		fmt.Println("End Game")
-		money := int(float64(killed) * 0.1)
-		fmt.Println("Nickname : ", keys[0], " ,Money : ", money)
+	if err != nil {
+		if err.Error() == "Die" {
+			fmt.Println("true", killed, "true")
+			//fmt.Println(gs)
+			fmt.Println("End Game")
+			money := int(float64(killed) * 0.1)
+			fmt.Println("Nickname : ", keys[0], " ,Money : ", money)
 
-		r.DB.UpdatePointsByNickname(keys[0], money)
+			r.DB.UpdatePointsByNickname(keys[0], money)
+
+		}
 	}
-
+	r.RemoveRoom()
 }
