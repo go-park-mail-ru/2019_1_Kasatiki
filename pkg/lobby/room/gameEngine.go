@@ -3,6 +3,7 @@ package room
 import (
 	"fmt"
 	gl "github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/game_logic"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -99,6 +100,7 @@ func (r *Room) GameEngine() {
 			// Если есть сигнал от 1го игрока - оправляем его 2му игроку
 			case message = <-r.Messenger.Player_From[keys[0]]:
 				if message.Close {
+					err = errors.New("Die")
 					goto EndGame
 				}
 				if err != nil {
@@ -211,7 +213,6 @@ EndGame:
 			fmt.Println("End Game")
 			money := int(float64(killed) * 0.1)
 			fmt.Println("Nickname : ", keys[0], " ,Money : ", money)
-
 			r.DB.UpdatePointsByNickname(keys[0], money)
 
 		}
