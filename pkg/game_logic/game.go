@@ -90,7 +90,7 @@ func GetGameObjs() []*DynamycObject {
 // Входная точка для изменения состояния игры
 // Принимает в себя структуру, которая получилась после разкодирования из json
 func (g *Game) EventListener(mes InputMessage, nickname string, advsData []*Adv) (res GameStatus, err error) {
-
+	res.Url = ""
 	g.GameObjects.Players[nickname].SetAngular(mes.Angular)
 	delta := g.GameObjects.Players[nickname].Object.Velocity + 5
 
