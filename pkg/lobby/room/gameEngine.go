@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+type DeadMessage struct {
+	dead bool `json:"dead"`
+}
+
 func (r *Room) GameEngine() {
 	var err error
 	advsData, err := r.DB.GetAdv()
@@ -213,6 +217,8 @@ EndGame:
 			fmt.Println("End Game")
 			money := int(float64(killed) * 0.1)
 			fmt.Println("Nickname : ", keys[0], " ,Money : ", money)
+			d := &DeadMessage{dead: true}
+			r.Players[keys[0]].Connection.WriteJSON(&d)
 			r.DB.UpdatePointsByNickname(keys[0], money)
 
 		}

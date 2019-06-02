@@ -12,7 +12,7 @@ func (adv *Adv) Spawn(x int, y int, size int) {
 		HpCap:    10,
 		X:        x,
 		Y:        y,
-		Velocity: 8,
+		Velocity: 7,
 		Xsize:    size,
 		Ysize:    size,
 	}
