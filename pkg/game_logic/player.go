@@ -64,7 +64,7 @@ func (p *Player) Shot(a float32) *Bullet {
 		Ysize:    5,
 	}
 
-	b.Damage = 5
+	b.Damage = 1
 	b.Angle = a
 
 	return &b

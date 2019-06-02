@@ -135,7 +135,7 @@ type Map struct {
 
 type GameObjects struct {
 	Players map[string]*Player `json:"palyers"`
-	Advs    map[int]*Adv       `json:"advs"`
+	Advs    []*Adv             `json:"advs"`
 	Bullets []*Bullet          `json:"bullets"`
 	Barrier []*Barrier         `json:"barrier"`
 }

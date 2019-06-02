@@ -5,13 +5,16 @@ import (
 	"math"
 )
 
-func (adv *Adv) Spawn(x int, y int) {
+func (adv *Adv) Spawn(x int, y int, size int) {
 	adv.Object = &DynamycObject{
 		Name:     "Adv",
 		Hp:       10,
+		HpCap:    10,
 		X:        x,
 		Y:        y,
 		Velocity: 2,
+		Xsize:    size,
+		Ysize:    size,
 	}
 }
 
@@ -160,15 +163,6 @@ func (adv *Adv) MoveToPlayer(m *Map) {
 			}
 		}
 	}
-	log.Println(distanceX, distanceY, "_______________--")
 	adv.Object.Y += distanceY
 	adv.Object.X += distanceX
-	// if adv.Object.X != player.Object.X {
-	// 	adv.Object.X += int(float64(adv.Object.Velocity) * math.Cos(angular))
-	// }
-	// if adv.Object.Y != player.Object.Y {
-	// 	adv.Object.Y += int(float64(adv.Object.Velocity) * math.Sin(angular))
-	// }
-	// log.Println("P", player.Object.Y, player.Object.X)
-	// log.Println("A", adv.Object.Y, adv.Object.X)
 }
