@@ -184,7 +184,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string, advsData []*Adv)
 		for _, p := range g.GameObjects.Players {
 			if IsCollision(g.GameObjects.Advs[i].Object, p.Object) {
 				fmt.Println(g.GameObjects.Advs[i].Url)
-				p.Object.Hp -= 10
+				p.Object.Hp -= 5
 				g.PauseTime = time.Now()
 				err = errors.New("pause")
 
