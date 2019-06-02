@@ -89,7 +89,7 @@ func GetGameObjs() []*DynamycObject {
 
 // Входная точка для изменения состояния игры
 // Принимает в себя структуру, которая получилась после разкодирования из json
-func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus, err error) {
+func (g *Game) EventListener(mes InputMessage, nickname string, advsData []*Adv) (res GameStatus, err error) {
 
 	g.GameObjects.Players[nickname].SetAngular(mes.Angular)
 	delta := g.GameObjects.Players[nickname].Object.Velocity + 5
@@ -174,7 +174,6 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus,
 		info.Nickname = p.Nickname
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
-		fmt.Println("Killed", p.Killed)
 	}
 
 	// Reklama
@@ -182,9 +181,10 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus,
 	for i := 0; i < len(g.GameObjects.Advs); i++ {
 		g.GameObjects.Advs[i].MoveToPlayer(g.Map)
 		for _, p := range g.GameObjects.Players {
-
 			if IsCollision(g.GameObjects.Advs[i].Object, p.Object) {
-				p.Object.Hp -= 5
+				fmt.Println(g.GameObjects.Advs[i].Url)
+				p.Object.Hp -= 10
+				res.Url = "https://mail.ru"
 				g.GameObjects.Advs = append(g.GameObjects.Advs[:i], g.GameObjects.Advs[i+1:]...)
 				break
 			}
@@ -197,7 +197,7 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus,
 		res.Advs = append(res.Advs, info)
 	}
 	if len(g.GameObjects.Advs) < 20 {
-		g.GameObjects.Advs = append(g.GameObjects.Advs, AdvsCreate(40, g.Map, g.GameObjects.Players)...)
+		g.GameObjects.Advs = append(g.GameObjects.Advs, AdvsCreate(40, g.Map, g.GameObjects.Players, advsData)...)
 	}
 
 	return

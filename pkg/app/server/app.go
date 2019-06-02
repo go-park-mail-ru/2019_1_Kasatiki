@@ -50,7 +50,7 @@ func (instance *App) initializeRoutes() {
 		// PUT ( update data )
 		api.PUT("/edit", instance.Middleware.AuthMiddleware(instance.editUser))
 
-		api.GET("/game/start", gin.WrapF(instance.Upgrader.StartGame))
+		api.GET("/game/start", instance.Middleware.AuthMiddleware(instance.Upgrader.StartGame))
 
 		//api.GET("/ws", func(c *gin.Context) {
 		//	m.HandleRequest(c.Writer, c.Request)
@@ -114,7 +114,7 @@ func (instance *App) Initialize(conf *models.Config) {
 	instance.DB.AdvsIserting()
 	instance.Router = gin.New()
 	instance.Upgrader = connections.NewConnUpgrader()
-	instance.Lobby = lobby.NewLobby()
+	instance.Lobby = lobby.NewLobby(instance.DB)
 	go instance.Lobby.Run(instance.Upgrader.Queue)
 	instance.initializeRoutes()
 }

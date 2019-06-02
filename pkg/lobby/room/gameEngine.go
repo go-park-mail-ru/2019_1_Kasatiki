@@ -7,8 +7,12 @@ import (
 )
 
 func (r *Room) GameEngine() {
-	game, re := gl.GameIni(r.Players)
+	var err error
+	advsData, err := r.DB.GetAdv()
+	fmt.Println(err)
+	game, re := gl.GameIni(r.Players, advsData)
 	var message gl.InputMessage
+	var killed int
 
 	var keys []string
 	for k, _ := range r.Players {
@@ -23,7 +27,7 @@ func (r *Room) GameEngine() {
 	ticker := time.NewTicker(time.Second / 30)
 	gs := gl.GameStatus{}
 	res := &gl.BulletStatus{}
-	var err error
+
 	fmt.Println(err)
 	for {
 
@@ -32,13 +36,13 @@ func (r *Room) GameEngine() {
 				select {
 				// Если есть сигнал от 1го игрока - оправляем его 2му игроку
 				case message = <-r.Messenger.Player_From[keys[0]]:
-					gs, err = game.EventListener(message, r.Players[keys[0]].Login)
+					gs, err = game.EventListener(message, r.Players[keys[0]].Login, advsData)
 					if err != nil {
 						goto EndGame
 					}
 				// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
 				case message = <-r.Messenger.Player_From[keys[1]]:
-					gs, err = game.EventListener(message, r.Players[keys[1]].Login)
+					gs, err = game.EventListener(message, r.Players[keys[1]].Login, advsData)
 					if err != nil {
 						goto EndGame
 					}
@@ -94,11 +98,11 @@ func (r *Room) GameEngine() {
 			select {
 			// Если есть сигнал от 1го игрока - оправляем его 2му игроку
 			case message = <-r.Messenger.Player_From[keys[0]]:
-				gs, err = game.EventListener(message, r.Players[keys[0]].Login)
+				gs, err = game.EventListener(message, r.Players[keys[0]].Login, advsData)
 				if err != nil {
 					goto EndGame
 				}
-			// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
+				gs.Players[0].CashPoints = float32(killed) * 0.1
 			case <-ticker.C:
 				r.Players[keys[0]].Connection.WriteJSON(&gs)
 			}
@@ -115,6 +119,7 @@ func (r *Room) GameEngine() {
 						game.GameObjects.Bullets = append(game.GameObjects.Bullets[:i], game.GameObjects.Bullets[i+1:]...)
 						if game.GameObjects.Advs[j].Object.Hp == 0 {
 							p.Killed++
+							killed++
 							game.GameObjects.Advs = append(game.GameObjects.Advs[:j], game.GameObjects.Advs[j+1:]...)
 						}
 						// break чтобы он не декрементил hp у всех реклам
@@ -146,12 +151,18 @@ func (r *Room) GameEngine() {
 			}
 			res.Bullets = bs
 		}
+
 		r.Players[keys[0]].Connection.WriteJSON(&res)
 	}
 EndGame:
 	if err.Error() == "Die" {
+		fmt.Println("true", killed, "true")
+		//fmt.Println(gs)
 		fmt.Println("End Game")
+		money := int(float64(killed) * 0.1)
+		fmt.Println("Nickname : ", keys[0], " ,Money : ", money)
 
+		r.DB.UpdatePointsByNickname(keys[0], money)
 	}
 
 }

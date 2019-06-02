@@ -10,8 +10,8 @@ import (
 // Создание игры
 // Проинициализировать карту
 // Заполнить массив объектов
-func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGame) {
-	fmt.Println("Game Ini")
+func GameIni(roomPlayers map[string]*connections.UserConnection, advsData []*Adv) (*Game, StartGame) {
+	fmt.Println("Game Iniiii")
 	var game Game
 	var res StartGame
 	game.GameObjects = &GameObjects{}
@@ -29,7 +29,7 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
 	}
-	game.GameObjects.Advs = AdvsCreate(40, game.Map, game.GameObjects.Players)
+	game.GameObjects.Advs = AdvsCreate(40, game.Map, game.GameObjects.Players, advsData)
 	for _, p := range game.GameObjects.Advs {
 		var info AdvInfo
 		info.Object = p.Object
@@ -72,18 +72,26 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 	return
 }
 
-func AdvsCreate(count int, gameMap *Map, players map[string]*Player) (advs []*Adv) {
+func AdvsCreate(count int, gameMap *Map, players map[string]*Player, advsData []*Adv) (advs []*Adv) {
 	var id int
 	tileSize := gameMap.TileSize
 	// Достаем все ключи плееров
-
 	keys := reflect.ValueOf(players).MapKeys()
+	counter := 0
 	for i := 0; i < count; i++ {
+		if counter >= len(advsData) {
+			counter = 0
+		} else {
+			counter++
+		}
+
 		id++
 		adv := &Adv{
 			// Сетим плеера в качестве цели
 			// каждому плееру одинаковое количество реклам.
 			Player: players[keys[len(keys)*i/count].Interface().(string)],
+			Url:    advsData[counter].Url,
+			Pict:   "http://0.0.0.0:8080/AdvsImgs/" + advsData[counter].Pict,
 		}
 		x := 50
 		y := 50

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/connections"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
 	rm "github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/lobby/room"
 )
 
@@ -23,16 +24,20 @@ type Lobby struct {
 	WaitingConnection *connections.UserConnection
 	// Канал, по которому сообщается, какая комната должна быть удалена
 	DeleteRooms chan rm.RoomId
+
+	DB *dbhandler.DBHandler
 }
 
 // Создаем новое лобби
-func NewLobby() *Lobby {
+func NewLobby(db *dbhandler.DBHandler) *Lobby {
 	fmt.Println("Creating new Lobby")
 	return &Lobby{
 		ProcessedPlayers: make(map[string]GameToConnect),
 		Rooms:            make(map[rm.RoomId]*rm.Room),
 		DeleteRooms:      make(chan rm.RoomId, 5),
+		DB:               db,
 	}
+
 }
 
 // Запускаем лобби
@@ -50,6 +55,8 @@ func (lb *Lobby) Run(connectionQueue chan *connections.UserConnection) {
 		// Если пришел сигнал на коннект нового пользователя
 		case connection, ok := <-connectionQueue:
 			if ok {
+				u, _ := lb.DB.GetUser(connection.Id)
+				connection.Login = u.Nickname
 				lb.AddPlayer(connection)
 			} else {
 				connectionQueue = nil
@@ -82,7 +89,7 @@ func (lb *Lobby) AddPlayer(connection *connections.UserConnection) error {
 	if connection.TypeGame != "Multiplayer" {
 		var players []*connections.UserConnection
 		players = append(players, connection)
-		lb.Rooms[lb.LastRoom] = rm.NewRoom(players, lb.DeleteRooms, lb.LastRoom)
+		lb.Rooms[lb.LastRoom] = rm.NewRoom(players, lb.DeleteRooms, lb.LastRoom, lb.DB)
 		// Создаем коннект для первого игрока(Ждущий)
 		lb.ProcessedPlayers[connection.Token] = GameToConnect{
 			Room: lb.LastRoom,
@@ -106,7 +113,7 @@ func (lb *Lobby) AddPlayer(connection *connections.UserConnection) error {
 
 	//комната				ждущий игрок									текущий игрок
 	lb.Rooms[lb.LastRoom], lb.ProcessedPlayers[lb.WaitingConnection.Token], lb.ProcessedPlayers[connection.Token] = CreatingMatch(lb.WaitingConnection,
-		connection, lb.DeleteRooms, lb.LastRoom)
+		connection, lb.DeleteRooms, lb.LastRoom, lb.DB)
 
 	// Ждущего больше нет
 	lb.WaitingConnection = nil
@@ -120,12 +127,12 @@ func (lb *Lobby) AddPlayer(connection *connections.UserConnection) error {
 // Создаем новую комнату и коннектим двух игроков
 // Возвращаем саму комнату и коннекты
 func CreatingMatch(waiter *connections.UserConnection, current *connections.UserConnection,
-	DeleteRooms chan rm.RoomId, LastRoom rm.RoomId) (room *rm.Room, Conn1 GameToConnect, Conn2 GameToConnect) {
+	DeleteRooms chan rm.RoomId, LastRoom rm.RoomId, DB *dbhandler.DBHandler) (room *rm.Room, Conn1 GameToConnect, Conn2 GameToConnect) {
 	fmt.Println("Creating new Room and connects")
 	// Создаем новую комнату
 	var players []*connections.UserConnection
 	players = append(players, waiter, current)
-	room = rm.NewRoom(players, DeleteRooms, LastRoom)
+	room = rm.NewRoom(players, DeleteRooms, LastRoom, DB)
 	// Создаем коннект для первого игрока(Ждущий)
 	Conn1 = GameToConnect{
 		Room: LastRoom,

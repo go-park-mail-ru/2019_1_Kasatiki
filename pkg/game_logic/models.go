@@ -26,6 +26,7 @@ type BulletStatus struct {
 type GameStatus struct {
 	Players []PlayerInfo `json:"players"`
 	Advs    []AdvInfo    `json:"advs"`
+	Url     string       `json:"url"`
 }
 
 type StartGame struct {
@@ -42,6 +43,7 @@ type PlayerInfo struct {
 	Nickname   string         `json:"nickname"`
 	Id         int            `json:"id"`
 	Angular    float32        `json:"ang"`
+	Killed     int
 }
 
 type AdvInfo struct {

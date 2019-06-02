@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/connections"
+	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/dbhandler"
 	"github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/game_logic"
 	"log"
 	"strconv"
@@ -45,14 +46,17 @@ type Room struct {
 
 	// Номер текущей комнаты
 	CurrentRoomId RoomId
+
+	DB *dbhandler.DBHandler
 }
 
 // Создание новой комнаты
-func NewRoom(players []*connections.UserConnection, completedRooms chan RoomId, ownNumber RoomId) (room *Room) {
+func NewRoom(players []*connections.UserConnection, completedRooms chan RoomId, ownNumber RoomId, db *dbhandler.DBHandler) (room *Room) {
 	// Инициализируем структуру комнаты
 	room = &Room{
 		Suicide:       completedRooms,
 		CurrentRoomId: ownNumber,
+		DB:            db,
 	}
 
 	// Создаем мапы

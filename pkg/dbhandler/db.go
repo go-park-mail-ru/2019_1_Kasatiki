@@ -104,6 +104,14 @@ func (instance *DBHandler) UpdatePoints(id int, points int) (err error) {
 	return
 }
 
+func (instance *DBHandler) UpdatePointsByNickname(nickname string, points int) (err error) {
+	sql := `
+		UPDATE users SET points = points + $2 
+			WHERE nickname = $1;`
+	_, err = instance.Connection.Exec(sql, nickname, points)
+	return
+}
+
 func (instance *DBHandler) InsertUser(user models.User) (ret models.User, err error) {
 	sql := `
 		INSERT INTO users (nickname, email, password, points, age, imgurl, region, about)
@@ -185,7 +193,7 @@ func (instance *DBHandler) InsertAdv(adv *game_logic.Adv) (err error) {
 	return err
 }
 
-func (instance *DBHandler) GetAdv() (advs []game_logic.Adv, err error) {
+func (instance *DBHandler) GetAdv() (advs []*game_logic.Adv, err error) {
 	sql := `
 		SELECT id, name, url, img FROM advs;`
 	rows, err := instance.Connection.Query(sql)
@@ -195,7 +203,7 @@ func (instance *DBHandler) GetAdv() (advs []game_logic.Adv, err error) {
 	for rows.Next() {
 		var a game_logic.Adv
 		err = rows.Scan(&a.Id, &a.Name, &a.Url, &a.Pict)
-		advs = append(advs, a)
+		advs = append(advs, &a)
 		if err != nil {
 			return nil, err
 		}

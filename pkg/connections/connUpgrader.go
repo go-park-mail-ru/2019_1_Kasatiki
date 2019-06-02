@@ -2,8 +2,8 @@ package connections
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"log"
 	"net/http"
 	"time"
 )
@@ -13,6 +13,7 @@ type UserConnection struct {
 	Token      string
 	Connection *websocket.Conn
 	TypeGame   string
+	Id         int
 }
 
 type ConnUpgrader struct {
@@ -41,27 +42,21 @@ func NewConnUpgrader() (cu *ConnUpgrader) {
 
 var debug = true
 
-func (up *ConnUpgrader) StartGame(res http.ResponseWriter, req *http.Request) {
-	log.Printf("New connection: %#v", req)
+func (up *ConnUpgrader) StartGame(c *gin.Context) {
 	// Проверяет SessionId из cookie.
-	fmt.Println(req.Cookies())
-	sessionID, err := req.Cookie("session_id")
+	sessionID, err := c.Cookie("session_id")
 	if err != nil {
-		fmt.Println(err)
-		http.Error(res, "wrong cookie", 404)
+		fmt.Println("Ошибка", err)
+		c.JSON(404, "Bad cookie")
 		return
 	}
-	var login string
-	if debug {
-		// просто создаёт случайный логин
-		login = "Anon" + time.Now().Format(time.RFC3339)
-	}
 
+	gettinId, _ := c.Get("id")
 	// Меняет протокол.
-	WSConnection, err := up.upgrader.Upgrade(res, req, nil)
+	WSConnection, err := up.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Println(err)
-		res.WriteHeader(409)
+		c.Writer.WriteHeader(409)
 		//c.JSON(409, "error of creating WS")
 		return
 	}
@@ -72,8 +67,8 @@ func (up *ConnUpgrader) StartGame(res http.ResponseWriter, req *http.Request) {
 	//	return
 	//}
 	connection := &UserConnection{
-		Login:      login,
-		Token:      sessionID.Value,
+		Id:         int(gettinId.(float64)),
+		Token:      sessionID,
 		Connection: WSConnection,
 		//TypeGame:   "Multiplayer",
 		TypeGame: "sp",
