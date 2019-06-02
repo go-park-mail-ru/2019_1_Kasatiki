@@ -73,10 +73,10 @@ type DynamycObject struct {
 }
 
 type Bullet struct {
-	Object   *DynamycObject `json:"object"`
-	Damage   float32
-	Angle    float32
-	PlayerId int `json:"playerid"`
+	Object *DynamycObject `json:"object"`
+	Damage float32
+	Angle  float32
+	Player *Player `json:"-"`
 }
 
 type Weapon struct {
@@ -98,6 +98,7 @@ type Player struct {
 	Angular    float32        `json:"ang"`
 	Weapon     *Weapon
 	Stepback   *Moves
+	Killed     int `json:"killed"`
 	//Inventory 		[]DynamycObject
 }
 

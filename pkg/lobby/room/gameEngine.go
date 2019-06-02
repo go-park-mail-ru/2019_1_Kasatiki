@@ -1,6 +1,7 @@
 package room
 
 import (
+	"fmt"
 	gl "github.com/go-park-mail-ru/2019_1_Kasatiki/pkg/game_logic"
 	"time"
 )
@@ -22,6 +23,8 @@ func (r *Room) GameEngine() {
 	ticker := time.NewTicker(time.Second / 30)
 	gs := gl.GameStatus{}
 	res := &gl.BulletStatus{}
+	var err error
+	fmt.Println(err)
 	for {
 
 		if len(keys) > 1 {
@@ -29,10 +32,16 @@ func (r *Room) GameEngine() {
 				select {
 				// Если есть сигнал от 1го игрока - оправляем его 2му игроку
 				case message = <-r.Messenger.Player_From[keys[0]]:
-					gs = game.EventListener(message, r.Players[keys[0]].Login)
+					gs, err = game.EventListener(message, r.Players[keys[0]].Login)
+					if err != nil {
+						goto EndGame
+					}
 				// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
 				case message = <-r.Messenger.Player_From[keys[1]]:
-					gs = game.EventListener(message, r.Players[keys[1]].Login)
+					gs, err = game.EventListener(message, r.Players[keys[1]].Login)
+					if err != nil {
+						goto EndGame
+					}
 				case <-ticker.C:
 					r.Players[keys[0]].Connection.WriteJSON(&gs)
 					r.Players[keys[1]].Connection.WriteJSON(&gs)
@@ -85,7 +94,10 @@ func (r *Room) GameEngine() {
 			select {
 			// Если есть сигнал от 1го игрока - оправляем его 2му игроку
 			case message = <-r.Messenger.Player_From[keys[0]]:
-				gs = game.EventListener(message, r.Players[keys[0]].Login)
+				gs, err = game.EventListener(message, r.Players[keys[0]].Login)
+				if err != nil {
+					goto EndGame
+				}
 			// Если есть сигнал от 2го игрока -  оправляем его 1му игроку
 			case <-ticker.C:
 				r.Players[keys[0]].Connection.WriteJSON(&gs)
@@ -99,8 +111,10 @@ func (r *Room) GameEngine() {
 					}
 					if game.GameObjects.Bullets[i].IsCollisionInWay(game.GameObjects.Advs[j].Object) {
 						game.GameObjects.Advs[j].Object.Hp -= game.GameObjects.Bullets[i].Damage
+						p := game.GameObjects.Bullets[i].Player
 						game.GameObjects.Bullets = append(game.GameObjects.Bullets[:i], game.GameObjects.Bullets[i+1:]...)
 						if game.GameObjects.Advs[j].Object.Hp == 0 {
+							p.Killed++
 							game.GameObjects.Advs = append(game.GameObjects.Advs[:j], game.GameObjects.Advs[j+1:]...)
 						}
 						// break чтобы он не декрементил hp у всех реклам
@@ -134,4 +148,10 @@ func (r *Room) GameEngine() {
 		}
 		r.Players[keys[0]].Connection.WriteJSON(&res)
 	}
+EndGame:
+	if err.Error() == "Die" {
+		fmt.Println("End Game")
+
+	}
+
 }

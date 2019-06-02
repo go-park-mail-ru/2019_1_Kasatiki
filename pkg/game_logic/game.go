@@ -1,6 +1,10 @@
 package game_logic
 
 // import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // Колизии
 
@@ -85,7 +89,7 @@ func GetGameObjs() []*DynamycObject {
 
 // Входная точка для изменения состояния игры
 // Принимает в себя структуру, которая получилась после разкодирования из json
-func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus) {
+func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus, err error) {
 
 	g.GameObjects.Players[nickname].SetAngular(mes.Angular)
 	delta := g.GameObjects.Players[nickname].Object.Velocity + 5
@@ -159,6 +163,10 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 	//}
 
 	for _, p := range g.GameObjects.Players {
+		if p.Object.Hp <= 0 {
+			err = errors.New("Die")
+			return
+		}
 		var info PlayerInfo
 		info.Object = p.Object
 		info.Id = p.Id
@@ -166,14 +174,30 @@ func (g *Game) EventListener(mes InputMessage, nickname string) (res GameStatus)
 		info.Nickname = p.Nickname
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
+		fmt.Println("Killed", p.Killed)
 	}
 
 	// Reklama
-	for _, adv := range g.GameObjects.Advs {
-		adv.MoveToPlayer(g.Map)
+	fmt.Println(len(g.GameObjects.Advs))
+	for i := 0; i < len(g.GameObjects.Advs); i++ {
+		g.GameObjects.Advs[i].MoveToPlayer(g.Map)
+		for _, p := range g.GameObjects.Players {
+
+			if IsCollision(g.GameObjects.Advs[i].Object, p.Object) {
+				p.Object.Hp -= 5
+				g.GameObjects.Advs = append(g.GameObjects.Advs[:i], g.GameObjects.Advs[i+1:]...)
+				break
+			}
+		}
 		var info AdvInfo
-		info.Object = adv.Object
+		if i >= len(g.GameObjects.Advs) {
+			break
+		}
+		info.Object = g.GameObjects.Advs[i].Object
 		res.Advs = append(res.Advs, info)
+	}
+	if len(g.GameObjects.Advs) < 20 {
+		g.GameObjects.Advs = append(g.GameObjects.Advs, AdvsCreate(40, g.Map, g.GameObjects.Players)...)
 	}
 
 	return

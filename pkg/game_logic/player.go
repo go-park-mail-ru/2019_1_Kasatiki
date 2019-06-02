@@ -5,7 +5,7 @@ import (
 )
 
 // Хардкод дефолного оружия
-func (w *Weapon) SetBullet(dam float32, player Player) {
+func (w *Weapon) SetBullet(dam float32, player *Player) {
 	w.Bullet = &Bullet{}
 	w.Bullet.Object = &DynamycObject{
 		Name:     w.Name,
@@ -14,7 +14,7 @@ func (w *Weapon) SetBullet(dam float32, player Player) {
 		Velocity: 7,
 	}
 	w.Bullet.Damage = dam
-	w.Bullet.PlayerId = player.Id
+	w.Bullet.Player = player
 }
 
 func (p *Player) CreateDefaultWeapon() {
@@ -24,7 +24,7 @@ func (p *Player) CreateDefaultWeapon() {
 		FireRate: 3,
 		Coast:    300,
 	}
-	p.Weapon.SetBullet(20, *p)
+	p.Weapon.SetBullet(20, p)
 }
 
 //// Обращение к бд для смены оружия(покупка)
@@ -66,7 +66,7 @@ func (p *Player) Shot(a float32) *Bullet {
 
 	b.Damage = 1
 	b.Angle = a
-
+	b.Player = p
 	return &b
 }
 

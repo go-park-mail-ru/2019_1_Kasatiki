@@ -29,7 +29,7 @@ func GameIni(roomPlayers map[string]*connections.UserConnection) (*Game, StartGa
 		info.Id = p.Id
 		res.Players = append(res.Players, info)
 	}
-	game.GameObjects.Advs = AdvsCreate(10, game.Map, game.GameObjects.Players)
+	game.GameObjects.Advs = AdvsCreate(40, game.Map, game.GameObjects.Players)
 	for _, p := range game.GameObjects.Advs {
 		var info AdvInfo
 		info.Object = p.Object
@@ -74,7 +74,9 @@ func PlayersCreate(roomPlayers map[string]*connections.UserConnection, gameMap *
 
 func AdvsCreate(count int, gameMap *Map, players map[string]*Player) (advs []*Adv) {
 	var id int
+	tileSize := gameMap.TileSize
 	// Достаем все ключи плееров
+
 	keys := reflect.ValueOf(players).MapKeys()
 	for i := 0; i < count; i++ {
 		id++
@@ -83,8 +85,34 @@ func AdvsCreate(count int, gameMap *Map, players map[string]*Player) (advs []*Ad
 			// каждому плееру одинаковое количество реклам.
 			Player: players[keys[len(keys)*i/count].Interface().(string)],
 		}
-		adv.Spawn(gameMap.SizeX/2, gameMap.SizeY/2, gameMap.TileSize)
-		advs = append(advs, adv)
+		x := 50
+		y := 50
+		if i%4 == 0 {
+			x = (i%3)*4 + 1
+			y = 40 + (i%3)*4
+		} else if i%4 == 1 {
+			x = 49 + (i%3)*4
+			y = 98 - (i%3)*4
+		} else if i%4 == 2 {
+			x = 98 - (i%3)*4
+			y = 40 + (i%3)*4
+		} else if i%4 == 3 {
+			x = 98 - (i%3)*4
+			y = 98 - (i%3)*4
+		}
+		if (gameMap.Field[x-1][y] == 1) &&
+			(gameMap.Field[x+1][y] == 1) &&
+			(gameMap.Field[x][y-1] == 1) &&
+			(gameMap.Field[x][y+1] == 1) {
+			// ничего
+		} else {
+			adv.Spawn(x*tileSize, y*tileSize, tileSize)
+			advs = append(advs, adv)
+			gameMap.Field[x][y] = 0
+		}
+		// adv.Spawn(gameMap.SizeX/2 * i+1, gameMap.SizeY/2 * i, gameMap.TileSize)
+		// advs = append(advs, adv)
 	}
+
 	return
 }
