@@ -13,7 +13,7 @@ func (r *Room) GameEngine() {
 	game, re := gl.GameIni(r.Players, advsData)
 	var message gl.InputMessage
 	var killed int
-
+	var flag bool
 	var keys []string
 	for k, _ := range r.Players {
 		keys = append(keys, k)
@@ -103,8 +103,10 @@ func (r *Room) GameEngine() {
 				}
 				if err != nil {
 					if err.Error() == "pause" {
+
 						if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
 							err = nil
+							flag = false
 						}
 						continue
 					}
@@ -113,8 +115,13 @@ func (r *Room) GameEngine() {
 				gs, err = game.EventListener(message, r.Players[keys[0]].Login, advsData)
 				if err != nil {
 					if err.Error() == "pause" {
+						if !flag {
+							r.Players[keys[0]].Connection.WriteJSON(&gs)
+							flag = true
+						}
 						if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
 							err = nil
+							flag = false
 						}
 						continue
 					}
@@ -128,6 +135,8 @@ func (r *Room) GameEngine() {
 
 						if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
 							err = nil
+							flag = false
+
 						}
 						continue
 					}
@@ -137,15 +146,15 @@ func (r *Room) GameEngine() {
 			}
 			if err != nil {
 				if err.Error() == "pause" {
-
 					if time.Now().Sub(game.PauseTime).Seconds() > float64(game.PausePeriod) {
 						err = nil
+						flag = false
 					}
-					r.Players[keys[0]].Connection.WriteJSON(&gs)
 					continue
 				}
 				goto EndGame
 			}
+
 			var bs []*gl.Bullet
 			objs := gl.GetGameObjs()
 			for i := 0; i < len(game.GameObjects.Bullets); i++ {
