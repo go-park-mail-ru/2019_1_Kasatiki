@@ -8,6 +8,7 @@ go:
 script: 
 - scp -r $TRAVIS_BUILD_DIR/  evv@advhater.ru:/mnt/disks/storage/advhater-production
 - ssh evv@advhater.ru cp -r /home/evv_bmstu/credentials/payments/. /mnt/disks/storage/advhater-production/2019_1_Kasatiki/pkg/payments/
+- ssh evv@advhater.ru sudo /home/evv_bmstu/go/src/github.com/mailru/easyjson/easyjson/easyjson -disallow_unknown_fields  /mnt/disks/storage/advhater-production/2019_1_Kasatiki/pkg/models/message.go /mnt/disks/storage/advhater-production/2019_1_Kasatiki/pkg/models/config.go /mnt/disks/storage/advhater-production/2019_1_Kasatiki/pkg/models/payout.go /mnt/disks/storage/advhater-production/2019_1_Kasatiki/pkg/models/user.go
 - ssh evv@advhater.ru sudo systemctl restart advhater-host
 - ssh evv@advhater.ru sudo systemctl status advhater-host
 before_install:

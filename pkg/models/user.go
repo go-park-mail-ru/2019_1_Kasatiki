@@ -53,7 +53,6 @@ type LoginInfo struct {
 
 //easyjson:json
 type LeaderboardUsers struct {
-	Imgurl   string `json:"imgurl"`
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	Points   int    `json:"points"`
