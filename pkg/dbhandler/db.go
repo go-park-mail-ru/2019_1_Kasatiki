@@ -62,6 +62,7 @@ func (instance *DBHandler) dataCreating(lim int) {
 		u.Password = RandStr(10)
 		u.Email = RandStr(10) + "@ya.ru"
 		u.Points = r1.Intn(1000)
+		u.ImgUrl = "https://advhater.ru/avatars/default.jpeg"
 		instance.InsertUser(u)
 	}
 }
@@ -136,12 +137,14 @@ func (instance *DBHandler) GetUsers(order string, offsetdb int64, limitdb int64)
 	var rows *pgx.Rows
 	fmt.Println(offsetdb, limitdb)
 	sql := `
-		SELECT nickname, email, points FROM users ORDER BY points DESC LIMIT $1 OFFSET $2;
+		SELECT imgurl, nickname, email, points FROM users ORDER BY points DESC LIMIT $1 OFFSET $2;
 	`
 	rows, err = instance.Connection.Query(sql, limitdb, offsetdb)
 	for rows.Next() {
 		var u models.LeaderboardUsers
-		err = rows.Scan(&u.Nickname, &u.Email, &u.Points)
+		fmt.Println(rows)
+		err = rows.Scan(&u.Imgurl, &u.Nickname, &u.Email, &u.Points)
+		fmt.Println(u)
 		users = append(users, u)
 		if err != nil {
 			return nil, err
