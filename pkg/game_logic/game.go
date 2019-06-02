@@ -188,7 +188,8 @@ func (g *Game) EventListener(mes InputMessage, nickname string, advsData []*Adv)
 				g.PauseTime = time.Now()
 				err = errors.New("pause")
 
-				res.Url = "https://advhater.ru/adv/adv.png"
+				//res.Url = "https://advhater.ru/adv/adv.png"
+				res.Url = "https://shop.by/ventilyatory/"
 				g.GameObjects.Advs = append(g.GameObjects.Advs[:i], g.GameObjects.Advs[i+1:]...)
 				break
 			}

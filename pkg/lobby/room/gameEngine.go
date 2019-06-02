@@ -220,7 +220,6 @@ EndGame:
 			d := &DeadMessage{dead: true}
 			r.Players[keys[0]].Connection.WriteJSON(&d)
 			r.DB.UpdatePointsByNickname(keys[0], money)
-
 		}
 	}
 	r.RemoveRoom()
